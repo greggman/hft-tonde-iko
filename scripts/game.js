@@ -38,14 +38,14 @@ requirejs(
     return document.getElementById(id);
   }
 
-  var launch = function(opt) {
+  var numWindows = 3;
+
+  // use a width so there's at least 1 window left of space.
+  var width  = window.screen.availWidth / (numWindows + 1) | 0;
+  var height = window.screen.availHeight / 3 * 2 | 0;
+
+  var makeLaunchFunc = function(windowNum, opt) {
     opt = opt || {};
-
-    var numWindows = 3;
-
-    // use a width so there's at least 1 window left of space.
-    var width  = window.screen.availWidth / (numWindows + 1) | 0;
-    var height = window.screen.availHeight / 3 * 2 | 0;
 
     var settings = {
       shared: {
@@ -71,25 +71,41 @@ requirejs(
     }
 
     var middle = numWindows / 2 | 0;
-    for (var ii = 0; ii < numWindows; ++ii) {
-      options.left = 10 + window.screen.availLeft + ii * width;
-      options.top  = 10 + window.screen.availTop;
+    options.left = 10 + window.screen.availLeft + windowNum * width;
+    options.top  = 10 + window.screen.availTop;
 
-      if (!opt.useWindowPosition) {
-        settings.x = ii * width;
-        settings.y = 0;
-      }
+    if (!opt.useWindowPosition) {
+      settings.x = windowNum * width;
+      settings.y = 0;
+    }
 
-      settings.subId = ii;
+    settings.subId = windowNum;
 
-      var url = "realgame.html?settings=" + JSON.stringify(settings);
-      var title = "view " + ii;
-      var windowOptions = JSON.stringify(options).replace(/[{}"]/g, "").replace(/\:/g,"=");
+    var url = "realgame.html?settings=" + JSON.stringify(settings);
+    var title = "view " + windowNum;
+    var windowOptions = JSON.stringify(options).replace(/[{}"]/g, "").replace(/\:/g,"=");
 
+    return function() {
       window.open(url, title, windowOptions);
+    };
+  };
+
+  var launch = function(opt) {
+    for (var ii = 0; ii < numWindows; ++ii) {
+      makeLaunchFunc(ii, opt)();
     }
   };
 
   $("button1").addEventListener('click', function() { launch(); }, false);
+  for (var ii = 0; ii < numWindows; ++ii) {
+    var div = document.createElement("div");
+    div.className = "button";
+    div.style.display = "inline-block";
+    div.style.margin = "1em";
+    div.style.width = "5em";
+    div.appendChild(document.createTextNode(ii + 1));
+    div.addEventListener('click', makeLaunchFunc(ii), false);
+    $("manual").appendChild(div);
+  }
 });
 

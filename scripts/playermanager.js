@@ -37,12 +37,23 @@ define(['./player'], function(Player) {
     this.players = [];
   };
 
-  PlayerManager.prototype.startPlayer = function(netPlayer, name) {
+  PlayerManager.prototype.startPlayer = function(netPlayer, name, data) {
     var misc = this.services.misc;
     var levelManager = this.services.levelManager;
     var level = levelManager.getLevel();
     var direction = misc.randInt(2) ? -1 : 1;
-    var player = new Player(this.services, level.tileWidth, level.tileHeight, direction, name, netPlayer);
+    var startPosition;
+    if (data) {
+      name = data.name;
+      if (data.dest == 0) {
+        startPosition = { x: level.width - 3, y: 2};
+      } else {
+        startPosition = { x: 2, y: 2};
+      }
+      startPosition.x *= level.tileWidth;
+      startPosition.y *= level.tileHeight;
+    }
+    var player = new Player(this.services, level.tileWidth, level.tileHeight, direction, name, netPlayer, startPosition);
     this.players.push(player);
     return player;
   }

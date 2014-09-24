@@ -124,6 +124,7 @@ requirejs(
     var keys = { };
     keys[Input.cursorKeys.kLeft]  = function(e) { handleLeftRight(e.pressed, 0x1); }
     keys[Input.cursorKeys.kRight] = function(e) { handleLeftRight(e.pressed, 0x2); }
+    keys[Input.cursorKeys.kUp]    = function(e) { handleJump(e.pressed);           }
     keys["Z".charCodeAt(0)]       = function(e) { handleJump(e.pressed);           }
     Input.setupKeys(keys);
 

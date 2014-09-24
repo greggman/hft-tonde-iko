@@ -54,7 +54,7 @@ define([
    * @constructor
    */
   var Player = (function() {
-    return function(services, width, height, direction, name, netPlayer) {
+    return function(services, width, height, direction, name, netPlayer, startPosition) {
       this.services = services;
       this.renderer = services.renderer;
       services.entitySystem.addEntity(this);
@@ -100,7 +100,7 @@ window.p = this;
       this.addPoints(0);
 
       this.setState('idle');
-      this.reset();
+      this.reset(startPosition);
       this.checkBounds();
     };
   }());
@@ -113,10 +113,10 @@ window.p = this;
     }
   };
 
-  Player.prototype.reset = function() {
+  Player.prototype.reset = function(startPosition) {
     var levelManager = this.services.levelManager;
     var level = levelManager.getLevel();
-    var position = levelManager.getRandomOpenPosition();
+    var position = startPosition || levelManager.getRandomOpenPosition();
     this.position = [position.x + level.tileWidth / 2, position.y];
     this.lastPosition = [this.position[0], this.position[1]];
   };
@@ -307,7 +307,10 @@ window.p = this;
         } else if (tile.dest == 1) {
           subId = (subId + 1) % 3;
         }
-        this.netPlayer.switchGame("ja" + subId);
+        this.netPlayer.switchGame("ja" + subId, {
+          name: this.playerName,  // Send the name because otherwise we'll make a new one up
+          dest: tile.dest,        // Send the dest so we know where to start
+        });
       }
     }
   };
