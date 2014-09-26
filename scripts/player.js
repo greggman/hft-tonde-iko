@@ -54,7 +54,8 @@ define([
    * @constructor
    */
   var Player = (function() {
-    return function(services, width, height, direction, name, netPlayer, startPosition) {
+    return function(services, width, height, direction, name, netPlayer, startPosition, data) {
+      data = data || {};
       this.services = services;
       this.renderer = services.renderer;
       services.entitySystem.addEntity(this);
@@ -62,18 +63,21 @@ define([
       this.netPlayer = netPlayer;
       this.velocity = [0, 0];
       this.acceleration = [0, 0];
-      if (availableColors.length == 0) {
-        var colors = services.colors;
-        for (var ii = 0; ii < colors.length; ++ii) {
-          availableColors.push(colors[ii]);
+      if (data.color) {
+        this.color = data.color;
+      } else {
+        if (availableColors.length == 0) {
+          var colors = services.colors;
+          for (var ii = 0; ii < colors.length; ++ii) {
+            availableColors.push(colors[ii]);
+          }
         }
+        var colorNdx = Math.floor(Math.random() * availableColors.length);
+        this.color = availableColors[colorNdx];
+  window.p = this;
+        netPlayer.sendCmd('setColor', this.color);
+        availableColors.splice(colorNdx, 1);
       }
-      var colorNdx = Math.floor(Math.random() * availableColors.length);
-      this.color = availableColors[colorNdx];
-window.p = this;
-      netPlayer.sendCmd('setColor', this.color);
-      availableColors.splice(colorNdx, 1);
-      this.color.id;
       this.animTimer = 0;
       this.width = width;
       this.height = height;
@@ -94,8 +98,8 @@ window.p = this;
       netPlayer.addEventListener('busy', Player.prototype.handleBusyMsg.bind(this));
 
       this.setName(name);
-      this.direction = 0;         // direction player is pushing (-1, 0, 1)
-      this.facing = direction;    // direction player is facing (-1, 1)
+      this.direction = data.direction || 0;         // direction player is pushing (-1, 0, 1)
+      this.facing = data.facing || direction;    // direction player is facing (-1, 1)
       this.score = 0;
       this.addPoints(0);
 
@@ -301,15 +305,18 @@ window.p = this;
       }
       if (tile.teleport) {
         // HACK!
-        var subId = globals.subId;
+        var id = globals.id;
         if (tile.dest == 0) {
-          subId = (subId + 3 - 1) % 3;
+          id = (id + 3 - 1) % 3;
         } else if (tile.dest == 1) {
-          subId = (subId + 1) % 3;
+          id = (id + 1) % 3;
         }
-        this.netPlayer.switchGame("ja" + subId, {
-          name: this.playerName,  // Send the name because otherwise we'll make a new one up
-          dest: tile.dest,        // Send the dest so we know where to start
+        this.netPlayer.switchGame("ja" + id, {
+          name: this.playerName,    // Send the name because otherwise we'll make a new one up
+          dest: tile.dest,          // Send the dest so we know where to start
+          color: this.color,        // Send the color so we don't pick a new one
+          direction: this.direction,// Send the direction so if we're moving we're still moving.
+          facing: this.facing,      // Send the facing so we're facing the sme way
         });
       }
     }

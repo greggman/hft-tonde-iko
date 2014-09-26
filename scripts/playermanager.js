@@ -53,7 +53,7 @@ define(['./player'], function(Player) {
       startPosition.x *= level.tileWidth;
       startPosition.y *= level.tileHeight;
     }
-    var player = new Player(this.services, level.tileWidth, level.tileHeight, direction, name, netPlayer, startPosition);
+    var player = new Player(this.services, level.tileWidth, level.tileHeight, direction, name, netPlayer, startPosition, data);
     this.players.push(player);
     return player;
   }

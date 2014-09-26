@@ -205,7 +205,7 @@ window.g = globals;
   if (globals.haveServer) {
     var server = new GameServer({
       allowMultipleGames: true,
-      subId: "ja" + globals.subId,  // don't use numbers because server uses numbers.
+      id: "ja" + globals.id,
     });
     g_services.server = server;
     server.addEventListener('playerconnect', g_playerManager.startPlayer.bind(g_playerManager));

@@ -79,7 +79,7 @@ requirejs(
       settings.y = 0;
     }
 
-    settings.subId = windowNum;
+    settings.id = windowNum;
 
     var url = "realgame.html?settings=" + JSON.stringify(settings);
     var title = "view " + windowNum;

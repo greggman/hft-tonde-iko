@@ -1,11 +1,11 @@
 {
-  "name": "JumpAbout",
+  "name": "Tonde-Iko",
   "description": "A multi-player platformer that runs across multiple monitors and machines",
   "version": "0.0.0",
   "private": false,
   "dependencies": {},
   "happyFunTimes": {
-    "gameId": "jumpabout",
+    "gameId": "tonde-iko",
     "category": "game",
     "apiVersion": "1.4.0",
     "gameType": "html",
