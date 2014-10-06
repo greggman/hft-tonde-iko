@@ -261,7 +261,7 @@ window.g = globals;
     idle:  { url: "assets/spr_idle.png",  colorize: 32, scale: 2, slices: 16, },
     move:  { url: "assets/spr_run.png",   colorize: 32, scale: 2, slices: 16, },
     jump:  { url: "assets/spr_jump.png",  colorize: 32, scale: 2, slices: [16, 17, 17, 18, 16, 16] },
-    brick: { url: "assets/bricks.png",    colorize:  1, scale: 2, slices: 128, },
+    brick: { url: "assets/bricks.png",    colorize:  1, scale: 1, slices: 256, },
     coin:  { url: "assets/coin_anim.png", colorize:  1, scale: 4, slices: 8, },
   };
   var colors = [];

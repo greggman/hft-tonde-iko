@@ -46,7 +46,35 @@ requirejs([
     columns: 6,
     rows: 1,
   };
+
+  var settings = {
+    shared: {
+      canvasWidth: 1920,
+      canvasHeight: 1080,
+    },
+  };
+
   var grid = new Grid(gridSize);
+
+  var makeWindowFunc = function(options) {
+    var opt = {
+      resizeable: 1,
+      scrollbars: 1,
+      menubar: 1,
+      toolbar: 1,
+      location: 1,
+      width: options.width,
+      height: options.height,
+      left: options.left,
+      top: options.top,
+    };
+
+    var windowOptions = JSON.stringify(opt).replace(/[{}"]/g, "").replace(/\:/g,"=");
+
+    return function() {
+      window.open(options.url, options.title, windowOptions);
+    };
+  };
 
   var makeLaunchFunc = function(x, y, opt) {
     opt = opt || {};
@@ -55,27 +83,8 @@ requirejs([
     var width  = window.screen.availWidth  / (gridSize.columns + 1) | 0;
     var height = window.screen.availHeight / (gridSize.rows    + 1) | 0;
 
-    var settings = {
-      shared: {
-        fullWidth:  width  * gridSize.columns,
-        fullHeight: height * gridSize.rows,
-        canvasWidth: 1920,
-        canvasHeight: 1080,
-      },
-    };
-
-    var options = {
-      resizeable: 1,
-      scrollbars: 1,
-      menubar: 1,
-      toolbar: 1,
-      location: 1,
-      width: width,
-      height: height,
-    };
-
-    options.left = 10 + window.screen.availLeft + x * width;
-    options.top  = 10 + window.screen.availTop  + y * height;
+    settings.shared.fullWidth  = width  * gridSize.columns;
+    settings.shared.fullHeight = height * gridSize.rows;
 
     settings.x       = x * width;
     settings.y       = y * height;
@@ -83,13 +92,16 @@ requirejs([
     settings.rows    = gridSize.rows;
     settings.id      = "s" + x + "-" + y;
 
-    var url = "realgame.html?settings=" + JSON.stringify(settings);
-    var title = "view[" + x + "-" + y + "]";
-    var windowOptions = JSON.stringify(options).replace(/[{}"]/g, "").replace(/\:/g,"=");
-
-    return function() {
-      window.open(url, title, windowOptions);
+    var options = {
+      width: width,
+      height: height,
+      left: 10 + window.screen.availLeft + x * width,
+      right: 10 + window.screen.availTop  + y * height,
+      url: "realgame.html?settings=" + JSON.stringify(settings),
+      title: "view[" + x + "-" + y + "]",
     };
+
+    return makeWindowFunc(options);
   };
 
   var removeChildren = function(element) {
@@ -135,6 +147,22 @@ requirejs([
   $("h-plus" ).addEventListener('click', function(e) { resizeGrid(+1,  0); }, false);
   */
 
-  $("button1").addEventListener('click', function() { launch(); }, false);
+  $("button1").addEventListener('click', function() {
+    settings.shared.canvasWidth  = undefined;
+    settings.shared.canvasHeight = undefined;
+    gridSize.columns = 3;
+    gridSize.rows = 1;
+    grid.setDimensions(gridSize.columns, gridSize.rows);
+    fillGrid();
+    launch();
+    makeWindowFunc({
+      url: "http://localhost:8080",
+      title: "controller",
+      left: window.screen.availWidth - 550,
+      top: window.screen.availHeight - 450,
+      width: 500,
+      height: 400,
+    })();
+  }, false);
 });
 
