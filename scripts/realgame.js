@@ -196,6 +196,10 @@ window.g = globals;
 
   var resize = function() {
     if (!globals.resizeOnce || (globals.resize !== false && Misc.resize(canvas))) {
+      if (!globals.resizeOnce && globals.resize !== false) {
+        canvas.style.width  = "100%";
+        canvas.style.height = "100%";
+      }
       globals.resizeOnce = true;
       g_services.levelManager.reset(canvas.width, canvas.height);
       g_services.playerManager.forEachPlayer(function(player) {
