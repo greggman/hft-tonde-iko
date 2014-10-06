@@ -49,6 +49,7 @@ requirejs(
     '../bower_components/hft-utils/dist/imageutils',
     '../bower_components/hft-utils/dist/spritemanager',
     './collectable',
+    './levelloader',
     './levelmanager',
     './playermanager',
   ], function(
@@ -65,6 +66,7 @@ requirejs(
     ImageUtils,
     SpriteManager,
     Collectable,
+    LevelLoader,
     LevelManager,
     PlayerManager) {
 
@@ -201,7 +203,7 @@ window.g = globals;
         canvas.style.height = "100%";
       }
       globals.resizeOnce = true;
-      g_services.levelManager.reset(canvas.width, canvas.height);
+      g_services.levelManager.reset(canvas.width, canvas.height, globals.level.layers[0]);
       g_services.playerManager.forEachPlayer(function(player) {
         player.reset();
       });
@@ -309,24 +311,38 @@ window.g = globals;
       }
     });
 
-    var tileset = {
-      tileWidth: 32,
-      tileHeight: 32,
-      tilesAcross: 8,  // tiles across set
-      tilesDown: 1,    // tiles across set
-      texture: images.brick.colors[0][0],
+    var startGame = function() {
+      var tileset = {
+        tileWidth: 32,
+        tileHeight: 32,
+        tilesAcross: 8,  // tiles across set
+        tilesDown: 1,    // tiles across set
+        texture: images.brick.colors[0][0],
+      };
+      var g_levelManager = new LevelManager(g_services, tileset);
+      g_services.levelManager = g_levelManager;
+      resize();
+
+      // Add a 2 players if there is no communication
+      if (!globals.haveServer) {
+        startLocalPlayers();
+      }
+
+      new Collectable(g_services);
+      GameSupport.run(globals, mainloop);
     };
-    var g_levelManager = new LevelManager(g_services, tileset);
-    g_services.levelManager = g_levelManager;
-    resize();
 
-    // Add a 2 players if there is no communication
-    if (!globals.haveServer) {
-      startLocalPlayers();
-    }
-
-    new Collectable(g_services);
-    GameSupport.run(globals, mainloop);
+    if (globals.levelName) {
+      LevelLoader.load(gl, "assets/" + globals.levelName + ".tmx", function(err, level) {
+        if (err) {
+          throw err;
+        }
+        globals.level = level;
+        startGame();
+      });
+    } else {
+      startGame();
+    };
   };
 
   ImageLoader.loadImages(images, processImages);

@@ -86,11 +86,12 @@ requirejs([
     settings.shared.fullWidth  = width  * gridSize.columns;
     settings.shared.fullHeight = height * gridSize.rows;
 
-    settings.x       = x * width;
-    settings.y       = y * height;
-    settings.columns = gridSize.columns;
-    settings.rows    = gridSize.rows;
-    settings.id      = "s" + x + "-" + y;
+    settings.x         = x * width;
+    settings.y         = y * height;
+    settings.columns   = gridSize.columns;
+    settings.rows      = gridSize.rows;
+    settings.id        = "s" + x + "-" + y;
+    settings.levelName = opt.levelName;
 
     var options = {
       width:  width,
@@ -126,6 +127,7 @@ requirejs([
           top:  10,
           width: 1280,
           height: 720,
+          levelName: "level" + x + "-" + y,
         }), false);
       element.appendChild(div);
     });

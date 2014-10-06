@@ -32,121 +32,10 @@
 
 define([
     'hft/misc/misc',
-    '../bower_components/hft-utils/dist/tilemap',
-    './tiled',
+    './level',
   ], function(
     Misc,
-    TileMap,
-    Tiled) {
-
-  var charToTileId = {
-    ' ': { tileId: 0x0001, },
-    '#': { tileId: 0x0002, },
-    '0': { tileId: 0x0003, },
-    '1': { tileId: 0x0004, },
-    '2': { tileId: 0x0005, },
-    '3': { tileId: 0x0006, },
-    '4': { tileId: 0x0007, },
-  };
-
-  var Level = function(options) {
-    var tileset = options.tileset;
-    var width = options.width;
-    var height = options.height;
-    var tiles = options.tiles;
-
-    this.width = width + 2;
-    this.height = height + 2;
-    this.tileWidth = tileset.tileWidth;
-    this.tileHeight = tileset.tileHeight;
-    this.levelWidth = this.width * this.tileWidth;
-    this.levelHeight = this.height * this.tileHeight;
-    this.outOfBoundsTile = charToTileId['#'].tileId;
-    if (typeof(tiles) == 'string') {
-      var t = [];
-      // Add top line
-      for (var ii = 0; ii < this.width; ++ii) {
-        t.push(this.outOfBoundsTile);
-      }
-      // Add lines of original plus abounds
-      for (var yy = 0; yy < height; ++yy) {
-        t.push(this.outOfBoundsTile);
-        for (var xx = 0; xx < width; ++xx) {
-          t.push(charToTileId[tiles.substr(yy * width + xx, 1)].tileId);
-        }
-        t.push(this.outOfBoundsTile);
-      }
-      // Add bottom line
-      for (var ii = 0; ii < this.width; ++ii) {
-        t.push(this.outOfBoundsTile);
-      }
-      tiles = t;
-    }
-
-    this.tiles = new Uint32Array(tiles);
-    this.uint8view = new Uint8Array(this.tiles.buffer);
-    this.uint16view = new Uint16Array(this.tiles.buffer);
-    this.tilemap = new TileMap({
-      mapTilesAcross: this.width,
-      mapTilesDown: this.height,
-      tilemap: this.uint8view,
-      tileset: tileset,
-    });
-
-    this.tileDrawOptions = {
-      x: 0,
-      y: 0,
-      width:  this.width  * this.tileWidth ,
-      height: this.height * this.tileHeight,
-      canvasWidth: 0, //this.canvas.width,
-      canvasHeight: 0, //this.canvas.height,
-      scrollX: 0,
-      scrollY: 0,
-      rotation: 0,
-      scaleX: 1,
-      scaleY: 1,
-      originX: 0,
-      originY: 0,
-    };
-  };
-
-  Level.prototype.getTile = function(tileX, tileY) {
-    if (tileX >= 0 && tileX < this.width &&
-        tileY >= 0 && tileY < this.height) {
-      return this.uint16view[(tileY * this.width + tileX) * 2];
-    }
-    return this.outOfBoundsTile;
-  };
-
-  Level.prototype.getTileByPixel = function(x, y) {
-    var tileX = Math.floor(x / this.tileWidth);
-    var tileY = Math.floor(y / this.tileHeight);
-    return this.getTile(tileX, tileY);
-  };
-
-  Level.prototype.getDrawOffset = function(obj) {
-    obj.x = ((gl.canvas.width  - this.levelWidth ) / 2) | 0;
-    obj.y = ((gl.canvas.height - this.levelHeight) / 2) | 0;
-  };
-
-  Level.prototype.draw = function(levelManager, options) {
-    if (this.dirty) {
-      this.tilemap.uploadTilemap();
-      this.dirty = false;
-    }
-
-    var opt = this.tileDrawOptions;
-    opt.scaleX = options.scale || 1;
-    opt.scaleY = options.scale || 1;
-    opt.width  = this.width  * this.tileWidth  * options.scale;
-    opt.height = this.height * this.tileHeight * options.scale;
-
-
-    this.getDrawOffset(opt);
-    opt.canvasWidth = gl.canvas.width;
-    opt.canvasHeight = gl.canvas.height;
-    this.tilemap.draw(opt);
-  };
+    Level) {
 
   var levels = [];
 
@@ -281,52 +170,45 @@ define([
   };
 
   var tileInfoMap = {};
-  tileInfoMap[charToTileId[' '].tileId] = tileInfoSky;
-  tileInfoMap[charToTileId['#'].tileId] = tileInfoWall;
-  tileInfoMap[charToTileId['0'].tileId] = tileInfoTeleport0;
-  tileInfoMap[charToTileId['1'].tileId] = tileInfoTeleport1;
-  tileInfoMap[charToTileId['2'].tileId] = tileInfoTeleport2;
-  tileInfoMap[charToTileId['3'].tileId] = tileInfoTeleport3;
-  tileInfoMap[charToTileId['4'].tileId] = tileInfoTeleport4;
+  tileInfoMap[Level.charToTileId[' '].tileId] = tileInfoSky;
+  tileInfoMap[Level.charToTileId['#'].tileId] = tileInfoWall;
+  tileInfoMap[Level.charToTileId['0'].tileId] = tileInfoTeleport0;
+  tileInfoMap[Level.charToTileId['1'].tileId] = tileInfoTeleport1;
+  tileInfoMap[Level.charToTileId['2'].tileId] = tileInfoTeleport2;
+  tileInfoMap[Level.charToTileId['3'].tileId] = tileInfoTeleport3;
+  tileInfoMap[Level.charToTileId['4'].tileId] = tileInfoTeleport4;
 
   var LevelManager = function(services, tileset) {
     this.services = services;
     this.tileset = tileset;
-
-    //Tiled.loadMap("assets/level1.tmx", function(err, map) {
-    //  if (err) {
-    //    console.error(err);
-    //    return;
-    //  }
-    //
-    //  console.log(JSON.stringify(map, undefined, "  "));
-    //});
-
     initLevels(tileset);
   };
 
-  LevelManager.prototype.reset = function(canvasWidth, canvasHeight) {
+  LevelManager.prototype.reset = function(canvasWidth, canvasHeight, level) {
     // pick the largest level that fits
-    var largestLevel = levels[0];
-    var largestSize = 0;
-    for (var ii = 0; ii < levels.length; ++ii) {
-      var level = levels[ii];
-      var hSpace = canvasWidth  - level.levelWidth;
-      var vSpace = canvasHeight - level.levelHeight;
-      if (hSpace >= 0 && vSpace >= 0) {
-        var size = level.levelWidth * level.levelHeight;
-        if (size > largestSize) {
-          largestSize = size;
-          largestLevel = level;
+    if (!level) {
+      var largestLevel = levels[0];
+      var largestSize = 0;
+      for (var ii = 0; ii < levels.length; ++ii) {
+        var level = levels[ii];
+        var hSpace = canvasWidth  - level.levelWidth;
+        var vSpace = canvasHeight - level.levelHeight;
+        if (hSpace >= 0 && vSpace >= 0) {
+          var size = level.levelWidth * level.levelHeight;
+          if (size > largestSize) {
+            largestSize = size;
+            largestLevel = level;
+          }
         }
       }
+      level = largestLeve;
     }
-    this.level = largestLevel;
-    this.level.needsUpdate = true;
+    this.level = level;
+    this.level.dirty = true;
   };
 
   LevelManager.prototype.getTileInfo = function(tileId) {
-    return tileInfoMap[tileId];
+    return tileInfoMap[tileId] || { collisions: false };
   };
 
   LevelManager.prototype.getTileInfoByPixel = function(x, y) {
@@ -347,6 +229,7 @@ define([
   };
 
   LevelManager.prototype.getRandomOpenPosition = function() {
+    var count = 0;
     var level = this.level;
     var found = false;
     while (!found) {
@@ -354,6 +237,9 @@ define([
       var y = (2 + Misc.randInt(level.height - 4)) * level.tileHeight;
       var tile = this.getTileInfoByPixel(x, y);
       found = !tile.collisions;
+      if (++count > 10000) {
+        throw("something's wrong with level data");
+      }
     }
     return {x: x, y: y};
   };

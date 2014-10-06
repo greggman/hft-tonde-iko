@@ -35,11 +35,13 @@ define([
   ], function(
     IO) {
 
-  var applyAttributes = function(node, dest) {
+  var parseStr = function(v) { return v; };
+  var applyAttributes = function(typeMap, node, dest) {
     dest = dest || {};
     for (var ii = 0; ii < node.attributes.length; ++ii) {
       var attr = node.attributes[ii];
-      dest[attr.name] = attr.value;
+      var parseFn = typeMap[attr.name] ? typeMap[attr.name] : parseStr;
+      dest[attr.name] = parseFn(attr.value);
     }
     return dest;
   };
@@ -56,49 +58,90 @@ define([
     }
   };
 
+  var noop = function() { };
+
+  var layerTypeMap = {
+    width: parseInt,
+    height: parseInt,
+  };
   var parseLayer = function(node) {
-    var layer = applyAttributes(node);
+    var layer = applyAttributes(layerTypeMap, node);
     parseChildren(node, {
       data: function(node) {
         if (layer.data) {
           throw("more than one <data> element in layer");
         }
         var data = node.childNodes[0].nodeValue.split(",").map(function(str) {
-          return parseInt(str.trim());
+          return Math.max(0, parseInt(str.trim()) - 1);
         });
         layer.data = data;
       },
+      "#text": noop,
     });
     return layer;
   };
 
+  var tilesetTypeMap = {
+    firstgid: parseInt,
+    tilewidth: parseInt,
+    tileheight: parseInt,
+  };
+  var imageTypeMap = {
+    width: parseInt,
+    height: parseInt,
+  };
   var parseTileset = function(node) {
-    var tilemap = applyAttributes(node);
+    var tilemap = applyAttributes(tilesetTypeMap, node);
     parseChildren(node, {
       image: function(node) {
         if (tilemap.image) {
           throw("more than one <image> element in tilemap");
         }
-        tilemap.image = applyAttributes(node);
-      }
+        tilemap.image = applyAttributes(imageTypeMap, node);
+      },
+      "#text": noop,
     });
     return tilemap;
   };
 
+  var parsePoints = function(str) {
+    var points = [];
+    str.split(" ").forEach(function(point) {
+      var coords = point.split(",");
+      points.push(parseFloat(coords[0], parseFloat(coords[1])));
+    });
+    return points;
+  };
+
+  var objectTypeMap = {
+    x: parseFloat,
+    y: parseFloat,
+    width: parseFloat,
+    height: parseFloat,
+    rotation: parseFloat,
+    gid: parseInt,
+  };
+  var polygonTypeMap = {
+    points: parsePoints,
+  };
+  var polylineTypeMap = {
+    points: parsePoints,
+  };
   var parseObject = function(node) {
-    var ob = applyAttributes(node);
+    var ob = applyAttributes(objectTypeMap, node);
     parseChildren(node, {
       ellipse: function(node) {
         ob.type = "ellipse";
       },
       polygon: function(node) {
         ob.type = "polygon";
-        applyAttributes(node, ob);
+        applyAttributes(polygonTypeMap, node, ob);
       },
       polyline: function(node) {
         ob.type = "polyline";
-        applyAttributes(node, ob);
+        applyAttributes(polyLineTypeMap, node, ob);
       },
+      "#text": noop,
     });
     if (!ob.type) {
       if (ob.gid) {
@@ -110,19 +153,28 @@ define([
     return ob;
   }
 
+  var objectGroupTypeMap = {
+  };
   var parseObjectGroup = function(node) {
     var og = {
       objects: [],
     };
-    applyAttributes(node, og);
+    applyAttributes(objectGroupTypeMap, node, og);
     parseChildren(node, {
       object: function(node) {
         og.objects.push(parseObject(node));
-      }
+      },
+      "#text": noop,
     });
     return og;
   };
 
+  var mapTypeMap = {
+    width: parseInt,
+    height: parseInt,
+    tilewidth: parseInt,
+    tileheight: parseInt,
+  };
   var loadMap = function(url, callback) {
     var onLoad = function(err, str) {
       if (err) {
@@ -139,7 +191,7 @@ define([
       try {
         var xml = (new window.DOMParser()).parseFromString(str, "text/xml");
         var mapNode = xml.childNodes[0];
-        applyAttributes(mapNode, map);
+        applyAttributes(mapTypeMap, mapNode, map);
         parseChildren(mapNode, {
           tileset: function(node) {
             map.tilesets.push(parseTileset(node));
@@ -154,6 +206,7 @@ define([
             map.objectGroups.push(objectGroup);
             map.order.push(objectGroup);
           },
+          "#text": noop,
         });
       } catch (e) {
         return callback(e);
