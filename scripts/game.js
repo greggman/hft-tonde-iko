@@ -80,8 +80,8 @@ requirejs([
     opt = opt || {};
 
     // use a width so there's at least 1 window left of space.
-    var width  = window.screen.availWidth  / (gridSize.columns + 1) | 0;
-    var height = window.screen.availHeight / (gridSize.rows    + 1) | 0;
+    var width  = opt.width  || window.screen.availWidth  / (gridSize.columns + 1) | 0;
+    var height = opt.height || window.screen.availHeight / (gridSize.rows    + 1) | 0;
 
     settings.shared.fullWidth  = width  * gridSize.columns;
     settings.shared.fullHeight = height * gridSize.rows;
@@ -93,12 +93,12 @@ requirejs([
     settings.id      = "s" + x + "-" + y;
 
     var options = {
-      width: width,
+      width:  width,
       height: height,
-      left: 10 + window.screen.availLeft + x * width,
-      right: 10 + window.screen.availTop  + y * height,
-      url: "realgame.html?settings=" + JSON.stringify(settings),
-      title: "view[" + x + "-" + y + "]",
+      left:   opt.left || 10 + window.screen.availLeft + x * width,
+      top:    opt.top  || 10 + window.screen.availTop  + y * height,
+      url:    "realgame.html?settings=" + JSON.stringify(settings),
+      title:  "view[" + x + "-" + y + "]",
     };
 
     return makeWindowFunc(options);
@@ -120,7 +120,13 @@ requirejs([
       var div = document.createElement("div");
       div.className = "comp-button";
       div.appendChild(document.createTextNode((x + 1) + ", " +  (y + 1)));
-      div.addEventListener('click', makeLaunchFunc(x, y), false);
+      div.addEventListener('click',
+        makeLaunchFunc(x, y, {
+          left: 10,
+          top:  10,
+          width: 1280,
+          height: 720,
+        }), false);
       element.appendChild(div);
     });
   };
@@ -147,14 +153,7 @@ requirejs([
   $("h-plus" ).addEventListener('click', function(e) { resizeGrid(+1,  0); }, false);
   */
 
-  $("button1").addEventListener('click', function() {
-    settings.shared.canvasWidth  = undefined;
-    settings.shared.canvasHeight = undefined;
-    gridSize.columns = 3;
-    gridSize.rows = 1;
-    grid.setDimensions(gridSize.columns, gridSize.rows);
-    fillGrid();
-    launch();
+  var startController = function() {
     makeWindowFunc({
       url: "http://localhost:8080",
       title: "controller",
@@ -163,6 +162,19 @@ requirejs([
       width: 500,
       height: 400,
     })();
+  };
+
+  $("button1").addEventListener('click', function() {
+    settings.shared.canvasWidth  = undefined;
+    settings.shared.canvasHeight = undefined;
+    gridSize.columns = 3;
+    gridSize.rows = 1;
+    grid.setDimensions(gridSize.columns, gridSize.rows);
+    fillGrid();
+    launch();
+    startController();
   }, false);
+
+  $("button2").addEventListener('click', startController, false);
 });
 
