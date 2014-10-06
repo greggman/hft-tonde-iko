@@ -305,13 +305,16 @@ define([
       }
       if (tile.teleport) {
         // HACK!
-        var id = globals.id;
+        var parts = /s(\d+)-(\d+)/.exec(globals.id);
+        var id = parseInt(parts[1]) + parseInt(parts[2]) * globals.columns;
+        var numScreens = globals.columns * globals.rows;
         if (tile.dest == 0) {
-          id = (id + 3 - 1) % 3;
+          id = (id + numScreens - 1) % numScreens;
         } else if (tile.dest == 1) {
-          id = (id + 1) % 3;
+          id = (id + 1) % numScreens;
         }
-        this.netPlayer.switchGame("ja" + id, {
+        var id = "s" + (id % globals.columns) + "-" + (Math.floor(id / globals.columns));
+        this.netPlayer.switchGame(id, {
           name: this.playerName,    // Send the name because otherwise we'll make a new one up
           dest: tile.dest,          // Send the dest so we know where to start
           color: this.color,        // Send the color so we don't pick a new one
@@ -471,18 +474,18 @@ define([
 
     var sprite = this.sprite;
     sprite.uniforms.u_texture = img;
-    sprite.x = (off.x + this.position[0]) | 0;
-    sprite.y = (off.y + height / -2 + this.position[1]) | 0;
-    sprite.width = width;
-    sprite.height = height;
+    sprite.x = off.x + ((              this.position[0]) | 0) * globals.scale;
+    sprite.y = off.y + ((height / -2 + this.position[1]) | 0) * globals.scale;
+    sprite.width  = width  * globals.scale;
+    sprite.height = height * globals.scale;
     sprite.xScale = this.facing > 0 ? 1 : -1;
 
     var nameSprite = this.nameSprite;
     nameSprite.uniforms.u_texture = this.nameImage;
-    nameSprite.x = (off.x + this.position[0]) | 0;
-    nameSprite.y = (off.y + height / -2 + this.position[1] - 24) | 0;
-    nameSprite.width = this.nameImage.img.width;
-    nameSprite.height = this.nameImage.img.height;
+    nameSprite.x = off.x + ((              this.position[0])      | 0) * globals.scale;
+    nameSprite.y = off.y + ((height / -2 + this.position[1] - 24) | 0) * globals.scale;
+    nameSprite.width  = this.nameImage.img.width  * globals.scale;
+    nameSprite.height = this.nameImage.img.height * globals.scale;
   };
 
   return Player;

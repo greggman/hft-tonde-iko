@@ -50,22 +50,55 @@
   align-items: center;
  }
 
- #buttons {
-    -webkit-flex: 0 0 auto;
-    flex: 0 0 auto;
+#buttons {
+   -webkit-flex: 0 0 auto;
+   flex: 0 0 auto;
+   text-align: center;
+   -webkit-user-select: none;
+   user-select: none;
+}
+
+#buttons>div {
+   margin: 1em;
+}
+
+#manual {
     text-align: center;
- }
+    margin: auto;
+    display: inline-block;
+}
 
- #buttons>div {
-    margin: 1em;
- }
+.button {
+   padding: 1em;
+   border-radius: 1em;
+   background-color: blue;
+   color:white;
+   font-size: xx-large;
+   font-weight: bold;
+}
 
- .button {
+.s-button {
+    display: inline-block;
+    width: 2em;
+    text-align: center;
+    margin: 0.1em;
+    padding: 0.5em;
+    border-radius: 0.5em;
+    background-color: blue;
+    color:white;
+    font-size: xx-large;
+    font-weight: bold;
+}
+
+.comp-button {
+    margin: 0.3em;
+    width: 4em;
     padding: 1em;
     border-radius: 1em;
     background-color: blue;
     color:white;
     font-size: xx-large;
     font-weight: bold;
- }
+}
+
 

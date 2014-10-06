@@ -1,7 +1,16 @@
 To Do
 =====
 
-*   Make name persist across machines
+*   make it start fullscreen
+*   make it always use 1920x1080 canvas
+*   make canvas scale correctly for size
+*   use Tiled levels
+*   make it load Tiled tiles
+*   make it handle tile animation
+*   make it handle 2 layers of tiles (above / below)
+*   make it load meaning tiles from map
+*   make launcher start window 1280x720 + extra
+
 *   Set and define destinations
 *   Make end that disconnects you
 *   Make queue to get into the game
@@ -30,4 +39,8 @@ To Do
 *   Make version that plays locally. Use < 1.0 scale to fit on screen
 
 
+Done
+====
+
+*   Make name persist across machines
 

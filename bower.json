@@ -21,6 +21,6 @@
     "tests"
   ],
   "dependencies": {
-    "hft-utils": "https://github.com/greggman/hft-utils.git#0.1.1"
+    "hft-utils": "https://github.com/greggman/hft-utils.git#0.1.2"
   }
 }

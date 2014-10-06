@@ -102,6 +102,7 @@ window.s = g_services;
     coinAnimSpeed: 10,
     jumpFirstFrameTime: 0.1,
     fallTopAnimVelocity: 100,
+    scale: 1,
   };
 window.g = globals;
 
@@ -188,11 +189,14 @@ window.g = globals;
   Misc.applyUrlSettings(globals);
 
   var canvas = $("playfield");
+  if (globals.shared.canvasWidth ) { globals.resize = false; canvas.width  = globals.shared.canvasWidth;  }
+  if (globals.shared.canvasHeight) { globals.resize = false; canvas.height = globals.shared.canvasHeight; }
   var gl = WebGL.setupWebGL(canvas, {alpha:false}, function() {});
   g_services.spriteManager = new SpriteManager();
 
   var resize = function() {
-    if (Misc.resize(canvas)) {
+    if (!globals.resizeOnce || (globals.resize !== false && Misc.resize(canvas))) {
+      globals.resizeOnce = true;
       g_services.levelManager.reset(canvas.width, canvas.height);
       g_services.playerManager.forEachPlayer(function(player) {
         player.reset();
@@ -205,7 +209,7 @@ window.g = globals;
   if (globals.haveServer) {
     var server = new GameServer({
       allowMultipleGames: true,
-      id: "ja" + globals.id,
+      id: globals.id,
     });
     g_services.server = server;
     server.addEventListener('playerconnect', g_playerManager.startPlayer.bind(g_playerManager));
@@ -329,7 +333,7 @@ window.g = globals;
 
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
     gl.clear(gl.CLEAR_BUFFER_BIT);
-    g_services.levelManager.draw();
+    g_services.levelManager.draw(globals);
     g_services.drawSystem.processEntities();
     g_services.spriteManager.draw();
   };

@@ -33,7 +33,11 @@
 define([
     'hft/misc/misc',
     '../bower_components/hft-utils/dist/tilemap',
-  ], function(Misc, TileMap) {
+    './tiled',
+  ], function(
+    Misc,
+    TileMap,
+    Tiled) {
 
   var charToTileId = {
     ' ': { tileId: 0x0001, },
@@ -125,13 +129,19 @@ define([
     obj.y = ((gl.canvas.height - this.levelHeight) / 2) | 0;
   };
 
-  Level.prototype.draw = function(levelManager) {
+  Level.prototype.draw = function(levelManager, options) {
     if (this.dirty) {
       this.tilemap.uploadTilemap();
       this.dirty = false;
     }
 
     var opt = this.tileDrawOptions;
+    opt.scaleX = options.scale || 1;
+    opt.scaleY = options.scale || 1;
+    opt.width  = this.width  * this.tileWidth  * options.scale;
+    opt.height = this.height * this.tileHeight * options.scale;
+
+
     this.getDrawOffset(opt);
     opt.canvasWidth = gl.canvas.width;
     opt.canvasHeight = gl.canvas.height;
@@ -283,6 +293,15 @@ define([
     this.services = services;
     this.tileset = tileset;
 
+    //Tiled.loadMap("assets/level1.tmx", function(err, map) {
+    //  if (err) {
+    //    console.error(err);
+    //    return;
+    //  }
+    //
+    //  console.log(JSON.stringify(map, undefined, "  "));
+    //});
+
     initLevels(tileset);
   };
 
@@ -315,8 +334,8 @@ define([
     return this.getTileInfo(tileId);
   }
 
-  LevelManager.prototype.draw = function() {
-    this.level.draw(this);
+  LevelManager.prototype.draw = function(options) {
+    this.level.draw(this, options);
   };
 
   LevelManager.prototype.getLevel = function() {

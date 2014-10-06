@@ -31,27 +31,36 @@
 "use strict";
 
 // Start the main app logic.
-requirejs(
-  [], function() {
+requirejs([
+    '../bower_components/hft-utils/dist/grid',
+  ], function(
+    Grid
+  ) {
 
   function $(id) {
     return document.getElementById(id);
   }
 
-  var numWindows = 3;
+  var gridSize = {
+    container: $("manual"),
+    columns: 6,
+    rows: 1,
+  };
+  var grid = new Grid(gridSize);
 
-  // use a width so there's at least 1 window left of space.
-  var width  = window.screen.availWidth / (numWindows + 1) | 0;
-  var height = window.screen.availHeight / 3 * 2 | 0;
-
-  var makeLaunchFunc = function(windowNum, opt) {
+  var makeLaunchFunc = function(x, y, opt) {
     opt = opt || {};
+
+    // use a width so there's at least 1 window left of space.
+    var width  = window.screen.availWidth  / (gridSize.columns + 1) | 0;
+    var height = window.screen.availHeight / (gridSize.rows    + 1) | 0;
 
     var settings = {
       shared: {
-        fullWidth:  width * numWindows,
-        fullHeight: height,
-        useWindowPosition: opt.useWindowPosition,
+        fullWidth:  width  * gridSize.columns,
+        fullHeight: height * gridSize.rows,
+        canvasWidth: 1920,
+        canvasHeight: 1080,
       },
     };
 
@@ -65,24 +74,17 @@ requirejs(
       height: height,
     };
 
-    if (opt.useWindowPosition) {
-      settings.shared.fullWidth = window.screen.availWidth;
-      settings.shared.fullHeight = window.screen.availHeight;
-    }
+    options.left = 10 + window.screen.availLeft + x * width;
+    options.top  = 10 + window.screen.availTop  + y * height;
 
-    var middle = numWindows / 2 | 0;
-    options.left = 10 + window.screen.availLeft + windowNum * width;
-    options.top  = 10 + window.screen.availTop;
-
-    if (!opt.useWindowPosition) {
-      settings.x = windowNum * width;
-      settings.y = 0;
-    }
-
-    settings.id = windowNum;
+    settings.x       = x * width;
+    settings.y       = y * height;
+    settings.columns = gridSize.columns;
+    settings.rows    = gridSize.rows;
+    settings.id      = "s" + x + "-" + y;
 
     var url = "realgame.html?settings=" + JSON.stringify(settings);
-    var title = "view " + windowNum;
+    var title = "view[" + x + "-" + y + "]";
     var windowOptions = JSON.stringify(options).replace(/[{}"]/g, "").replace(/\:/g,"=");
 
     return function() {
@@ -90,22 +92,49 @@ requirejs(
     };
   };
 
-  var launch = function(opt) {
-    for (var ii = 0; ii < numWindows; ++ii) {
-      makeLaunchFunc(ii, opt)();
+  var removeChildren = function(element) {
+    for(;;) {
+      var child = element.firstChild;
+      if (!child) {
+        return;
+      }
+      element.removeChild(child);
     }
   };
 
+  var fillGrid = function() {
+    grid.forEach(function(element, x, y) {
+      removeChildren(element);
+      var div = document.createElement("div");
+      div.className = "comp-button";
+      div.appendChild(document.createTextNode((x + 1) + ", " +  (y + 1)));
+      div.addEventListener('click', makeLaunchFunc(x, y), false);
+      element.appendChild(div);
+    });
+  };
+  fillGrid();
+
+  var resizeGrid = function(dx, dy) {
+    gridSize.columns = Math.max(1, gridSize.columns + dx);
+    gridSize.rows    = Math.max(1, gridSize.rows    + dy);
+    grid.setDimensions(gridSize.columns, gridSize.rows);
+    fillGrid();
+  };
+
+  var launch = function(opt) {
+    grid.forEach(function(element, x, y) {
+      makeLaunchFunc(x, y, opt)();
+    });
+  };
+
+
+  /*
+  $("v-minus").addEventListener('click', function(e) { resizeGrid( 0, -1); }, false);
+  $("v-plus" ).addEventListener('click', function(e) { resizeGrid( 0, +1); }, false);
+  $("h-minus").addEventListener('click', function(e) { resizeGrid(-1,  0); }, false);
+  $("h-plus" ).addEventListener('click', function(e) { resizeGrid(+1,  0); }, false);
+  */
+
   $("button1").addEventListener('click', function() { launch(); }, false);
-  for (var ii = 0; ii < numWindows; ++ii) {
-    var div = document.createElement("div");
-    div.className = "button";
-    div.style.display = "inline-block";
-    div.style.margin = "1em";
-    div.style.width = "5em";
-    div.appendChild(document.createTextNode(ii + 1));
-    div.addEventListener('click', makeLaunchFunc(ii), false);
-    $("manual").appendChild(div);
-  }
 });
 
