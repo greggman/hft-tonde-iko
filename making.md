@@ -25,7 +25,7 @@ you want to change the tileset on.
 
 *   Delete the old tileset. Select the old tileset (probably "bricks") and click the trashcan
 
-    <img src="src/deleting-old-tileset.png" width="505" height="472" />
+    <img src="src/deleting-old-tileset.png" width="419" height="271" />
 
 ## Assign Meanings to tiles
 
