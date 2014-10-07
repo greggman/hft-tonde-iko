@@ -12,7 +12,7 @@ I've made 1 map for each screen, they are stored in
     assets/level4-0.tmx
     assets/level5-0.tmx
 
-Each screen-map is allowed **ONE** tileset. Currently all the maps are using a "bricks" tileset.
+You have more than one tileset per map.
 
 ## Making a new Tileset
 
