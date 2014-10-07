@@ -64,6 +64,9 @@ define([
     width: parseInt,
     height: parseInt,
   };
+  var tileTypeMap = {
+    gid: parseInt,
+  };
   var parseLayer = function(node) {
     var layer = applyAttributes(layerTypeMap, node);
     parseChildren(node, {
@@ -71,9 +74,22 @@ define([
         if (layer.data) {
           throw("more than one <data> element in layer");
         }
-        var data = node.childNodes[0].nodeValue.split(",").map(function(str) {
-          return Math.max(0, parseInt(str.trim()) - 1);
-        });
+        var attrs = applyAttributes({}, node);
+        if (attrs.encoding == "csv") {
+          var data = node.childNodes[0].nodeValue.split(",").map(function(str) {
+            return parseInt(str.trim());
+          });
+        } else if (attrs.encoding === undefined) {
+          var data = [];
+          for (var ii = 0; ii < node.childNodes.length; ++ii) {
+            var child = node.childNodes[ii];
+            if (child.nodeName == "tile") {
+              data.push(applyAttributes(tileTypeMap, child).gid);
+            }
+          }
+        } else {
+          throw ("unsupported format: " + attrs.encoding);
+        }
         layer.data = data;
       },
       "#text": noop,
@@ -175,43 +191,48 @@ define([
     tilewidth: parseInt,
     tileheight: parseInt,
   };
+
+  var parseMap = function(str, callback) {
+    var map = {
+      tilesets: [],
+      layers: [],
+      objectGroups: [],
+      order: [],
+    };
+
+    try {
+      var xml = (new window.DOMParser()).parseFromString(str, "text/xml");
+      var mapNode = xml.childNodes[0];
+      applyAttributes(mapTypeMap, mapNode, map);
+      parseChildren(mapNode, {
+        tileset: function(node) {
+          map.tilesets.push(parseTileset(node));
+        },
+        layer: function(node) {
+          var layer = parseLayer(node);
+          map.layers.push(layer);
+          map.order.push(layer);
+        },
+        objectgroup: function(node) {
+          var objectGroup = parseObjectGroup(node);
+          map.objectGroups.push(objectGroup);
+          map.order.push(objectGroup);
+        },
+        "#text": noop,
+      });
+    } catch (e) {
+      return callback(e);
+    }
+    callback(null, map);
+  };
+
   var loadMap = function(url, callback) {
     var onLoad = function(err, str) {
       if (err) {
         callback(err);
       }
 
-      var map = {
-        tilesets: [],
-        layers: [],
-        objectGroups: [],
-        order: [],
-      };
-
-      try {
-        var xml = (new window.DOMParser()).parseFromString(str, "text/xml");
-        var mapNode = xml.childNodes[0];
-        applyAttributes(mapTypeMap, mapNode, map);
-        parseChildren(mapNode, {
-          tileset: function(node) {
-            map.tilesets.push(parseTileset(node));
-          },
-          layer: function(node) {
-            var layer = parseLayer(node);
-            map.layers.push(layer);
-            map.order.push(layer);
-          },
-          objectgroup: function(node) {
-            var objectGroup = parseObjectGroup(node);
-            map.objectGroups.push(objectGroup);
-            map.order.push(objectGroup);
-          },
-          "#text": noop,
-        });
-      } catch (e) {
-        return callback(e);
-      }
-      callback(null, map);
+      parseMap(str, callback);
     };
 
     var options = {
@@ -224,6 +245,7 @@ define([
 
   return {
     loadMap: loadMap,
+    parseMap: parseMap,
   }
 });
 

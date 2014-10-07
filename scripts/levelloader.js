@@ -31,17 +31,19 @@
 "use strict";
 
 define([
+    'hft/misc/strings',
     '../bower_components/tdl/tdl/textures',
     '../bower_components/hft-utils/dist/imageloader',
     './level',
     './tiled'
   ], function(
+    Strings,
     Textures,
     ImageLoader,
     Level,
     Tiled) {
 
-  var makeLevel = function(gl, map) {
+  var makeLevel = function(gl, map, callback) {
     // convert level to what we need
     // First get tileset. Let's assume just 1
     if (map.tilesets.length != 1) {
@@ -49,37 +51,90 @@ define([
     }
 
     var ts = map.tilesets[0];
+    var meaningUrl = ts.image.src.substring(0, ts.image.src.length - 4) + "-meaning.tmx";
 
-    var tileset = {
-      tileWidth: ts.tilewidth,
-      tileHeight: ts.tileheight,
-      tilesAcross: ts.image.width / ts.tilewidth,
-      tilesDown: ts.image.height / ts.tileheight,
-      texture: Textures.loadTexture(ts.image),
-    };
+    Tiled.loadMap(meaningUrl, function(err, meaningMap) {
+      if (err) {
+        console.error(err);
+        return;
+      }
 
-    var createTexture = function(img) {
-      var tex = Textures.loadTexture(img);
-      tex.setParameter(gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-      tex.setParameter(gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-      tex.setParameter(gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-      tex.setParameter(gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-      return tex;
-    };
+      var tileset = {
+        tileWidth: ts.tilewidth,
+        tileHeight: ts.tileheight,
+        tilesAcross: ts.image.width / ts.tilewidth,
+        tilesDown: ts.image.height / ts.tileheight,
+        texture: Textures.loadTexture(ts.image),
+      };
 
-    var layers = map.layers.map(function(l) {
-      return new Level({
+      var numTiles = tileset.tilesAcross * tileset.tilesDown;
+      var meaningTable = [];
+
+      var meaningTS;
+      var visualTS;
+      meaningMap.tilesets.forEach(function(ts) {
+        if (Strings.endsWith(ts.image.source, "meaning-icons.png")) {
+          meaningTS = ts;
+        } else {
+          visualTS = ts;
+        }
+      });
+
+      var layer = meaningMap.layers[0];
+      for (var y = 0; y < layer.height - 1; y += 2) {
+        for (var x = 0; x < layer.width; ++x) {
+          var tileId    = layer.data[(y + 0) * layer.width + x];
+          var meaningId = layer.data[(y + 1) * layer.width + x];
+          if (tileId && meaningId) {
+            var tile    = tileId    - visualTS.firstgid;
+            var meaning = meaningId - meaningTS.firstgid;
+//console.log("" + x + ", " + y + ": tileId" + tileId + ", meaningId: " + meaningId + ", tile: " + tile + ", meaning: " + meaning);
+            if (meaningTable[tile] == undefined) {
+              meaningTable[tile] = meaning;
+            } else if (meaningTable[tile] != meaning) {
+              console.error("tile " + tile + " assigned more than one meaning, A = " + meaningTable[tile] + ", B = " + meaning);
+            }
+          }
+        }
+      }
+
+      // Fill out mising
+      for (var ii = 0; ii < numTiles; ++ii) {
+        if (!meaningTable[ii]) {
+          meaningTable[ii] = 0;
+        }
+      }
+
+      var createTexture = function(img) {
+        var tex = Textures.loadTexture(img);
+        tex.setParameter(gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        tex.setParameter(gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        tex.setParameter(gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        tex.setParameter(gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        return tex;
+      };
+
+      var layers = map.layers.map(function(l) {
+        // Tiled is 1 based (0 = no tile). We're 0 based so subtract 1.
+        var data = new Uint32Array(l.data.length);
+        for (var ii = 0; ii < l.data.length; ++ii) {
+          data[ii] = Math.max(0, l.data[ii] - 1);
+        }
+        return new Level({
+          tileset: tileset,
+          width: l.width,
+          height: l.height,
+          tiles: data,
+          meaningTable: meaningTable,
+        });
+      });
+
+      callback(null, {
+        layers: layers,
         tileset: tileset,
-        width: l.width,
-        height: l.height,
-        tiles: new Uint32Array(l.data),
+        meaningTable: meaningTable,
       });
     });
-
-    return {
-      layers: layers,
-      tileset: tileset,
-    };
   };
 
   var load = function(gl, url, callback) {
@@ -101,7 +156,7 @@ define([
           ts.image = images[ts.image.source].img;
         });
 
-        callback(null, makeLevel(gl, map));
+        makeLevel(gl, map, callback);
       });
     });
   };

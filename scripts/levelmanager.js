@@ -169,6 +169,16 @@ define([
     dest: 4,
   };
 
+  var tileInfos = [
+    tileInfoSky,        // 0
+    tileInfoWall,       // 1
+    tileInfoTeleport0,  // 2
+    tileInfoTeleport1,  // 3
+    tileInfoTeleport2,  // 4
+    tileInfoTeleport3,  // 5
+    tileInfoTeleport4,  // 6
+  ];
+
   var tileInfoMap = {};
   tileInfoMap[Level.charToTileId[' '].tileId] = tileInfoSky;
   tileInfoMap[Level.charToTileId['#'].tileId] = tileInfoWall;
@@ -213,6 +223,10 @@ define([
 
   LevelManager.prototype.getTileInfoByPixel = function(x, y) {
     var tileId = this.level.getTileByPixel(x, y);
+    if (this.level.meaningTable) {
+      var meaningNdx = this.level.meaningTable[tileId];
+      return tileInfos[meaningNdx];
+    }
     return this.getTileInfo(tileId);
   }
 

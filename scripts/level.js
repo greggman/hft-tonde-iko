@@ -48,6 +48,8 @@ define([
     this.levelWidth = this.width * this.tileWidth;
     this.levelHeight = this.height * this.tileHeight;
     this.outOfBoundsTile = Level.charToTileId['#'].tileId;
+    this.meaningTable = options.meaningTable;
+
     if (typeof(tiles) == 'string') {
       var t = [];
       /// Add a border
