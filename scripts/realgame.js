@@ -350,7 +350,7 @@ window.g = globals;
     };
 
     if (globals.levelName) {
-      LevelLoader.load(gl, "assets/" + globals.levelName + ".tmx", function(err, level) {
+      LevelLoader.load(gl, "assets/" + globals.levelName + ".json", function(err, level) {
         if (err) {
           throw err;
         }

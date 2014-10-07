@@ -32,30 +32,22 @@
 
 define([
   './io',
-  './tiled'
 ], function(
-  IO,
-  Tiled) {
+  IO) {
 
   var loadMap = function(url, callback) {
-    var onLoad = function(err, str) {
+    var onLoad = function(err, map) {
       if (err) {
         callback(err);
       }
 
-      try {
-        var map = Tiled.parseMap(str);
-      } catch (e) {
-        return callback(e);
-      }
       callback(null, map);
     };
 
     var options = {
-      inMimeType: "text/xml",
+      method: "GET",
     };
-
-    IO.get(url, "", onLoad, options);
+    IO.sendJSON(url, {}, onLoad, options);
   };
 
   return {

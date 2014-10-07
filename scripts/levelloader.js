@@ -129,7 +129,7 @@ define([
       }
 
       ++loadCount;
-      var meaningUrl = ts.image.src.substring(0, ts.image.src.length - 4) + "-meaning.tmx";
+      var meaningUrl = ts.image.src.substring(0, ts.image.src.length - 4) + "-meaning.json";
       TiledLoader.loadMap(meaningUrl, function(err, meaningMap) {
         --loadCount;
         if (err) {
@@ -160,7 +160,7 @@ define([
         var meaningMap = ts.meaningMap;
         if (meaningMap) {
           meaningMap.tilesets.forEach(function(mts) {
-            if (Strings.endsWith(mts.image.source, "meaning-icons.png")) {
+            if (Strings.endsWith(mts.image, "meaning-icons.png")) {
               meaningTS = mts;
             } else {
               visualTS = mts;
@@ -237,12 +237,12 @@ define([
 
       var images = {};
       map.tilesets.forEach(function(ts) {
-        images[ts.image.source] = { url: "assets/" + ts.image.source };
+        images[ts.image] = { url: "assets/" + ts.image };
       });
 
       ImageLoader.loadImages(images, function() {
         map.tilesets.forEach(function(ts) {
-          ts.image = images[ts.image.source].img;
+          ts.image = images[ts.image].img;
         });
 
         makeLevel(gl, map, callback);
