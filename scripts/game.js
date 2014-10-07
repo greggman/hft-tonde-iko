@@ -58,11 +58,11 @@ requirejs([
 
   var makeWindowFunc = function(options) {
     var opt = {
-      resizeable: 1,
-      scrollbars: 1,
-      menubar: 1,
-      toolbar: 1,
-      location: 1,
+      resizeable: "yes",
+      scrollbars: "yes",
+      menubar: "yes",
+      toolbar: "yes",
+      location: "yes",
       width: options.width,
       height: options.height,
       left: options.left,
@@ -120,7 +120,7 @@ requirejs([
       removeChildren(element);
       var div = document.createElement("div");
       div.className = "comp-button";
-      div.appendChild(document.createTextNode((x + 1) + ", " +  (y + 1)));
+      div.appendChild(document.createTextNode("" + x + "-" + y));
       div.addEventListener('click',
         makeLaunchFunc(x, y, {
           left: 10,

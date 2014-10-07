@@ -43,82 +43,169 @@ define([
     Level,
     TiledLoader) {
 
+  var createTexture = function(img) {
+    var tex = Textures.loadTexture(img);
+    tex.setParameter(gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    tex.setParameter(gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    tex.setParameter(gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    tex.setParameter(gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    return tex;
+  };
+
+
   var makeLevel = function(gl, map, callback) {
     // convert level to what we need
     // First get tileset. Let's assume just 1
-    if (map.tilesets.length != 1) {
-      throw "only one tileset allowed: " + url;
+
+    map.tilesets.sort(function(a, b) {
+      return a.firstgid == b.firstgid ? 0 : (a.firstgid < b.firstgid ? -1 : 1);
+    });
+
+    // count tiles.
+    var ts0 = map.tilesets[0];
+    var numTiles = 0;
+    map.tilesets.forEach(function(ts) {
+      var tilesAcross = ts.image.width  / ts.tilewidth;
+      var tilesDown   = ts.image.height / ts.tileheight;
+      if (ts.tilewidth != ts0.tilewidth || ts.tileheight != ts0.tileheight) {
+        throw("all tilesets must use the same size tiles");
+      }
+      numTiles += tilesAcross * tilesDown;
+    });
+
+    // make a new tileset
+    var superAcross = Math.floor(1024 / ts0.tilewidth);
+    var superDown   = Math.floor((numTiles + numTiles - 1) / superAcross);
+    var superWidth  = superAcross * ts0.tilewidth;
+    var superHeight = superDown   * ts0.tileheight;
+
+    var loadCount = 0;
+    var canvas = document.createElement("canvas");
+    canvas.width  = superWidth;
+    canvas.height = superHeight;
+    var ctx = canvas.getContext("2d");
+//canvas.style.backgroundColor = "#444";
+//canvas.style.width = superWidth + "px";
+//canvas.style.height = superHeight + "px";
+//canvas.style.display = "block";
+//canvas.style.position = "absolute";
+//canvas.style.top = "0px";
+//canvas.style.zIndex = "100";
+//canvas.style.border = "5px solid red";
+//document.body.appendChild(canvas);
+
+    var drawImage = function(img, sx, sy, sw, sh, dx, dy, dw, dh) {
+      var args = Array.prototype.slice.apply(arguments);
+//      console.log(args.join(", "));
+      ctx.drawImage.apply(ctx, arguments);
     }
 
-    var ts = map.tilesets[0];
-    var meaningUrl = ts.image.src.substring(0, ts.image.src.length - 4) + "-meaning.tmx";
-
-    TiledLoader.loadMap(meaningUrl, function(err, meaningMap) {
-      if (err) {
-        console.error(err);
-        return;
+    var dstX = 0;
+    var dstY = 0;
+    map.tilesets.forEach(function(ts) {
+      var srcX = 0;
+      var srcY = 0;
+      var tilesAcross = ts.image.width  / ts.tilewidth;
+      var tilesDown   = ts.image.height / ts.tileheight;
+      var numTiles    = tilesAcross * tilesDown;
+      while (srcY < tilesDown) {
+        var dstSize = superAcross - dstX;
+        var srcSize = tilesAcross - srcX;
+        var takeSize = Math.min(dstSize, srcSize);
+        drawImage(
+          ts.image,
+          srcX * ts.tilewidth, srcY * ts.tileheight, takeSize * ts.tilewidth, ts.tileheight,
+          dstX * ts.tilewidth, dstY * ts.tileheight, takeSize * ts.tilewidth, ts.tileheight);
+        srcX += takeSize;
+        dstX += takeSize;
+        if (srcX == tilesAcross) {
+          srcX = 0;
+          ++srcY;
+        }
+        if (dstX == superAcross) {
+          dstX = 0;
+          ++dstY;
+        }
       }
 
-      var tileset = {
-        tileWidth: ts.tilewidth,
-        tileHeight: ts.tileheight,
-        tilesAcross: ts.image.width / ts.tilewidth,
-        tilesDown: ts.image.height / ts.tileheight,
-        texture: Textures.loadTexture(ts.image),
-      };
+      ++loadCount;
+      var meaningUrl = ts.image.src.substring(0, ts.image.src.length - 4) + "-meaning.tmx";
+      TiledLoader.loadMap(meaningUrl, function(err, meaningMap) {
+        --loadCount;
+        if (err) {
+          console.error(err);
+          return;
+        }
 
-      var numTiles = tileset.tilesAcross * tileset.tilesDown;
-      var meaningTable = [];
-
-      var meaningTS;
-      var visualTS;
-      meaningMap.tilesets.forEach(function(ts) {
-        if (Strings.endsWith(ts.image.source, "meaning-icons.png")) {
-          meaningTS = ts;
-        } else {
-          visualTS = ts;
+        ts.meaningMap = meaningMap;
+        if (loadCount == 0) {
+          makeMapPhase2()
         }
       });
+    });
 
-      var layer = meaningMap.layers[0];
-      for (var y = 0; y < layer.height - 1; y += 2) {
-        for (var x = 0; x < layer.width; ++x) {
-          var tileId    = layer.data[(y + 0) * layer.width + x];
-          var meaningId = layer.data[(y + 1) * layer.width + x];
-          if (tileId && meaningId) {
-            var tile    = tileId    - visualTS.firstgid;
-            var meaning = meaningId - meaningTS.firstgid;
-//console.log("" + x + ", " + y + ": tileId" + tileId + ", meaningId: " + meaningId + ", tile: " + tile + ", meaning: " + meaning);
-            if (meaningTable[tile] == undefined) {
-              meaningTable[tile] = meaning;
-            } else if (meaningTable[tile] != meaning) {
-              console.error("tile " + tile + " assigned more than one meaning, A = " + meaningTable[tile] + ", B = " + meaning);
+    var makeMapPhase2 = function() {
+      console.log("setup tileset");
+      var tileset = {
+        tileWidth: ts0.tilewidth,
+        tileHeight: ts0.tileheight,
+        tilesAcross: superAcross,
+        tilesDown: superDown,
+        texture: createTexture(canvas),
+      };
+
+      var meaningTable = [];
+
+      map.tilesets.forEach(function(ts) {
+        var meaningTS;
+        var visualTS;
+        var meaningMap = ts.meaningMap;
+        meaningMap.tilesets.forEach(function(mts) {
+          if (Strings.endsWith(mts.image.source, "meaning-icons.png")) {
+            meaningTS = mts;
+          } else {
+            visualTS = mts;
+          }
+        });
+
+        var layer = meaningMap.layers[0];
+        for (var y = 0; y < layer.height - 1; y += 2) {
+          for (var x = 0; x < layer.width; ++x) {
+            var tileId    = layer.data[(y + 0) * layer.width + x];
+            var meaningId = layer.data[(y + 1) * layer.width + x];
+            if (tileId && meaningId) {
+              var id      = tileId    - visualTS.firstgid + ts.firstgid - 1;
+              var xid     = id % superAcross;
+              var yid     = id / superAcross | 0;
+              var tile    = xid + yid * 256;
+              var meaning = meaningId - meaningTS.firstgid;
+//  console.log("" + x + ", " + y + ": tileId: " + tileId + ", meaningId: " + meaningId + ", id: " + id + ", tile: " + tile + ", meaning: " + meaning);
+              if (meaningTable[tile] == undefined) {
+                meaningTable[tile] = meaning;
+              } else if (meaningTable[tile] != meaning) {
+                console.error("tile " + tile + " assigned more than one meaning, A = " + meaningTable[tile] + ", B = " + meaning);
+              }
             }
           }
         }
-      }
 
+      });
       // Fill out mising
+      var numTiles = superDown * 256;
       for (var ii = 0; ii < numTiles; ++ii) {
         if (!meaningTable[ii]) {
           meaningTable[ii] = 0;
         }
       }
 
-      var createTexture = function(img) {
-        var tex = Textures.loadTexture(img);
-        tex.setParameter(gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-        tex.setParameter(gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-        tex.setParameter(gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-        tex.setParameter(gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        return tex;
-      };
-
       var layers = map.layers.map(function(l) {
         // Tiled is 1 based (0 = no tile). We're 0 based so subtract 1.
         var data = new Uint32Array(l.data.length);
         for (var ii = 0; ii < l.data.length; ++ii) {
-          data[ii] = Math.max(0, l.data[ii] - 1);
+          var id = Math.max(0, l.data[ii] - 1);
+          var xid = id % superAcross;
+          var yid = id / superAcross | 0;
+          data[ii] = xid + yid * 256;
         }
         return new Level({
           tileset: tileset,
@@ -134,7 +221,7 @@ define([
         tileset: tileset,
         meaningTable: meaningTable,
       });
-    });
+    };
   };
 
 
