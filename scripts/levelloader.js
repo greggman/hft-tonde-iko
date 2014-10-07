@@ -35,13 +35,13 @@ define([
     '../bower_components/tdl/tdl/textures',
     '../bower_components/hft-utils/dist/imageloader',
     './level',
-    './tiled'
+    './tiledloader'
   ], function(
     Strings,
     Textures,
     ImageLoader,
     Level,
-    Tiled) {
+    TiledLoader) {
 
   var makeLevel = function(gl, map, callback) {
     // convert level to what we need
@@ -53,7 +53,7 @@ define([
     var ts = map.tilesets[0];
     var meaningUrl = ts.image.src.substring(0, ts.image.src.length - 4) + "-meaning.tmx";
 
-    Tiled.loadMap(meaningUrl, function(err, meaningMap) {
+    TiledLoader.loadMap(meaningUrl, function(err, meaningMap) {
       if (err) {
         console.error(err);
         return;
@@ -137,8 +137,9 @@ define([
     });
   };
 
+
   var load = function(gl, url, callback) {
-    Tiled.loadMap(url, function(err, map) {
+    TiledLoader.loadMap(url, function(err, map) {
       if (err) {
         console.error(err);
         return;

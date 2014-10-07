@@ -31,9 +31,7 @@
 "use strict";
 
 define([
-    './io',
-  ], function(
-    IO) {
+  ], function() {
 
   var parseStr = function(v) { return v; };
   var applyAttributes = function(typeMap, node, dest) {
@@ -192,7 +190,7 @@ define([
     tileheight: parseInt,
   };
 
-  var parseMap = function(str, callback) {
+  var parseMap = function(str) {
     var map = {
       tilesets: [],
       layers: [],
@@ -200,51 +198,30 @@ define([
       order: [],
     };
 
-    try {
-      var xml = (new window.DOMParser()).parseFromString(str, "text/xml");
-      var mapNode = xml.childNodes[0];
-      applyAttributes(mapTypeMap, mapNode, map);
-      parseChildren(mapNode, {
-        tileset: function(node) {
-          map.tilesets.push(parseTileset(node));
-        },
-        layer: function(node) {
-          var layer = parseLayer(node);
-          map.layers.push(layer);
-          map.order.push(layer);
-        },
-        objectgroup: function(node) {
-          var objectGroup = parseObjectGroup(node);
-          map.objectGroups.push(objectGroup);
-          map.order.push(objectGroup);
-        },
-        "#text": noop,
-      });
-    } catch (e) {
-      return callback(e);
-    }
-    callback(null, map);
+    var xml = (new window.DOMParser()).parseFromString(str, "text/xml");
+    var mapNode = xml.childNodes[0];
+    applyAttributes(mapTypeMap, mapNode, map);
+    parseChildren(mapNode, {
+      tileset: function(node) {
+        map.tilesets.push(parseTileset(node));
+      },
+      layer: function(node) {
+        var layer = parseLayer(node);
+        map.layers.push(layer);
+        map.order.push(layer);
+      },
+      objectgroup: function(node) {
+        var objectGroup = parseObjectGroup(node);
+        map.objectGroups.push(objectGroup);
+        map.order.push(objectGroup);
+      },
+      "#text": noop,
+    });
+
+    return map;
   };
-
-  var loadMap = function(url, callback) {
-    var onLoad = function(err, str) {
-      if (err) {
-        callback(err);
-      }
-
-      parseMap(str, callback);
-    };
-
-    var options = {
-      inMimeType: "text/xml",
-    };
-
-    IO.get(url, "", onLoad, options);
-  };
-
 
   return {
-    loadMap: loadMap,
     parseMap: parseMap,
   }
 });
