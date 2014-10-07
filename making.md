@@ -1,18 +1,16 @@
-Making
-======
+Making Levels
+=============
 
 I've forced this to be 6 screens, 1920x1080. With 32x32 pixel tiles that's 60x33 tiles per screen.
 
 I've made 1 map for each screen, they are stored in
 
-    assets/level0-0.tmx
-    assets/level1-0.tmx
-    assets/level2-0.tmx
-    assets/level3-0.tmx
-    assets/level4-0.tmx
-    assets/level5-0.tmx
-
-You have more than one tileset per map.
+    assets/level0-0.json
+    assets/level1-0.json
+    assets/level2-0.json
+    assets/level3-0.json
+    assets/level4-0.json
+    assets/level5-0.json
 
 ## Making a new Tileset
 
@@ -23,7 +21,7 @@ you want to change the tileset on.
 
     <img src="src/making-tileset.png" width="505" height="472" />
 
-*   To delete the old tileset. Select the old tileset (probably "bricks") and click the trashcan
+*   To delete an old tileset. Select the old tileset (probably "bricks") and click the trashcan
 
     <img src="src/deleting-old-tileset.png" width="419" height="271" />
 
@@ -57,7 +55,9 @@ To assign these meanings
 
 5.  Save the file with the same name as your tileset png except change the end
     to "-meaning". In other words, if you had png called `my-tiles.png` you'd
-    have a corresponding `my-tiles-meaning.tmx` file beside it.
+    have a corresponding `my-tiles-meaning.json` file beside it.
+
+Note: You are not required to have a `-meaning.json` file. If no file exists all the tiles will have meaning #0 (sky).
 
 ## Multiple Layers
 
