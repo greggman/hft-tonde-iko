@@ -133,10 +133,8 @@ define([
       TiledLoader.loadMap(meaningUrl, function(err, meaningMap) {
         --loadCount;
         if (err) {
-          console.error(err);
-          return;
+          console.warn(err);
         }
-
         ts.meaningMap = meaningMap;
         if (loadCount == 0) {
           makeMapPhase2()
@@ -160,37 +158,39 @@ define([
         var meaningTS;
         var visualTS;
         var meaningMap = ts.meaningMap;
-        meaningMap.tilesets.forEach(function(mts) {
-          if (Strings.endsWith(mts.image.source, "meaning-icons.png")) {
-            meaningTS = mts;
-          } else {
-            visualTS = mts;
-          }
-        });
+        if (meaningMap) {
+          meaningMap.tilesets.forEach(function(mts) {
+            if (Strings.endsWith(mts.image.source, "meaning-icons.png")) {
+              meaningTS = mts;
+            } else {
+              visualTS = mts;
+            }
+          });
 
-        var layer = meaningMap.layers[0];
-        for (var y = 0; y < layer.height - 1; y += 2) {
-          for (var x = 0; x < layer.width; ++x) {
-            var tileId    = layer.data[(y + 0) * layer.width + x];
-            var meaningId = layer.data[(y + 1) * layer.width + x];
-            if (tileId && meaningId) {
-              var id      = tileId    - visualTS.firstgid + ts.firstgid - 1;
-              var xid     = id % superAcross;
-              var yid     = id / superAcross | 0;
-              var tile    = xid + yid * 256;
-              var meaning = meaningId - meaningTS.firstgid;
-//  console.log("" + x + ", " + y + ": tileId: " + tileId + ", meaningId: " + meaningId + ", id: " + id + ", tile: " + tile + ", meaning: " + meaning);
-              if (meaningTable[tile] == undefined) {
-                meaningTable[tile] = meaning;
-              } else if (meaningTable[tile] != meaning) {
-                console.error("tile " + tile + " assigned more than one meaning, A = " + meaningTable[tile] + ", B = " + meaning);
+          var layer = meaningMap.layers[0];
+          for (var y = 0; y < layer.height - 1; y += 2) {
+            for (var x = 0; x < layer.width; ++x) {
+              var tileId    = layer.data[(y + 0) * layer.width + x];
+              var meaningId = layer.data[(y + 1) * layer.width + x];
+              if (tileId && meaningId) {
+                var id      = tileId    - visualTS.firstgid + ts.firstgid - 1;
+                var xid     = id % superAcross;
+                var yid     = id / superAcross | 0;
+                var tile    = xid + yid * 256;
+                var meaning = meaningId - meaningTS.firstgid;
+  //  console.log("" + x + ", " + y + ": tileId: " + tileId + ", meaningId: " + meaningId + ", id: " + id + ", tile: " + tile + ", meaning: " + meaning);
+                if (meaningTable[tile] == undefined) {
+                  meaningTable[tile] = meaning;
+                } else if (meaningTable[tile] != meaning) {
+                  console.error("tile " + tile + " assigned more than one meaning, A = " + meaningTable[tile] + ", B = " + meaning);
+                }
               }
             }
           }
         }
-
       });
-      // Fill out mising
+
+      // Fill out missing meanings. All will be meaning 0.
       var numTiles = superDown * 256;
       for (var ii = 0; ii < numTiles; ++ii) {
         if (!meaningTable[ii]) {
@@ -213,6 +213,7 @@ define([
           height: l.height,
           tiles: data,
           meaningTable: meaningTable,
+          name: l.name,
         });
       });
 

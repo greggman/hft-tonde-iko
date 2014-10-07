@@ -41,6 +41,7 @@ requirejs(
     'hft/localnetplayer',
     'hft/misc/input',
     'hft/misc/misc',
+    'hft/misc/strings',
     '../bower_components/tdl/tdl/fullscreen',
     '../bower_components/tdl/tdl/textures',
     '../bower_components/tdl/tdl/webgl',
@@ -59,6 +60,7 @@ requirejs(
     LocalNetPlayer,
     Input,
     Misc,
+    Strings,
     Fullscreen,
     Textures,
     WebGL,
@@ -205,7 +207,20 @@ window.g = globals;
         canvas.style.height = "100%";
       }
       globals.resizeOnce = true;
-      g_services.levelManager.reset(canvas.width, canvas.height, globals.level.layers[0]);
+      // Figure out which level is the play one.
+      var playLevel;
+      globals.level.layers.forEach(function(layer) {
+        if (layer.name == "Tile Layer 1" ||
+            Strings.startsWith(layer.name.toLowerCase(), "play")) {
+          playLevel = layer;
+        }
+      });
+      if (!playLevel) {
+        playLevel = globals.level.layers[globals.level.layers.length / 2 | 0];
+      }
+      globals.playLevel = playLevel;
+
+      g_services.levelManager.reset(canvas.width, canvas.height, globals.playLevel);
       g_services.playerManager.forEachPlayer(function(player) {
         player.reset();
       });
@@ -343,6 +358,9 @@ window.g = globals;
         startGame();
       });
     } else {
+      globals.level = {
+        layers:[],
+      };
       startGame();
     };
   };
@@ -355,9 +373,25 @@ window.g = globals;
 
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
     gl.clear(gl.CLEAR_BUFFER_BIT);
-    g_services.levelManager.draw(globals);
+    var layerNdx = 0;
+    var layers    = globals.level.layers;
+    var numLayers = layers.length;
+    if (globals.playLevel) {
+      // Draw all layers before and including playLevel
+      for (; layerNdx < numLayers && layer !== globals.playLevel; ++layerNdx) {
+        var layer = layers[layerNdx];
+        layer.draw(g_services.levelManager, globals);
+      }
+    }
     g_services.drawSystem.processEntities();
     g_services.spriteManager.draw();
+    if (globals.playLevel) {
+      // Draw the remaining layers
+      for(; layerNdx < numLayers; ++layerNdx) {
+        var layer = layers[layerNdx];
+        layer.draw(g_services.levelManager, globals);
+      }
+    }
   };
 
   var sounds = {

@@ -41,6 +41,7 @@ define([
     var height = options.height;
     var tiles = options.tiles;
 
+    this.name = options.name;
     this.width = width;
     this.height = height;
     this.tileWidth = tileset.tileWidth;

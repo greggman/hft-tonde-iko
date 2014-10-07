@@ -23,13 +23,15 @@ you want to change the tileset on.
 
     <img src="src/making-tileset.png" width="505" height="472" />
 
-*   Delete the old tileset. Select the old tileset (probably "bricks") and click the trashcan
+*   To delete the old tileset. Select the old tileset (probably "bricks") and click the trashcan
 
     <img src="src/deleting-old-tileset.png" width="419" height="271" />
 
+    Note: You can have multiple tilesets.
+
 ## Assign Meanings to tiles
 
-I choose a 1x1 meaning system meaning each visual tile is allowed only 1 specific meaning.
+I chose a 1x1 meaning system meaning each visual tile is allowed only 1 specific meaning.
 To assign these meanings
 
 1.  make new map in tiled.
@@ -56,6 +58,14 @@ To assign these meanings
 5.  Save the file with the same name as your tileset png except change the end
     to "-meaning". In other words, if you had png called `my-tiles.png` you'd
     have a corresponding `my-tiles-meaning.tmx` file beside it.
+
+## Multiple Layers
+
+You can have multiple layers. The first layer named either "Tile Layer 1" or starting with
+the letters "play" is the **playable layer**. It is the only layer in which tiles have a meaning.
+Layers behind that layer will be be drawn behind, layers in front of that layer will be draw in front.
+Be aware that each layer has a cost. Too many layers can ruin performance. I'd prefer to keep it at
+3 layers, one behind, one the player is on, one in front.
 
 
 
