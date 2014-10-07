@@ -99,6 +99,8 @@ define([
     firstgid: parseInt,
     tilewidth: parseInt,
     tileheight: parseInt,
+    margin: parseInt,
+    spacing: parseInt,
   };
   var imageTypeMap = {
     width: parseInt,
