@@ -2,15 +2,12 @@ To Do
 =====
 
 *   make it start fullscreen
-*   make it always use 1920x1080 canvas
-*   make canvas scale correctly for size
-*   use Tiled levels
-*   make it load Tiled tiles
 *   make it handle tile animation
-*   make it handle 2 layers of tiles (above / below)
-*   make it load meaning tiles from map
-*   make launcher start window 1280x720 + extra
 
+*   let you enter initials?
+
+*   make it rain coins
+    *   set max coins per level
 *   Set and define destinations
 *   Make end that disconnects you
 *   Make queue to get into the game
@@ -43,4 +40,11 @@ Done
 ====
 
 *   Make name persist across machines
+*   make it always use 1920x1080 canvas
+*   make canvas scale correctly for size
+*   use Tiled levels
+*   make it load Tiled tiles
+*   make it handle 2 layers of tiles (above / below)
+*   make launcher start window 1280x720 + extra
+*   make it load meaning tiles from map
 

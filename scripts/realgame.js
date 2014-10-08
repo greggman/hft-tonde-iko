@@ -221,6 +221,10 @@ window.g = globals;
       globals.playLevel = playLevel;
 
       g_services.levelManager.reset(canvas.width, canvas.height, globals.playLevel);
+      if (!globals.level.layers.length) {
+        globals.level.layers.push(g_services.levelManager.level);
+        g_services.levelManager.level.name = "foo";
+      }
       g_services.playerManager.forEachPlayer(function(player) {
         player.reset();
       });

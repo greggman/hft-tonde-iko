@@ -211,7 +211,7 @@ define([
           }
         }
       }
-      level = largestLeve;
+      level = largestLevel;
     }
     this.level = level;
     this.level.dirty = true;

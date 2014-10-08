@@ -35,11 +35,13 @@ define([
     'hft/misc/strings',
     '../bower_components/hft-utils/dist/2d',
     '../bower_components/hft-utils/dist/imageutils',
+    './math',
   ], function(
     Misc,
     Strings,
     M2D,
-    ImageUtils) {
+    ImageUtils,
+    gmath) {
 
   var availableColors = [];
   var nameFontOptions = {
@@ -295,13 +297,16 @@ define([
     var off = this.velocity[0] < 0 ? 0 : 1;
     for (var ii = 0; ii < 2; ++ii) {
       var xCheck = this.position[0] + this.checkWallOffset[off];
-      var tile = levelManager.getTileInfoByPixel(xCheck, this.position[1] - this.height / 4 - this.height / 2 * ii);
+      var yCheck = this.position[1] - this.height / 4 - this.height / 2 * ii
+      var tile = levelManager.getTileInfoByPixel(xCheck, yCheck);
       if (tile.collisions) {
         var level = levelManager.getLevel();
         this.velocity[0] = 0;
-        var distInTile = xCheck % level.tileWidth;
+        var distInTile = gmath.emod(xCheck, level.tileWidth);
         var xoff = off ? -distInTile : level.tileWidth - distInTile;
-        this.position[0] += xoff;
+        var oldP = this.position[0];
+        this.position[0] += xoff * 1.001;
+//console.log("" + ii + " xChk: " + xCheck.toFixed(3) + " yChk: " + yCheck.toFixed(3) + " distIn: " + distInTile.toFixed(3) + " xoff: " + xoff.toFixed(3) + " oldP: " + oldP.toFixed(3) + " newP: " + this.position[0].toFixed(3))
       }
       if (tile.teleport) {
         // HACK!
@@ -309,7 +314,7 @@ define([
         var id = parseInt(parts[1]) + parseInt(parts[2]) * globals.columns;
         var numScreens = globals.columns * globals.rows;
         if (tile.dest == 0) {
-          id = (id + numScreens - 1) % numScreens;
+          id = gmath.emod(numScreens - 1, numScreens);
         } else if (tile.dest == 1) {
           id = (id + 1) % numScreens;
         }
@@ -344,7 +349,7 @@ define([
       if (tile.collisions) {
         var level = levelManager.getLevel();
         this.velocity[1] = 0;
-        this.position[1] = (Math.floor(this.position[1] / level.tileHeight) + 1) * level.tileHeight;
+        this.position[1] = (gmath.unitdiv(this.position[1], level.tileHeight) + 1) * level.tileHeight;
         if (!this.bonked) {
           this.bonked = true;
           this.services.audioManager.playSound('bonkhead');
@@ -361,7 +366,7 @@ define([
       var tile = levelManager.getTileInfoByPixel(this.position[0] - this.width / 4 + this.width / 2 * ii, this.position[1]);
       if (tile.collisions) {
         var level = levelManager.getLevel();
-        this.position[1] = Math.floor(this.position[1] / level.tileHeight) * level.tileHeight;
+        this.position[1] = gmath.unitdiv(this.position[1], level.tileHeight) * level.tileHeight;
         this.velocity[1] = 0;
         this.services.audioManager.playSound('land');
         this.setState('move');
