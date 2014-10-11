@@ -31,7 +31,39 @@
 "use strict";
 
 define([
-  ], function() {
+    '../bower_components/pako/dist/pako_inflate.min',
+  ], function(pako) {
+
+  var base64ToTypedArray = function(
+     d, // base64 data (in IE7 or older, use .split('') to get this working
+     b, // replacement map ("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/")
+     h, // typed array subarray method (.subarray || .subset || .slice)
+     g,  // result buffer
+     c, // character and - ascii value buffer
+     u, // bit storage
+     r, // result byte counter
+     q, // bit counter
+     x  // char counter
+  ){
+  // buffer and character map, not assuming well-formed input.
+     g=new Uint8Array(d.length);
+     h=g.subarray||g.subset||g.slice;
+     b="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+     for (
+        // initialize result and counters
+        r = 0, q = x = '';
+        // get next character
+        c = d[x++];
+        // character found in table? initialize bit storage and add its ascii value;
+        ~c && (u = q%4 ? u*64+c : c,
+            // and if not first of each 4 characters, convert the first 8bits to one ascii character
+            q++ % 4) ? r += String.fromCharCode(255&u>>(-2*q&6)) : 0
+     )
+        // try to find character in table (0-63, not found => -1)
+        c = b.indexOf(c);
+     // return result
+     return r;
+  };
 
   var parseStr = function(v) { return v; };
   var applyAttributes = function(typeMap, node, dest) {
@@ -77,6 +109,19 @@ define([
           var data = node.childNodes[0].nodeValue.split(",").map(function(str) {
             return parseInt(str.trim());
           });
+          data = new Uint32Array(data);
+        } else if (attrs.encoding == "base64") {
+           var mapDataStr = atob(node.childNodes[0].nodeValue.trim());
+           var mapData = new Uint8Array(mapDataStr.length);
+           for (var ii = 0; ii < mapDataStr.length; ++ii) {
+             mapData[ii] = mapDataStr.charCodeAt(ii);
+           }
+           if (attrs.compression == "zlib") {
+             var binData = pako.inflate(mapData);
+             var data = new Uint32Array(binData.buffer);
+           } else {
+             throw ("unknown compression format");
+           }
         } else if (attrs.encoding === undefined) {
           var data = [];
           for (var ii = 0; ii < node.childNodes.length; ++ii) {
@@ -85,6 +130,7 @@ define([
               data.push(applyAttributes(tileTypeMap, child).gid);
             }
           }
+          data = new Uint32Array(data);
         } else {
           throw ("unsupported format: " + attrs.encoding);
         }
@@ -113,7 +159,10 @@ define([
         if (tilemap.image) {
           throw("more than one <image> element in tilemap");
         }
-        tilemap.image = applyAttributes(imageTypeMap, node);
+        var image = applyAttributes(imageTypeMap, node);
+        tilemap.image = image.source;
+        tilemap.imagewidth = image.width;
+        tilemap.imageheight = image.height;
       },
       "#text": noop,
     });

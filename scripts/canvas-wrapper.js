@@ -31,54 +31,79 @@
 "use strict";
 
 define([
-  'hft/misc/strings',
-  './io',
-  './tiled',
-], function(
-  Strings,
-  IO,
-  Tiled) {
+    './transform',
+  ], function(
+    Transform
+  ) {
 
-  var loadMap = function(url, callback) {
-console.log(url);
-    if (Strings.endsWith(url, ".json")) {
-      var onLoad = function(err, map) {
-        if (err) {
-          callback(err);
-        } else {
-          callback(null, map);
-        }
-      };
+  var wrap = function(ctx) {
 
-      var options = {
-        method: "GET",
-      };
-      IO.sendJSON(url, {}, onLoad, options);
-    } else if (Strings.endsWith(url, ".tmx")) {
-      var onLoad = function(err, str) {
-        if (err) {
-          callback(err);
-        } else {
-          try {
-            var map = Tiled.parseMap(str);
-          } catch (e) {
-console.log(e);
-             callback(e);
-             return;
-          }
-          callback(null, map);
-        }
-      };
-      IO.get(url, "", onLoad, {
-        inMimeType: "text/xml",
-      });
-    } else {
-      throw ("unknown format: " + url);
+    if (ctx.currentTransform) {
+      return ctx;
     }
+
+    var stack = [];
+
+    ctx.scale = function(scale) {
+      return function(x, y) {
+        ctx.currentTransform.scale(x, y);
+        scale(x, y);
+      };
+    }(ctx.scale.bind(ctx));
+
+    ctx.rotate = function(rotate) {
+      return function(r) {
+        ctx.currentTransform.rotate(r);
+        rotate(r);
+      };
+    }(ctx.rotate.bind(ctx));
+
+    ctx.translate = function(translate) {
+      return function(x, y) {
+        ctx.currentTransform.translate(x, y);
+        translate(x, y);
+      };
+    }(ctx.translate.bind(ctx));
+
+    ctx.save = function(save) {
+      return function() {
+        stack.push(ctx.currentTransform.duplicate());
+        save();
+      };
+    }(ctx.save.bind(ctx));
+
+    ctx.restore = function(restore) {
+      return function() {
+        if (stack.length) {
+          ctx.currentTransform = stack.pop();
+        } else {
+          ctx.currentTransform = new Transform();
+        }
+        restore();
+      };
+    }(ctx.restore.bind(ctx));
+
+    ctx.transform = function(transform) {
+      return function(m11, m12, m21, m22, dx, dy) {
+        ctx.currentTransform.multiply(m11, m12, m21, m22, dx, dy);
+        transform(m11, m12, m21, m22, dx, dy);
+      };
+    }(ctx.transform.bind(ctx));
+
+    ctx.setTransform = function(setTransform) {
+      return function(m11, m12, m21, m22, dx, dy) {
+        ctx.currentTransform.multiply(m11, m12, m21, m22, dx, dy);
+        setTransform(m11, m12, m21, m22, dx, dy);
+      };
+    }(ctx.setTransform.bind(ctx));
+
+    ctx.restore();
+
+    return ctx;
   };
 
   return {
-    loadMap: loadMap,
+    wrap: wrap,
   };
 });
 

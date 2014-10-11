@@ -6,6 +6,9 @@ To Do
 
 *   let you enter initials?
 
+*   make controller use canvas
+    *   handle rotation
+    *   handle iOS8 shit
 *   make it rain coins
     *   set max coins per level
 *   Set and define destinations
