@@ -105,8 +105,14 @@ define([
       this.score = 0;
       this.addPoints(0);
 
-      this.setState('idle');
       this.reset(startPosition);
+      if (data.velocity) {
+        this.velocity[0] = data.velocity[0];
+        this.velocity[1] = data.velocity[1];
+        this.setState('move');
+      } else {
+        this.setState('idle');
+      }
       this.checkBounds();
     };
   }());
@@ -123,7 +129,7 @@ define([
     var levelManager = this.services.levelManager;
     var level = levelManager.getLevel();
     var position = startPosition || levelManager.getRandomOpenPosition();
-    this.position = [position.x + level.tileWidth / 2, position.y];
+    this.position = [position.x, position.y];
     this.lastPosition = [this.position[0], this.position[1]];
   };
 
@@ -144,7 +150,7 @@ define([
     var levelManager = this.services.levelManager;
     var level = levelManager.getLevel();
 
-    if (this.position[1] > level.width * level.tileHeight) {
+    if (this.position[1] >= level.levelHeight) {
       debugger;
     }
   };
@@ -294,47 +300,82 @@ define([
   Player.prototype.checkWall = function() {
     var globals = this.services.globals;
     var levelManager = this.services.levelManager;
+    var level = levelManager.getLevel();
     var off = this.velocity[0] < 0 ? 0 : 1;
     for (var ii = 0; ii < 2; ++ii) {
       var xCheck = this.position[0] + this.checkWallOffset[off];
       var yCheck = this.position[1] - this.height / 4 - this.height / 2 * ii
       var tile = levelManager.getTileInfoByPixel(xCheck, yCheck);
       if (tile.collisions) {
-        var level = levelManager.getLevel();
-        this.velocity[0] = 0;
-        var distInTile = gmath.emod(xCheck, level.tileWidth);
-        var xoff = off ? -distInTile : level.tileWidth - distInTile;
-        var oldP = this.position[0];
-        this.position[0] += xoff * 1.001;
+        var xInTile = gmath.emod(xCheck, level.tileWidth);
+        var yPixel = Math.floor(gmath.emod(yCheck, level.tileHeight));
+        if (this.velocity[0] >= 0) {
+          var lineX = tile.lrCollision[yPixel];
+          // wall = 15, we at 10,
+          // 10 - 15 = -5
+          var distInTile = xInTile - lineX;
+        } else {
+          // wall = 15, we at 20
+          // 20 - 15
+          var lineX = tile.rlCollision[yPixel] + 1;
+          var distInTile = lineX - xInTile;
+        }
+        if (distInTile > 0) {
+          var xoff = this.velocity[0] >=0 ? -distInTile : distInTile;
+          var oldP = this.position[0];
+          this.position[0] += xoff * 1.001;
+          this.velocity[0] = 0;
+        }
 //console.log("" + ii + " xChk: " + xCheck.toFixed(3) + " yChk: " + yCheck.toFixed(3) + " distIn: " + distInTile.toFixed(3) + " xoff: " + xoff.toFixed(3) + " oldP: " + oldP.toFixed(3) + " newP: " + this.position[0].toFixed(3))
       }
       if (tile.teleport) {
-        // HACK!
-        var parts = /s(\d+)-(\d+)/.exec(globals.id);
-        var id = parseInt(parts[1]) + parseInt(parts[2]) * globals.columns;
-        var numScreens = globals.columns * globals.rows;
-        if (tile.dest == 0) {
-          id = gmath.emod(numScreens - 1, numScreens);
-        } else if (tile.dest == 1) {
-          id = (id + 1) % numScreens;
+        if (tile.local) {
+          var dest = level.getLocalDest(tile.dest);
+          if (!dest) {
+            console.error("missing local dest for dest: " + tile.dest);
+            return;
+          }
+
+          dest = dest[Misc.randInt(dest.length)];
+          this.position[0] = (dest.tx + 0.5) * level.tileWidth;
+          this.position[1] = (dest.ty +   1) * level.tileHeight - 1;
+        } else {
+          // HACK!
+          var parts = /s(\d+)-(\d+)/.exec(globals.id);
+          var id = parseInt(parts[1]) + parseInt(parts[2]) * globals.columns;
+          var numScreens = globals.columns * globals.rows;
+          if (tile.dest == 0 || tile.dest == 2) {
+            id = gmath.emod(id - 1, numScreens);
+          } else if (tile.dest == 1 || tile.dest == 3) {
+            id = (id + 1) % numScreens;
+          }
+          var id = "s" + (id % globals.columns) + "-" + (Math.floor(id / globals.columns));
+          this.netPlayer.switchGame(id, {
+            name: this.playerName,    // Send the name because otherwise we'll make a new one up
+            dest: tile.dest,          // Send the dest so we know where to start
+            subDest: tile.subDest,    // Send the subDest so we know which subDest to start
+            color: this.color,        // Send the color so we don't pick a new one
+            direction: this.direction,// Send the direction so if we're moving we're still moving.
+            facing: this.facing,      // Send the facing so we're facing the sme way
+            velocity: this.velocity,  // Send the velocity so where going the right speed
+          });
         }
-        var id = "s" + (id % globals.columns) + "-" + (Math.floor(id / globals.columns));
-        this.netPlayer.switchGame(id, {
-          name: this.playerName,    // Send the name because otherwise we'll make a new one up
-          dest: tile.dest,          // Send the dest so we know where to start
-          color: this.color,        // Send the color so we don't pick a new one
-          direction: this.direction,// Send the direction so if we're moving we're still moving.
-          facing: this.facing,      // Send the facing so we're facing the sme way
-        });
       }
     }
   };
 
   Player.prototype.checkFall = function() {
     var levelManager = this.services.levelManager;
+    var level = levelManager.getLevel();
     for (var ii = 0; ii < 2; ++ii) {
-      var tile = levelManager.getTileInfoByPixel(this.position[0] - this.width / 4 + this.width / 2 * ii, this.position[1]);
+      var xCheck = this.position[0] - this.width / 4 + this.width / 2 * ii;
+      var tile = levelManager.getTileInfoByPixel(xCheck, this.position[1]);
       if (tile.collisions) {
+        var xPixel = Math.floor(gmath.emod(xCheck, level.tileWidth));
+        var yCheck = gmath.emod(this.position[1], level.tileHeight);
+        var lineY = tile.udCollision[xPixel];
+        var distInTile = yCheck - lineY;
+        this.position[1] -= distInTile;
         return false;
       }
     }

@@ -46,8 +46,6 @@ define([
     this.height = height;
     this.tileWidth = tileset.tileWidth;
     this.tileHeight = tileset.tileHeight;
-    this.levelWidth = this.width * this.tileWidth;
-    this.levelHeight = this.height * this.tileHeight;
     this.meaningTable = options.meaningTable;
 
     if (typeof(tiles) == 'string') {
@@ -55,18 +53,19 @@ define([
       /// Add a border
       this.width += 2;
       this.height += 2;
-      // Add top line
-      for (var ii = 0; ii < this.width; ++ii) {
-        t.push(this.outOfBoundsTile);
-      }
 
       // Add lines of original plus abounds
       var wallTile = Level.charToTileId['#'].tileId;
 
+      // Add top line
+      for (var ii = 0; ii < this.width; ++ii) {
+        t.push(wallTile);
+      }
       for (var yy = 0; yy < height; ++yy) {
         t.push(wallTile);
         for (var xx = 0; xx < width; ++xx) {
-          t.push(Level.charToTileId[tiles.substr(yy * width + xx, 1)].tileId);
+          var ch = tiles.substr(yy * width + xx, 1);
+          t.push(Level.charToTileId[ch].tileId);
         }
         t.push(wallTile);
       }
@@ -105,7 +104,10 @@ define([
       originY: 0,
     };
 
+    this.levelWidth = this.width * this.tileWidth;
+    this.levelHeight = this.height * this.tileHeight;
     this.dests = {};
+    this.localDests = {};
     this.isSetup = false;
   };
 
@@ -121,20 +123,39 @@ define([
         var info = levelManager.getTileInfo(tileId);
         var teleportDest = info.teleportDest;
         if (teleportDest !== undefined) {
-          var dests = this.dests[teleportDest];
+          var destMap = info.local ? this.localDests : this.dests;
+          var dests = destMap[teleportDest];
           if (!dests) {
-            dests = [];
-            this.dests[teleportDest] = dests;
+            dests = {};
+            destMap[teleportDest] = dests;
           }
-          dests.push({tx: xx, ty: yy});
+          var subDest = info.subDest || 0;
+          var subDests = dests[subDest];
+          if (!subDests) {
+            subDests = [];
+            dests[subDest] = subDests;
+          }
+          subDests.push({tx: xx, ty: yy});
         }
       }
     }
   };
 
-  Level.prototype.getDest = function(destId) {
-    return this.dests[destId];
+  Level.prototype.getDest = function(destId, subDestId) {
+    var dests = this.dests[destId];
+    if (dests) {
+      return dests[subDestId];
+    }
   };
+
+  Level.prototype.getLocalDest = function(destId, subDestId) {
+    subDestId = subDestId || 0;
+    var dests = this.localDests[destId];
+    if (dests) {
+      return dests[subDestId];
+    }
+  };
+
 
   Level.prototype.getTile = function(tileX, tileY) {
     if (tileX >= 0 && tileX < this.width &&
@@ -175,13 +196,21 @@ define([
   };
 
   Level.charToTileId = {
-    ' ': { tileId: 0x0000, },
-    '#': { tileId: 0x0001, },
-    '0': { tileId: 0x0002, },
-    '1': { tileId: 0x0003, },
-    '2': { tileId: 0x0004, },
-    '3': { tileId: 0x0005, },
-    '4': { tileId: 0x0006, },
+    ' ': { tileId: 0x0001, },
+    '#': { tileId: 0x0002, },
+    '0': { tileId: 0x0100, },
+    '1': { tileId: 0x0101, },
+    '2': { tileId: 0x0102, },
+    '3': { tileId: 0x0103, },
+    '4': { tileId: 0x0104, },
+    'A': { tileId: 0x0200, },
+    'B': { tileId: 0x0201, },
+    'C': { tileId: 0x0202, },
+    'D': { tileId: 0x0203, },
+    '8': { tileId: 0x0300, },
+    '9': { tileId: 0x0301, },
+    'Y': { tileId: 0x0400, },
+    'Z': { tileId: 0x0401, },
   };
 
 

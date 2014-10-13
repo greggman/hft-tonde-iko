@@ -41,15 +41,18 @@ define([
    * @constructor
    */
   var Collectable = (function() {
-    return function(services) {
+    return function(services, collectableManager) {
       this.services = services;
       this.renderer = services.renderer;
+      this.manager = collectableManager;
+      var globals = services.globals;
 
       services.entitySystem.addEntity(this);
       services.drawSystem.addEntity(this);
 
       this.animTimer = 0;
       this.anim = this.services.images.coin.colors[0];
+      this.animSpeed = globals.coinAnimSpeed + Math.random() * globals.coinAnimSpeedRange;
 
       var levelManager = this.services.levelManager;
       var level = levelManager.getLevel();
@@ -60,14 +63,18 @@ define([
       this.sprites = [];
       for (var ii = 0; ii < 3; ++ii) {
         var sprite = this.services.spriteManager.createSprite();
-        sprite.visible = ii == 0;
         this.sprites.push(sprite);
       }
-
-      this.chooseNewPosition();
-      this.setState("fall");
+      this.setState("off");
     };
   }());
+
+  Collectable.prototype.setVisible = function(visible) {
+    this.visible = visible;
+    this.sprites.forEach(function(sprite) {
+      sprite.visible = visible;
+    });
+  };
 
   Collectable.prototype.setState = function(state) {
     this.state = state;
@@ -99,18 +106,15 @@ define([
   Collectable.prototype.init_collected = function() {
     this.collectTime = 0;
     this.services.audioManager.playSound('coin');
-    for (var ii = 1; ii < this.sprites.length; ++ii) {
-      this.sprites[ii].visible = true;
-    }
+    this.setVisible(true);
   };
 
   Collectable.prototype.state_collected = function() {
     var globals = this.services.globals;
-    this.animTime += globals.elapsedTime * globals.coinAnimSpeed;
+    this.animTime += globals.elapsedTime * this.animSpeed;
     this.collectTime += globals.elapsedTime;
     if (this.collectTime > 0.125) {
-      this.chooseNewPosition();
-      this.setState("fall");
+      this.setState("off");
     }
   };
 
@@ -139,19 +143,22 @@ define([
 
   Collectable.prototype.state_idle = function() {
     var globals = this.services.globals;
-    this.animTimer += globals.elapsedTime * globals.coinAnimSpeed;
+    this.animTimer += globals.elapsedTime * this.animSpeed;
 
     if (this.checkCollected()) {
       return;
     }
   };
 
+  Collectable.prototype.init_fall = function() {
+    this.setVisible(false);
+    this.sprites[0].visible = true;
+    this.visible = true;
+  };
+
   Collectable.prototype.state_fall = function() {
     var globals = this.services.globals;
-    this.animTimer += globals.elapsedTime * globals.coinAnimSpeed;
-    for (var ii = 1; ii < this.sprites.length; ++ii) {
-      this.sprites[ii].visible = false;
-    }
+    this.animTimer += globals.elapsedTime * this.animSpeed;
 
     if (this.checkCollected()) {
       return;
@@ -169,15 +176,27 @@ define([
       this.velocity[1] = 0;
       this.services.audioManager.playSound('coinland');
       this.setState('idle');
+    } else if (!tile.open) {
+      this.services.audioManager.playSound('coinland');
+      this.chooseNewPosition();
     }
+  };
+
+  Collectable.prototype.init_off = function() {
+    this.setVisible(false);
+    this.manager.addInActive(this);
+  };
+
+  Collectable.prototype.state_off = function() {
   };
 
   Collectable.prototype.chooseNewPosition = function() {
     var levelManager = this.services.levelManager;
     var position = levelManager.getRandomOpenPosition();
-    this.position = [position.x + this.width / 2, position.y];
+    this.position = [position.x, position.y];
     this.velocity = [0, 0];
     this.falling = true;
+    this.setState("fall");
   };
 
   Collectable.prototype.defaultDraw = function(ctx) {
@@ -199,7 +218,9 @@ define([
   };
 
   Collectable.prototype.draw = function(ctx) {
-    this.drawFn(ctx);
+    if (this.visible) {
+      this.drawFn(ctx);
+    }
   };
 
   return Collectable;

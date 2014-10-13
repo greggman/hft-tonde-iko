@@ -41,30 +41,54 @@ define([
 
   var levels = [];
 
+  var meaningTable = [];
+  meaningTable[0x0001] = 0;
+  meaningTable[0x0002] = 1;
+  meaningTable[0x0100] = 0x20;
+  meaningTable[0x0101] = 0x21;
+  meaningTable[0x0102] = 0x22;
+  meaningTable[0x0103] = 0x23;
+  meaningTable[0x0200] = 0x30;
+  meaningTable[0x0201] = 0x31;
+  meaningTable[0x0202] = 0x32;
+  meaningTable[0x0203] = 0x33;
+  meaningTable[0x0300] = 0x40;
+  meaningTable[0x0301] = 0x41;
+  meaningTable[0x0400] = 0x50;
+  meaningTable[0x0401] = 0x51;
+
+  for (var ii = 0; ii < meaningTable.length; ++ii) {
+    if (meaningTable[ii] === undefined) {
+      meaningTable[ii] = 0;
+    }
+  }
+
   var initLevels = function(tileset) {
     levels.push(new Level({
+      meaningTable: meaningTable,
       tileset: tileset,
       width:   10,
       height:  15,
       tiles:   [ // 01234567890123456789
-          "          ", // 0
+          " YYY      ", // 0
           "          ", // 1
           "          ", // 2
           " ###      ", // 3
-          "         1", // 4
+          "       A 1", // 4
           "       ###", // 5
-          "          ", // 6
+          "       ZZZ", // 6
           "          ", // 7
           "   ###    ", // 8
           "          ", // 9
-          "          ", // 10
+          " B        ", // 10
           " ##    ## ", // 11
-          "      ####", // 12
+          "     9####", // 12
           "0    #####", // 13
-          "#   ######", // 14
+          "#  8######", // 14
       ].join("")}));
 
     levels.push(new Level({
+      meaningTable: meaningTable,
       tileset: tileset,
       width:   20,
       height:  10,
@@ -82,6 +106,7 @@ define([
       ].join("")}));
 
     levels.push(new Level({
+      meaningTable: meaningTable,
       tileset: tileset,
       width:   30,
       height:  15,
@@ -166,7 +191,7 @@ define([
 
   LevelManager.prototype.getTileInfo = function(tileId) {
     if (this.level.meaningTable) {
-      var tileId = this.level.meaningTable[tileId];
+      tileId = this.level.meaningTable[tileId];
     }
     return Tiles.getInfo(tileId);
   };
@@ -193,15 +218,20 @@ define([
     var level = this.level;
     var found = false;
     while (!found) {
-      var x = (2 + Misc.randInt(level.width  - 4)) * level.tileWidth;
-      var y = (2 + Misc.randInt(level.height - 4)) * level.tileHeight;
-      var tile = this.getTileInfoByPixel(x, y);
-      found = !tile.collisions;
       if (++count > 10000) {
         throw("something's wrong with level data");
       }
+      var x = (2 + Misc.randInt(level.width  - 4));
+      var y = (2 + Misc.randInt(level.height - 4));
+      var tile = this.getTileInfoByPixel(
+        x * level.tileWidth,
+        y * level.tileHeight);
+      found = tile.open;
     }
-    return {x: x, y: y};
+    return {
+      x: (x + 0.5) * level.tileWidth,
+      y: (y +   1) * level.tileHeight - 1,
+    };
   };
 
   return LevelManager;

@@ -50,7 +50,7 @@ requirejs(
     '../bower_components/hft-utils/dist/imageloader',
     '../bower_components/hft-utils/dist/imageutils',
     '../bower_components/hft-utils/dist/spritemanager',
-    './collectable',
+    './collectable-manager',
     './levelloader',
     './levelmanager',
     './playermanager',
@@ -69,7 +69,7 @@ requirejs(
     ImageLoader,
     ImageUtils,
     SpriteManager,
-    Collectable,
+    CollectableManager,
     LevelLoader,
     LevelManager,
     PlayerManager) {
@@ -106,9 +106,13 @@ window.s = g_services;
     idleAnimSpeed: 4,
     moveAnimSpeed: 0.2,
     coinAnimSpeed: 10,
+    coinAnimSpeedRange: 2,
     jumpFirstFrameTime: 0.1,
     fallTopAnimVelocity: 100,
     scale: 1,
+    minBonusTime: 60,
+    maxBonusTime: 180,
+    bonusSpeed: 4,  // every 4 frames
   };
 window.g = globals;
 
@@ -288,7 +292,7 @@ window.g = globals;
     idle:  { url: "assets/spr_idle.png",  colorize: 32, scale: 2, slices: 16, },
     move:  { url: "assets/spr_run.png",   colorize: 32, scale: 2, slices: 16, },
     jump:  { url: "assets/spr_jump.png",  colorize: 32, scale: 2, slices: [16, 17, 17, 18, 16, 16] },
-    brick: { url: "assets/bricks.png",    colorize:  1, scale: 1, slices: 256, },
+    brick: { url: "assets/bricks.png",    },
     coin:  { url: "assets/coin_anim.png", colorize:  1, scale: 4, slices: 8, },
   };
   var colors = [];
@@ -301,34 +305,38 @@ window.g = globals;
       var image = images[name];
       image.colors = [];
       image.imgColors = [];
-      for (var ii = 0; ii < image.colorize; ++ii) {
-        var h = ii / 32;
-        var s = (ii % 2) * -0.6;
-        var v = (ii % 2) * 0.1;
-        var range = duckBlueRange;
-        colors.push({
-          id: ii,
-          h: h,
-          s: s,
-          v: v,
-          range: range,
-        });
-        var coloredImage = ii ? ImageUtils.adjustHSV(image.img, h, s, v, range) : image.img;
-        var numFrames = image.slices.length ? image.slices.length : image.img.width / image.slices;
-        var frames = [];
-        var imgFrames = [];
-        var x = 0;
-        for (var jj = 0; jj < numFrames; ++jj) {
-          var width = image.slices.length ? image.slices[jj] : image.slices;
-          var frame = ImageUtils.cropImage(coloredImage, x, 0, width, coloredImage.height);
-          frame = ImageUtils.scaleImage(frame, width * image.scale, frame.height * image.scale);
-          imgFrames.push(frame);
-          frame = createTexture(frame);
-          frames.push(frame);
-          x += width;
+      if (image.colorize) {
+        for (var ii = 0; ii < image.colorize; ++ii) {
+          var h = ii / 32;
+          var s = (ii % 2) * -0.6;
+          var v = (ii % 2) * 0.1;
+          var range = duckBlueRange;
+          colors.push({
+            id: ii,
+            h: h,
+            s: s,
+            v: v,
+            range: range,
+          });
+          var coloredImage = ii ? ImageUtils.adjustHSV(image.img, h, s, v, range) : image.img;
+          var numFrames = image.slices.length ? image.slices.length : image.img.width / image.slices;
+          var frames = [];
+          var imgFrames = [];
+          var x = 0;
+          for (var jj = 0; jj < numFrames; ++jj) {
+            var width = image.slices.length ? image.slices[jj] : image.slices;
+            var frame = ImageUtils.cropImage(coloredImage, x, 0, width, coloredImage.height);
+            frame = ImageUtils.scaleImage(frame, width * image.scale, frame.height * image.scale);
+            imgFrames.push(frame);
+            frame = createTexture(frame);
+            frames.push(frame);
+            x += width;
+          }
+          image.colors[ii] = frames;
+          image.imgColors[ii] = imgFrames;
         }
-        image.colors[ii] = frames;
-        image.imgColors[ii] = imgFrames;
+      } else {
+        image.colors[0] = [createTexture(image.img)];
       }
     });
 
@@ -336,10 +344,11 @@ window.g = globals;
       var tileset = {
         tileWidth: 32,
         tileHeight: 32,
-        tilesAcross: 8,  // tiles across set
-        tilesDown: 1,    // tiles across set
+        tilesAcross: images.brick.img.width / 32,  // tiles across set
+        tilesDown: images.brick.img.height / 32,   // tiles down set
         texture: images.brick.colors[0][0],
       };
+ console.log((tileset));
       var g_levelManager = new LevelManager(g_services, tileset);
       g_services.levelManager = g_levelManager;
       resize();
@@ -349,7 +358,7 @@ window.g = globals;
         startLocalPlayers();
       }
 
-      new Collectable(g_services);
+      new CollectableManager(g_services);
       GameSupport.run(globals, mainloop);
     };
 
@@ -364,7 +373,7 @@ window.g = globals;
     } else {
       globals.level = {
         layers:[],
-        backgroundcolor: [0,0,0,1],
+        backgroundColor: [0,0,0,1],
       };
       startGame();
     };
@@ -388,12 +397,20 @@ window.g = globals;
     g_services.entitySystem.processEntities();
 
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+    gl.clearColor(0.15, 0.15, 0.15, 0);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    var level = g_services.levelManager.getLevel();
+    var xtraX = ((gl.canvas.width  - level.levelWidth ) / 2 | 0);
+    var xtraY = ((gl.canvas.height - level.levelHeight) / 2 | 0);
+    gl.scissor(xtraX, xtraY, gl.canvas.width, gl.canvas.height);
+    gl.enable(gl.SCISSOR_TEST);
     gl.clearColor(
         globals.level.backgroundColor[0],
         globals.level.backgroundColor[1],
         globals.level.backgroundColor[2],
         globals.level.backgroundColor[3]);
     gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.disable(gl.SCISSOR_TEST);
     var layerNdx = 0;
     var layers    = globals.level.layers;
     var numLayers = layers.length;

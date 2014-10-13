@@ -15,6 +15,7 @@ To Do
 *   Set and define destinations
 *   Make end that disconnects you
 *   Make queue to get into the game
+*   add sounds to controller.
 
     This way we can throttle players? Do we need this?
     Maybe have a countdown on the phone when you'll get

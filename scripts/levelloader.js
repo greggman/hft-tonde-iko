@@ -101,7 +101,7 @@ define([
       ctx.drawImage.apply(ctx, arguments);
     }
 
-    var dstX = 0;
+    var dstX = 1; // skip first tile so it's the empty tile
     var dstY = 0;
     map.tilesets.forEach(function(ts) {
       var srcX = 0;
@@ -174,7 +174,7 @@ define([
               var tileId    = layer.data[(y + 0) * layer.width + x];
               var meaningId = layer.data[(y + 1) * layer.width + x];
               if (tileId && meaningId) {
-                var id      = tileId    - visualTS.firstgid + ts.firstgid - 1;
+                var id      = tileId    - visualTS.firstgid + ts.firstgid;
                 var xid     = id % superAcross;
                 var yid     = id / superAcross | 0;
                 var tile    = xid + yid * 256;
@@ -203,7 +203,7 @@ define([
         // Tiled is 1 based (0 = no tile). We're 0 based so subtract 1.
         var data = new Uint32Array(l.data.length);
         for (var ii = 0; ii < l.data.length; ++ii) {
-          var id = Math.max(0, l.data[ii] - 1);
+          var id = Math.max(0, l.data[ii]);
           var xid = id % superAcross;
           var yid = id / superAcross | 0;
           data[ii] = xid + yid * 256;
