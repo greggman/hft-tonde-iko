@@ -30,66 +30,12 @@
  */
 "use strict";
 
-define([
-  'hft/misc/strings',
-  './io',
-  './tiled',
-], function(
-  Strings,
-  IO,
-  Tiled) {
-
-  // 0x80000000 xflip
-  // 0x40000000 yflip
-
-  // 0x20000000 swap x,y?
-
-  // 0xA0000000 rot right 90
-  // 0xC0000000 rot right 180
-  // 0x60000000 rot right 270
+define([], function() {
 
 
-  var loadMap = function(url, callback) {
-console.log(url);
-    if (Strings.endsWith(url, ".json")) {
-      var onLoad = function(err, map) {
-        if (err) {
-          callback(err);
-        } else {
-          callback(null, map);
-        }
-      };
 
-      var options = {
-        method: "GET",
-      };
-      IO.sendJSON(url, {}, onLoad, options);
-    } else if (Strings.endsWith(url, ".tmx")) {
-      var onLoad = function(err, str) {
-        if (err) {
-          callback(err);
-        } else {
-          try {
-            var map = Tiled.parseMap(str);
-          } catch (e) {
-console.log(e);
-             callback(e);
-             return;
-          }
-          callback(null, map);
-        }
-      };
-      IO.get(url, "", onLoad, {
-        inMimeType: "text/xml",
-      });
-    } else {
-      throw ("unknown format: " + url);
-    }
-  };
 
-  return {
-    loadMap: loadMap,
-  };
 });
+
 
 

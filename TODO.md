@@ -1,14 +1,15 @@
 To Do
 =====
 
+*   setup tilesets
+*   make levels
+*   make characters
 *   make it start fullscreen
 *   make it handle tile animation
+*   make it load play tilesets vs level building tilesets
 
 *   let you enter initials?
 
-*   make controller use canvas
-    *   handle rotation
-    *   handle iOS8 shit
 *   make it rain coins
     *   set max coins per level
 *   Set and define destinations
@@ -42,6 +43,10 @@ To Do
 Done
 ====
 
+*   add teleport destinations
+*   make controller use canvas
+    *   handle rotation
+    *   handle iOS8 shit
 *   Make name persist across machines
 *   make it always use 1920x1080 canvas
 *   make canvas scale correctly for size

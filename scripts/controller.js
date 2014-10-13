@@ -108,13 +108,35 @@ requirejs(
 
     CommonUI.setupStandardControllerUI(g_client, globals);
 
-    var handleLeftRight = function(pressed, bit) {
+    var g_oldDir;
+    var sendDirCmd = function(dir) {
+      if (dir !== g_oldDir) {
+        g_oldDir = dir;
+        g_client.sendCmd('move', {
+            dir: dir,
+        });
+      }
+    };
+
+    var newestTouchBits = 0;
+    var oldTouchBits = 0;
+    var bitsToDir = [0, -1, 1, 0];
+    var handleLeftRightTouch = function(bits) {
+      if (bits == 0x1 || bits == 0x2) {
+        oldTouchBits = bits ^ 0x3;
+        sendDirCmd(bitsToDir[bits]);
+      } else if (bits == 0x3) {
+        sendDirCmd(bitsToDir[oldTouchBits]);
+      } else {
+        sendDirCmd(0);
+      }
+    };
+
+    var handleLeftRightKeys = function(pressed, bit) {
       g_leftRight = (g_leftRight & ~bit) | (pressed ? bit : 0);
       if (g_leftRight != g_oldLeftRight) {
         g_oldLeftRight = g_leftRight;
-        g_client.sendCmd('move', {
-            dir: (g_leftRight & 1) ? -1 : ((g_leftRight & 2) ? 1 : 0),
-        });
+        sendDirCmd((g_leftRight & 1) ? -1 : ((g_leftRight & 2) ? 1 : 0));
       }
     };
 
@@ -128,8 +150,8 @@ requirejs(
     };
 
     var keys = { };
-    keys[Input.cursorKeys.kLeft]  = function(e) { handleLeftRight(e.pressed, 0x1); }
-    keys[Input.cursorKeys.kRight] = function(e) { handleLeftRight(e.pressed, 0x2); }
+    keys[Input.cursorKeys.kLeft]  = function(e) { handleLeftRightKeys(e.pressed, 0x1); }
+    keys[Input.cursorKeys.kRight] = function(e) { handleLeftRightKeys(e.pressed, 0x2); }
     keys[Input.cursorKeys.kUp]    = function(e) { handleJump(e.pressed);           }
     keys["Z".charCodeAt(0)]       = function(e) { handleJump(e.pressed);           }
     Input.setupKeys(keys);
@@ -214,7 +236,9 @@ window.p = pointers;
     metalGrad.addColorStop(0.600, 'rgba(198, 198, 198, 1.000)');
     metalGrad.addColorStop(1.000, 'rgba(100, 100, 100, 1.000)');
 
-    var inRect = function(ctx, width, height) {
+    var inRect = function(ctx, width, height, x, y) {
+      x = x || 0;
+      y = y || 0;
       var inv = ctx.currentTransform.duplicate();
       inv.invert();
       for (var id in pointers) {
@@ -222,8 +246,8 @@ window.p = pointers;
           var p = pointers[id];
           if (p.pressed) {
             var pnt = inv.transformPoint(p.pos.x, p.pos.y);
-            if (pnt[0] >= 0 && pnt[0] < width &&
-                pnt[1] >= 0 && pnt[1] < height) {
+            if (pnt[0] >= x && pnt[0] < x + width &&
+                pnt[1] >= y && pnt[1] < y + height) {
               return true;
             }
           }
@@ -268,21 +292,26 @@ window.p = pointers;
       // draw L-R button
 
       drawDepthRect(ctx, width, height, depth, "black", "gray", metalGrad);
-      var inButton = inRect(ctx, width, height);
 
-      ctx.fillStyle = inButton ? "red" : "black";
+      ctx.fillStyle = "black";
       ctx.strokeStyle = "none";
 
+      var inLeftButton = inRect(ctx, width / 2, height);
+      ctx.fillStyle = inLeftButton ? "red" : "black";
       ctx.save();
       ctx.translate(20, height / 2);
       drawTriangle(ctx, height * 0.6, height * 0.7);
       ctx.restore();
 
+      var inRightButton = inRect(ctx, width / 2, height, width / 2);
+      ctx.fillStyle = inRightButton ? "red" : "black";
       ctx.save();
       ctx.translate(width - 20, height / 2);
       ctx.rotate(Math.PI);
       drawTriangle(ctx, height * 0.6, height * 0.7);
       ctx.restore();
+
+      return (inLeftButton ? 0x1 : 0x0) | (inRightButton ? 0x2 : 0x0);
     };
 
     var drawUpButton = function(ctx, width, height, depth) {
@@ -297,6 +326,8 @@ window.p = pointers;
       ctx.rotate(Math.PI / 2);
       drawTriangle(ctx, height * 0.6, height * 0.7);
       ctx.restore();
+
+      return inButton ? 0x4 : 0x0;
     };
 
     var render = function() {
@@ -372,15 +403,19 @@ window.p = pointers;
           ctx.restore();
         }
 
+        var buttonBits = 0;
 
         ctx.save();
         ctx.translate(lrX, lrY);
-        drawLRButton(ctx, lrWidth, lrHeight, depth);
+        buttonBits |= drawLRButton(ctx, lrWidth, lrHeight, depth);
         ctx.restore();
 
         ctx.save();
         ctx.translate(upX, upY);
-        drawUpButton(ctx, upWidth, upHeight, depth);
+        buttonBits |= drawUpButton(ctx, upWidth, upHeight, depth);
+
+        handleLeftRightTouch(buttonBits & 0x3);
+        handleJump(buttonBits & 0x4);
         ctx.restore();
 
         ctx.restore();

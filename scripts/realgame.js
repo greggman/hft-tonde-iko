@@ -354,7 +354,7 @@ window.g = globals;
     };
 
     if (globals.levelName) {
-      LevelLoader.load(gl, "assets/" + globals.levelName + ".tmx", function(err, level) {
+      LevelLoader.load(gl, "assets/" + globals.levelName + ".json", function(err, level) {
         if (err) {
           throw err;
         }
@@ -364,6 +364,7 @@ window.g = globals;
     } else {
       globals.level = {
         layers:[],
+        backgroundcolor: [0,0,0,1],
       };
       startGame();
     };
@@ -371,12 +372,28 @@ window.g = globals;
 
   ImageLoader.loadImages(images, processImages);
 
+  gl.clearColor = function(clearColor) {
+    return function(r,g,b,a) {
+      clearColor(r,g,b,a);
+    };
+  }(gl.clearColor.bind(gl));
+  gl.clear = function(clear) {
+    return function(b) {
+      clear(b);
+    }
+  }(gl.clear.bind(gl));
+
   var mainloop = function() {
     resize();
     g_services.entitySystem.processEntities();
 
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-    gl.clear(gl.CLEAR_BUFFER_BIT);
+    gl.clearColor(
+        globals.level.backgroundColor[0],
+        globals.level.backgroundColor[1],
+        globals.level.backgroundColor[2],
+        globals.level.backgroundColor[3]);
+    gl.clear(gl.COLOR_BUFFER_BIT);
     var layerNdx = 0;
     var layers    = globals.level.layers;
     var numLayers = layers.length;

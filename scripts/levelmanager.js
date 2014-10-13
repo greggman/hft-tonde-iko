@@ -33,9 +33,11 @@
 define([
     'hft/misc/misc',
     './level',
+    './tiles',
   ], function(
     Misc,
-    Level) {
+    Level,
+    Tiles) {
 
   var levels = [];
 
@@ -129,65 +131,6 @@ define([
       ].join("")}));
   };
 
-  var tileInfoSky = {
-    collisions: false,
-  };
-
-  var tileInfoWall = {
-    collisions: true,
-    color: "white",
-    imgName: "brick",
-  };
-
-  var tileInfoTeleport0 = {
-    collisions: false,
-    teleport: true,
-    dest: 0,
-  };
-
-  var tileInfoTeleport1 = {
-    collisions: false,
-    teleport: true,
-    dest: 1,
-  };
-
-  var tileInfoTeleport2 = {
-    collisions: false,
-    teleport: true,
-    dest: 2,
-  };
-
-  var tileInfoTeleport3 = {
-    collisions: false,
-    teleport: true,
-    dest: 3,
-  };
-
-  var tileInfoTeleport4 = {
-    collisions: false,
-    teleport: true,
-    dest: 4,
-  };
-
-  var tileInfos = [
-    tileInfoSky,        // 0
-    tileInfoWall,       // 1
-    tileInfoTeleport0,  // 2
-    tileInfoTeleport1,  // 3
-    tileInfoTeleport2,  // 4
-    tileInfoTeleport3,  // 5
-    tileInfoTeleport4,  // 6
-  ];
-
-  var tileInfoMap = {};
-  tileInfoMap[Level.charToTileId[' '].tileId] = tileInfoSky;
-  tileInfoMap[Level.charToTileId['#'].tileId] = tileInfoWall;
-  tileInfoMap[Level.charToTileId['0'].tileId] = tileInfoTeleport0;
-  tileInfoMap[Level.charToTileId['1'].tileId] = tileInfoTeleport1;
-  tileInfoMap[Level.charToTileId['2'].tileId] = tileInfoTeleport2;
-  tileInfoMap[Level.charToTileId['3'].tileId] = tileInfoTeleport3;
-  tileInfoMap[Level.charToTileId['4'].tileId] = tileInfoTeleport4;
-
   var LevelManager = function(services, tileset) {
     this.services = services;
     this.tileset = tileset;
@@ -213,20 +156,23 @@ define([
       }
       level = largestLevel;
     }
+
+    // find the desinations
+
     this.level = level;
+    level.setup(this);
     this.level.dirty = true;
   };
 
   LevelManager.prototype.getTileInfo = function(tileId) {
-    return tileInfoMap[tileId] || { collisions: false };
+    if (this.level.meaningTable) {
+      var tileId = this.level.meaningTable[tileId];
+    }
+    return Tiles.getInfo(tileId);
   };
 
   LevelManager.prototype.getTileInfoByPixel = function(x, y) {
     var tileId = this.level.getTileByPixel(x, y);
-    if (this.level.meaningTable) {
-      var meaningNdx = this.level.meaningTable[tileId];
-      return tileInfos[meaningNdx];
-    }
     return this.getTileInfo(tileId);
   }
 

@@ -30,7 +30,10 @@
  */
 "use strict";
 
-define(['./player'], function(Player) {
+define([
+    './player'
+  ], function(
+    Player) {
 
   var PlayerManager = function(services) {
     this.services = services;
@@ -43,13 +46,25 @@ define(['./player'], function(Player) {
     var level = levelManager.getLevel();
     var direction = misc.randInt(2) ? -1 : 1;
     var startPosition;
+    var destId;
     if (data) {
       name = data.name;
-      if (data.dest == 0) {
+      destId = data.dest;
+    } else {
+      destId = 0;
+    }
+    var dest = level.getDest(destId);
+    if (dest) {
+      dest = dest[misc.randInt(dest.length)];
+      startPosition = { x: dest.tx, y: dest.ty };
+    } else {
+      if (destId == 0) {
         startPosition = { x: level.width - 3, y: 2};
       } else {
         startPosition = { x: 2, y: 2};
       }
+    }
+    if (startPosition) {
       startPosition.x *= level.tileWidth;
       startPosition.y *= level.tileHeight;
     }

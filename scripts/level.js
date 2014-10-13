@@ -48,7 +48,6 @@ define([
     this.tileHeight = tileset.tileHeight;
     this.levelWidth = this.width * this.tileWidth;
     this.levelHeight = this.height * this.tileHeight;
-    this.outOfBoundsTile = Level.charToTileId['#'].tileId;
     this.meaningTable = options.meaningTable;
 
     if (typeof(tiles) == 'string') {
@@ -60,17 +59,20 @@ define([
       for (var ii = 0; ii < this.width; ++ii) {
         t.push(this.outOfBoundsTile);
       }
+
       // Add lines of original plus abounds
+      var wallTile = Level.charToTileId['#'].tileId;
+
       for (var yy = 0; yy < height; ++yy) {
-        t.push(this.outOfBoundsTile);
+        t.push(wallTile);
         for (var xx = 0; xx < width; ++xx) {
           t.push(Level.charToTileId[tiles.substr(yy * width + xx, 1)].tileId);
         }
-        t.push(this.outOfBoundsTile);
+        t.push(wallTile);
       }
       // Add bottom line
       for (var ii = 0; ii < this.width; ++ii) {
-        t.push(this.outOfBoundsTile);
+        t.push(wallTile);
       }
       tiles = t;
       this.tiles = new Uint32Array(tiles);
@@ -102,6 +104,36 @@ define([
       originX: 0,
       originY: 0,
     };
+
+    this.dests = {};
+    this.isSetup = false;
+  };
+
+  Level.prototype.setup = function(levelManager) {
+    if (this.isSetup) {
+      return;
+    }
+    this.isSetup = true;
+    // find stuff
+    for (var yy = 0; yy < this.height; ++yy) {
+      for (var xx = 0; xx < this.width; ++xx) {
+        var tileId = this.getTile(xx, yy);
+        var info = levelManager.getTileInfo(tileId);
+        var teleportDest = info.teleportDest;
+        if (teleportDest !== undefined) {
+          var dests = this.dests[teleportDest];
+          if (!dests) {
+            dests = [];
+            this.dests[teleportDest] = dests;
+          }
+          dests.push({tx: xx, ty: yy});
+        }
+      }
+    }
+  };
+
+  Level.prototype.getDest = function(destId) {
+    return this.dests[destId];
   };
 
   Level.prototype.getTile = function(tileX, tileY) {
@@ -109,7 +141,7 @@ define([
         tileY >= 0 && tileY < this.height) {
       return this.uint16view[(tileY * this.width + tileX) * 2];
     }
-    return this.outOfBoundsTile;
+    return -1;
   };
 
   Level.prototype.getTileByPixel = function(x, y) {
@@ -143,13 +175,13 @@ define([
   };
 
   Level.charToTileId = {
-    ' ': { tileId: 0x0001, },
-    '#': { tileId: 0x0002, },
-    '0': { tileId: 0x0003, },
-    '1': { tileId: 0x0004, },
-    '2': { tileId: 0x0005, },
-    '3': { tileId: 0x0006, },
-    '4': { tileId: 0x0007, },
+    ' ': { tileId: 0x0000, },
+    '#': { tileId: 0x0001, },
+    '0': { tileId: 0x0002, },
+    '1': { tileId: 0x0003, },
+    '2': { tileId: 0x0004, },
+    '3': { tileId: 0x0005, },
+    '4': { tileId: 0x0006, },
   };
 
 

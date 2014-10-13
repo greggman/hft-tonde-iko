@@ -31,12 +31,14 @@
 "use strict";
 
 define([
+    'hft/misc/cssparse',
     'hft/misc/strings',
     '../bower_components/tdl/tdl/textures',
     '../bower_components/hft-utils/dist/imageloader',
     './level',
     './tiledloader'
   ], function(
+    CSSParse,
     Strings,
     Textures,
     ImageLoader,
@@ -56,7 +58,6 @@ define([
   var makeLevel = function(gl, map, callback) {
     // convert level to what we need
     // First get tileset. Let's assume just 1
-
     map.tilesets.sort(function(a, b) {
       return a.firstgid == b.firstgid ? 0 : (a.firstgid < b.firstgid ? -1 : 1);
     });
@@ -221,6 +222,7 @@ define([
         layers: layers,
         tileset: tileset,
         meaningTable: meaningTable,
+        backgroundColor: CSSParse.parseCSSColor(map.backgroundcolor || "#808080", true),
       });
     };
   };
