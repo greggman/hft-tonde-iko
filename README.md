@@ -1,5 +1,5 @@
-JumpAbout
-=========
+飛んで行こ！(Tonde-Iko!)
+======================
 
 This is a special multi-machine game for HappyFunTimes.
 To effectively play you need 2 or more computers and some
