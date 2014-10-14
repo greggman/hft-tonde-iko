@@ -128,31 +128,31 @@ Skeleton
 OPP
 
 *   authors:
-Daniel Siegmund (Hapiel)
-Damian
-Dawnbringer
-Ellian
-Squirrelsquid
-RileyFiery
-Noburo
-Numberplay
-Skeddles
-a3um
-Surt
-Stava
-Scarab
-guima1901
-Conzeit
-gogglecrab
-anodomani
-yaomon17
-Ails
-Letmethink
-Grimsane
-Diggyspiff
-PypeBros
-pistachio
-nickthem
+Daniel Siegmund (Hapiel),
+Damian,
+Dawnbringer,
+Ellian,
+Squirrelsquid,
+RileyFiery,
+Noburo,
+Numberplay,
+Skeddles,
+a3um,
+Surt,
+Stava,
+Scarab,
+guima1901,
+Conzeit,
+gogglecrab,
+anodomani,
+yaomon17,
+Ails,
+Letmethink,
+Grimsane,
+Diggyspiff,
+PypeBros,
+pistachio,
+nickthem,
 Crow
 
 *   url: http://opengameart.org/content/open-pixel-platformer-tiles-sprites
