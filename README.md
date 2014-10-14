@@ -16,19 +16,5 @@ Cloning
 Attribution
 -----------
 
-Bird
-
-Name:Nooks
-
-Link: http://forums.tigsource.com/index.php?topic=9353.0
-
-Bricks
-
-Name: SpiderDave
-
-Link: http://opengameart.org/content/bricks-tilable
-
-
-
-
+See [Attribution](attribution.md)
 
