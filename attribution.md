@@ -127,7 +127,7 @@ Skeleton
 ---
 OPP
 
-authors:
+*   authors:
 Daniel Siegmund (Hapiel)
 Damian
 Dawnbringer
