@@ -43,7 +43,6 @@ define([
   var Collectable = (function() {
     return function(services, collectableManager) {
       this.services = services;
-      this.renderer = services.renderer;
       this.manager = collectableManager;
       var globals = services.globals;
 

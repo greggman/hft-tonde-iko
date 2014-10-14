@@ -54,7 +54,9 @@ requirejs(
     './debug-renderer',
     './levelloader',
     './levelmanager',
+    './particlesystemmanager',
     './playermanager',
+    './portal',
   ], function(
     GameServer,
     GameSupport,
@@ -74,7 +76,9 @@ requirejs(
     DebugRenderer,
     LevelLoader,
     LevelManager,
-    PlayerManager) {
+    ParticleSystemManager,
+    PlayerManager,
+    Portal) {
 
   var g_debug = false;
   var g_services = {};
@@ -207,6 +211,7 @@ window.g = globals;
   var gl = WebGL.setupWebGL(canvas, {alpha:false}, function() {});
   g_services.spriteManager = new SpriteManager();
   g_services.debugRenderer = new DebugRenderer();
+  g_services.particleSystemManager = new ParticleSystemManager();
 
   var resize = function() {
     if (!globals.resizeOnce || (globals.resize !== false && Misc.resize(canvas))) {
@@ -371,6 +376,20 @@ window.g = globals;
       startLocalPlayers();
 
       new CollectableManager(g_services);
+
+      // create portals
+      var level = g_levelManager.getLevel();
+      var teleports = level.getThings("teleport");
+      Object.keys(teleports).forEach(function(key) {
+        teleports[key].forEach(function(teleport) {
+          new Portal(
+            g_services,
+            (teleport.tx + 0.5) * level.tileWidth,
+            (teleport.ty + 0.5) * level.tileHeight);
+        });
+      });
+
+
       GameSupport.run(globals, mainloop);
     };
 
@@ -424,6 +443,8 @@ window.g = globals;
         globals.level.backgroundColor[3]);
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.disable(gl.SCISSOR_TEST);
+    gl.disable(gl.BLEND);
+
     var layerNdx = 0;
     var layers    = globals.level.layers;
     var numLayers = layers.length;
@@ -443,6 +464,7 @@ window.g = globals;
         layer.draw(g_services.levelManager, globals);
       }
     }
+    g_services.particleSystemManager.draw(globals.drawOffset);
     g_services.debugRenderer.draw(globals.drawOffset);
     g_services.status.draw();
   };

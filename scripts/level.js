@@ -128,7 +128,12 @@ define([
             things = {};
             this.things[info.thing] = things;
           };
-          things[info.id] = { tx: xx, ty: yy };
+          var instances = things[info.id];
+          if (!instances) {
+            instances = [];
+            things[info.id] = instances;
+          }
+          instances.push({ tx: xx, ty: yy });
         }
         var teleportDest = info.teleportDest;
         if (teleportDest !== undefined) {
