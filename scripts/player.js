@@ -68,13 +68,24 @@ define([
       this.acceleration = [0, 0];
       this.stopFriction = globals.stopFriction;
       this.walkAcceleration = globals.moveAcceleration;
+      this.idleAnimSpeed = (0.8 + Math.random() * 0.4) * globals.idleAnimSpeed;
+
       if (data.color) {
         this.color = data.color;
       } else {
         if (availableColors.length == 0) {
-          var colors = services.colors;
-          for (var ii = 0; ii < colors.length; ++ii) {
-            availableColors.push(colors[ii]);
+          for (var ii = 0; ii < 32; ++ii) {
+            var h = ii / 32;
+            var s = (ii % 2) * -0.6;
+            var v = (ii % 2) * 0.1;
+            availableColors.push({
+              id: 0,
+              h: h,
+              s: s,
+              v: v,
+              hsv: [h, s, v, 0],
+              range: globals.duckBlueRange,
+            });
           }
         }
         var colorNdx = Math.floor(Math.random() * availableColors.length);
@@ -146,6 +157,8 @@ define([
     var position = startPosition || levelManager.getRandomOpenPosition();
     this.position = [position.x, position.y];
     this.lastPosition = [this.position[0], this.position[1]];
+    this.sprite.uniforms.u_hsvaAdjust = this.color.hsv.slice();
+    this.sprite.uniforms.u_adjustRange = this.color.range.slice();
   };
 
   Player.prototype.updateMoveVector = function() {
@@ -292,7 +305,7 @@ define([
     this.acceleration[0] = 0;
     this.acceleration[1] = 0;
     this.animTimer = 0;
-    this.anim = this.services.images.idle.colors[this.color.id];
+    this.anim = this.services.images.idle.frames;
   };
 
   Player.prototype.state_idle = function() {
@@ -303,13 +316,13 @@ define([
       return;
     }
     var globals = this.services.globals;
-    this.animTimer += globals.elapsedTime * globals.idleAnimSpeed;
+    this.animTimer += globals.elapsedTime * this.idleAnimSpeed;
     this.checkFall();
   };
 
   Player.prototype.init_fall = function() {
     this.animTimer = 1;
-    this.anim = this.services.images.jump.colors[this.color.id];
+    this.anim = this.services.images.jump.frames;
   };
 
   Player.prototype.state_fall = function() {
@@ -516,7 +529,7 @@ this.services.debugRenderer.addLine(
 
   Player.prototype.init_move = function() {
     this.animTimer = 0;
-    this.anim = this.services.images.move.colors[this.color.id];
+    this.anim = this.services.images.move.frames;
     this.lastDirection = this.direction;
   };
 
@@ -574,7 +587,7 @@ this.services.debugRenderer.addLine(
     this.jumpTimer = 0;
     this.animTimer = 0;
     this.bonked = false;
-    this.anim = this.services.images.jump.colors[this.color.id];
+    this.anim = this.services.images.jump.frames;
     this.services.audioManager.playSound('jump');
   };
 

@@ -2,7 +2,6 @@ To Do
 =====
 
 *   add bonus coin? Put it somewhere hard to reach
-*   need exit graphics (use particle system)
 *   need backgrounds
 *   make levels
 *   make characters
@@ -17,9 +16,6 @@ To Do
 
 *   let you enter initials?
 
-*   make it rain coins
-    *   set max coins per level
-*   Set and define destinations
 *   Make end that disconnects you
 *   Make queue to get into the game
 *   add sounds to controller.
@@ -51,6 +47,10 @@ To Do
 Done
 ====
 
+*   make it rain coins
+    *   set max coins per level
+*   Set and define destinations
+*   need exit graphics (use particle system)
 *   setup tilesets
 *   add teleport destinations
 *   make controller use canvas

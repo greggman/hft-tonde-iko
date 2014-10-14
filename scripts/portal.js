@@ -109,7 +109,7 @@ define(
     return emitter;
   };
 
-  var Portal = function(services, x, y, type) {
+  var Portal = function(services, data, type) {
     setup();
     this.services = services;
     switch (type) {
@@ -120,6 +120,10 @@ define(
         this.emitter = createPortal(services.particleSystemManager);
         break;
     };
+
+    var level = services.levelManager.getLevel();
+    var x = (data.tx + 0.5) * level.tileWidth;
+    var y = (data.ty + 0.5) * level.tileHeight;
     this.emitter.setTranslation(x, y, 0);
   };
 

@@ -133,7 +133,7 @@ define([
             instances = [];
             things[info.id] = instances;
           }
-          instances.push({ tx: xx, ty: yy });
+          instances.push({ tx: xx, ty: yy, tileInfo: info });
         }
         var teleportDest = info.teleportDest;
         if (teleportDest !== undefined) {

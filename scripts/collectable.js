@@ -50,7 +50,7 @@ define([
       services.drawSystem.addEntity(this);
 
       this.animTimer = 0;
-      this.anim = this.services.images.coin.colors[0];
+      this.anim = this.services.images.coin.frames;
       this.animSpeed = globals.coinAnimSpeed + Math.random() * globals.coinAnimSpeedRange;
 
       var levelManager = this.services.levelManager;

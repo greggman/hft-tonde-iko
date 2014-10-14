@@ -51,6 +51,7 @@ requirejs(
     '../bower_components/hft-utils/dist/imageutils',
     '../bower_components/hft-utils/dist/spritemanager',
     './collectable-manager',
+    './door',
     './debug-renderer',
     './levelloader',
     './levelmanager',
@@ -73,6 +74,7 @@ requirejs(
     ImageUtils,
     SpriteManager,
     CollectableManager,
+    Door,
     DebugRenderer,
     LevelLoader,
     LevelManager,
@@ -120,6 +122,7 @@ window.s = g_services;
     maxBonusTime: 180,
     bonusSpeed: 4,  // every 4 frames
     drawOffset: {},
+    duckBlueRange: [180 / 360, 275 / 360],  // color range for colorizing duck but not beak
   };
 window.g = globals;
 
@@ -128,13 +131,15 @@ window.g = globals;
 
     var addLocalPlayer = function() {
       var netPlayer = new LocalNetPlayer();
+      var player = g_playerManager.startPlayer(netPlayer, "Player" + (localPlayers.length + 1));
       localPlayers.push({
-        player: g_playerManager.startPlayer(netPlayer, "Player" + (localPlayers.length + 1)),
+        player: player,
         netPlayer: netPlayer,
         leftRight: 0,
         oldLeftRight: 0,
         jump: false,
       });
+      player.position[0] += 16 * localPlayers.length;
     };
 
     var removeLocalPlayer = function(playerId) {
@@ -244,6 +249,7 @@ window.g = globals;
     }
   };
   g_services.globals = globals;
+  g_services.gameSupport = GameSupport;
 
   if (globals.tileInspector) {
     var element = document.createElement("div");
@@ -299,54 +305,33 @@ window.g = globals;
   // colorize: number of colors to make
   // slizes: number = width of all slices, array = width of each consecutive slice
   var images = {
-    idle:  { url: "assets/spr_idle.png",  colorize: 32, scale: 2, slices: 16, },
-    move:  { url: "assets/spr_run.png",   colorize: 32, scale: 2, slices: 16, },
-    jump:  { url: "assets/spr_jump.png",  colorize: 32, scale: 2, slices: [16, 17, 17, 18, 16, 16] },
-    brick: { url: "assets/bricks.png",    },
-    coin:  { url: "assets/coin_anim.png", colorize:  1, scale: 4, slices: 8, },
+    idle:  { url: "assets/spr_idle.png",    scale: 2, slices: 16, },
+    move:  { url: "assets/spr_run.png",     scale: 2, slices: 16, },
+    jump:  { url: "assets/spr_jump.png",    scale: 2, slices: [16, 17, 17, 18, 16, 16] },
+    brick: { url: "assets/bricks.png",      },
+    coin:  { url: "assets/coin_anim.png",   scale: 4, slices: 8, },
+    door:  { url: "assets/door.png",        },
+    "switch":  { url: "assets/switch.png",  },
   };
-  var colors = [];
   g_services.images = images;
-  g_services.colors = colors;
   var processImages = function() {
-    // make 32 colors of duck. Maybe we should do this in WebGL and use a shader!?
-    var duckBlueRange = [180 / 360, 275 / 360];
     Object.keys(images).forEach(function(name) {
       var image = images[name];
-      image.colors = [];
-      image.imgColors = [];
-      if (image.colorize) {
-        for (var ii = 0; ii < image.colorize; ++ii) {
-          var h = ii / 32;
-          var s = (ii % 2) * -0.6;
-          var v = (ii % 2) * 0.1;
-          var range = duckBlueRange;
-          colors.push({
-            id: ii,
-            h: h,
-            s: s,
-            v: v,
-            range: range,
-          });
-          var coloredImage = ii ? ImageUtils.adjustHSV(image.img, h, s, v, range) : image.img;
-          var numFrames = image.slices.length ? image.slices.length : image.img.width / image.slices;
-          var frames = [];
-          var imgFrames = [];
-          var x = 0;
-          for (var jj = 0; jj < numFrames; ++jj) {
-            var width = image.slices.length ? image.slices[jj] : image.slices;
-            var frame = ImageUtils.cropImage(coloredImage, x, 0, width, coloredImage.height);
-            frame = ImageUtils.scaleImage(frame, width * image.scale, frame.height * image.scale);
-            imgFrames.push(frame);
-            frame = createTexture(frame);
-            frames.push(frame);
-            x += width;
-          }
-          image.colors[ii] = frames;
-          image.imgColors[ii] = imgFrames;
+      var frames = [];
+      if (image.slices) {
+        var numFrames = image.slices.length ? image.slices.length : image.img.width / image.slices;
+        var x = 0;
+        for (var jj = 0; jj < numFrames; ++jj) {
+          var width = image.slices.length ? image.slices[jj] : image.slices;
+          var frame = ImageUtils.cropImage(image.img, x, 0, width, image.img.height);
+          frame = ImageUtils.scaleImage(frame, width * image.scale, frame.height * image.scale);
+          frame = createTexture(frame);
+          frames.push(frame);
+          x += width;
         }
+        image.frames = frames;
       } else {
-        image.colors[0] = [createTexture(image.img)];
+        image.frames = [createTexture(image.img)];
       }
     });
 
@@ -356,7 +341,7 @@ window.g = globals;
         tileHeight: 32,
         tilesAcross: images.brick.img.width / 32,  // tiles across set
         tilesDown: images.brick.img.height / 32,   // tiles down set
-        texture: images.brick.colors[0][0],
+        texture: images.brick.frames[0],
       };
       var g_levelManager = new LevelManager(g_services, tileset);
       g_services.levelManager = g_levelManager;
@@ -380,19 +365,21 @@ window.g = globals;
       // create portals
       var level = g_levelManager.getLevel();
       [
-        {type: "teleport", portalType: 0},
-        {type: "end",      portalType: 1},
+        {type: "teleport", portalType: 0, constructor: Portal},
+        {type: "end",      portalType: 1, constructor: Portal},
+        {type: "door",                    constructor: Door},
       ].forEach(function(type) {
         var teleports = level.getThings(type.type);
-        Object.keys(teleports).forEach(function(key) {
-          teleports[key].forEach(function(teleport) {
-            new Portal(
-              g_services,
-              (teleport.tx + 0.5) * level.tileWidth,
-              (teleport.ty + 0.5) * level.tileHeight,
-              type.portalType);
+        if (teleports) {
+          Object.keys(teleports).forEach(function(key) {
+            teleports[key].forEach(function(teleport) {
+              new (type.constructor)(
+                g_services,
+                teleport,
+                type.portalType);
+            });
           });
-        });
+        }
       });
 
       GameSupport.run(globals, mainloop);
