@@ -329,7 +329,6 @@ define([
   };
 
   Player.prototype.checkWall = function() {
-return;
     var globals = this.services.globals;
     var levelManager = this.services.levelManager;
     var level = levelManager.getLevel();

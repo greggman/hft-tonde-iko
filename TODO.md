@@ -10,6 +10,7 @@ To Do
 *   make it handle tile animation
 *   make it load play tilesets vs level building tilesets
 *   remove fixed time in gamesupport
+*   turn off debug settings in game.js?
 *   comment out debug
     *   in launcher
     *   in player etc..

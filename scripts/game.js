@@ -95,6 +95,7 @@ requirejs([
 
     settings.numLocalPlayers = 1;
     settings.debug = true;
+    settings.fixedFramerate = 1/60;
 
     var options = {
       width:  width,
