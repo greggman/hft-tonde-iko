@@ -51,6 +51,7 @@ requirejs(
     '../bower_components/hft-utils/dist/imageutils',
     '../bower_components/hft-utils/dist/spritemanager',
     './collectable-manager',
+    './debug-renderer',
     './levelloader',
     './levelmanager',
     './playermanager',
@@ -70,6 +71,7 @@ requirejs(
     ImageUtils,
     SpriteManager,
     CollectableManager,
+    DebugRenderer,
     LevelLoader,
     LevelManager,
     PlayerManager) {
@@ -91,7 +93,7 @@ window.s = g_services;
   // http://path/gameview.html?settings={name:value,name:value}
   var globals = {
     haveServer: true,
-    numLocalPlayers: 1,  // num players when local (ie, debugger)
+    numLocalPlayers: 0,  // num players when local (ie, debugger)
     debug: false,
     tileInspector: false,
     showState: false,
@@ -113,6 +115,7 @@ window.s = g_services;
     minBonusTime: 60,
     maxBonusTime: 180,
     bonusSpeed: 4,  // every 4 frames
+    drawOffset: {},
   };
 window.g = globals;
 
@@ -203,6 +206,7 @@ window.g = globals;
   if (globals.shared.canvasHeight) { globals.resize = false; canvas.height = globals.shared.canvasHeight; }
   var gl = WebGL.setupWebGL(canvas, {alpha:false}, function() {});
   g_services.spriteManager = new SpriteManager();
+  g_services.debugRenderer = new DebugRenderer();
 
   var resize = function() {
     if (!globals.resizeOnce || (globals.resize !== false && Misc.resize(canvas))) {
@@ -236,17 +240,6 @@ window.g = globals;
   };
   g_services.globals = globals;
 
-  var server;
-  if (globals.haveServer) {
-    var server = new GameServer({
-      allowMultipleGames: true,
-      id: globals.id,
-    });
-    g_services.server = server;
-    server.addEventListener('playerconnect', g_playerManager.startPlayer.bind(g_playerManager));
-  }
-  GameSupport.init(server, globals);
-
   if (globals.tileInspector) {
     var element = document.createElement("div");
     var s = element.style;
@@ -275,6 +268,18 @@ window.g = globals;
         "tileId:" + tileId + " (" + String.fromCharCode(tileId) + ")";
     }, false);
   };
+
+  var Status = function() {
+    var lines = [];
+    this.addMsg = function(msg) {
+      lines.push(msg);
+    };
+    this.draw = function() {
+      GameSupport.setStatus(lines.join("\n"));
+      lines = [];
+    };
+  };
+  g_services.status = new Status();
 
   var createTexture = function(img) {
     var tex = Textures.loadTexture(img);
@@ -348,15 +353,22 @@ window.g = globals;
         tilesDown: images.brick.img.height / 32,   // tiles down set
         texture: images.brick.colors[0][0],
       };
- console.log((tileset));
       var g_levelManager = new LevelManager(g_services, tileset);
       g_services.levelManager = g_levelManager;
       resize();
 
-      // Add a 2 players if there is no communication
-      if (!globals.haveServer) {
-        startLocalPlayers();
+      var server;
+      if (globals.haveServer) {
+        var server = new GameServer({
+          allowMultipleGames: true,
+          id: globals.id,
+        });
+        g_services.server = server;
+        server.addEventListener('playerconnect', g_playerManager.startPlayer.bind(g_playerManager));
       }
+      GameSupport.init(server, globals);
+
+      startLocalPlayers();
 
       new CollectableManager(g_services);
       GameSupport.run(globals, mainloop);
@@ -394,6 +406,7 @@ window.g = globals;
 
   var mainloop = function() {
     resize();
+    g_services.levelManager.getDrawOffset(globals.drawOffset);
     g_services.entitySystem.processEntities();
 
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
@@ -430,6 +443,8 @@ window.g = globals;
         layer.draw(g_services.levelManager, globals);
       }
     }
+    g_services.debugRenderer.draw(globals.drawOffset);
+    g_services.status.draw();
   };
 
   var sounds = {

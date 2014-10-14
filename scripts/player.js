@@ -58,6 +58,7 @@ define([
   var Player = (function() {
     return function(services, width, height, direction, name, netPlayer, startPosition, data) {
       data = data || {};
+      var globals = services.globals;
       this.services = services;
       this.renderer = services.renderer;
       services.entitySystem.addEntity(this);
@@ -65,6 +66,8 @@ define([
       this.netPlayer = netPlayer;
       this.velocity = [0, 0];
       this.acceleration = [0, 0];
+      this.stopFriction = globals.stopFriction;
+      this.walkAcceleration = globals.moveAcceleration;
       if (data.color) {
         this.color = data.color;
       } else {
@@ -89,6 +92,9 @@ define([
         this.width / 2 - 1,
       ];
       this.timeAccumulator = 0;
+      this.moveVector = {};
+      this.workVector = {};
+      this.tileVector = {};
 
       this.sprite = this.services.spriteManager.createSprite();
       this.nameSprite = this.services.spriteManager.createSprite();
@@ -113,6 +119,15 @@ define([
       } else {
         this.setState('idle');
       }
+
+//this.setState('fall');
+//this.position[0] = 393 + 10;
+//this.position[1] = 466 - 10;
+//this.lastPosition[0] = 402 + 11;
+//this.lastPosition[1] = 466 - 10;
+//this.velocity[0] = -200;
+//this.velocity[1] =  370;
+
       this.checkBounds();
     };
   }());
@@ -131,6 +146,21 @@ define([
     var position = startPosition || levelManager.getRandomOpenPosition();
     this.position = [position.x, position.y];
     this.lastPosition = [this.position[0], this.position[1]];
+  };
+
+  Player.prototype.updateMoveVector = function() {
+    this.moveVector.x = this.position[0] - this.lastPosition[0];
+    this.moveVector.y = this.position[1] - this.lastPosition[1];
+  };
+
+  Player.prototype.checkCollisions = function() {
+    var levelManager = this.services.levelManager;
+    var level = levelManager.getLevel();
+
+    var xp = this.lastPosition[0];
+    var yp = this.lastPosition[1];
+
+    var tile = 0;
   };
 
   Player.prototype.addPoints = function(points) {
@@ -160,6 +190,7 @@ define([
       if (this.jump) {
         this.canJump = false;
         this.setState('jump');
+        return true;
       }
     } else {
       if (!this.jump) {
@@ -298,33 +329,42 @@ define([
   };
 
   Player.prototype.checkWall = function() {
+return;
     var globals = this.services.globals;
     var levelManager = this.services.levelManager;
     var level = levelManager.getLevel();
     var off = this.velocity[0] < 0 ? 0 : 1;
+
     for (var ii = 0; ii < 2; ++ii) {
+      if (ii == 0) {
+        continue;
+      }
       var xCheck = this.position[0] + this.checkWallOffset[off];
-      var yCheck = this.position[1] - this.height / 4 - this.height / 2 * ii
+      var yCheck = this.position[1] - this.height / 4 - this.height / 2 * ii;
+
+this.services.debugRenderer.addLine(
+  this.position[0], this.position[1], xCheck, yCheck, (globals.frameCount & 2) ? 0xFF0000FF : 0x00FF00FF);
+
       var tile = levelManager.getTileInfoByPixel(xCheck, yCheck);
       if (tile.collisions) {
-        var xInTile = gmath.emod(xCheck, level.tileWidth);
-        var yPixel = Math.floor(gmath.emod(yCheck, level.tileHeight));
-        if (this.velocity[0] >= 0) {
-          var lineX = tile.lrCollision[yPixel];
-          // wall = 15, we at 10,
-          // 10 - 15 = -5
-          var distInTile = xInTile - lineX;
-        } else {
-          // wall = 15, we at 20
-          // 20 - 15
-          var lineX = tile.rlCollision[yPixel] + 1;
-          var distInTile = lineX - xInTile;
-        }
-        if (distInTile > 0) {
-          var xoff = this.velocity[0] >=0 ? -distInTile : distInTile;
-          var oldP = this.position[0];
-          this.position[0] += xoff * 1.001;
-          this.velocity[0] = 0;
+        var wallPosition = levelManager.getWallPosition(xCheck, yCheck, this.velocity[0] < 0, tile);
+        if (wallPosition !== undefined) {
+          var xoff;
+          if (this.velocity[0] < 0) {
+            xoff = Math.max(0, wallPosition - xCheck);
+          } else {
+            xoff = Math.min(0, wallPosition - xCheck);
+          }
+          if (xoff != 0) {
+            if ((this.velocity[0] <= 0 && tile.slopeRight) ||
+                (this.velocity[0] >= 0 && tile.slopeLeft)) {
+              //
+            } else {
+              var oldP = this.position[0];
+              this.position[0] += xoff * 1.001;
+              this.velocity[0] = 0;
+            }
+          }
         }
 //console.log("" + ii + " xChk: " + xCheck.toFixed(3) + " yChk: " + yCheck.toFixed(3) + " distIn: " + distInTile.toFixed(3) + " xoff: " + xoff.toFixed(3) + " oldP: " + oldP.toFixed(3) + " newP: " + this.position[0].toFixed(3))
       }
@@ -365,18 +405,46 @@ define([
   };
 
   Player.prototype.checkFall = function() {
+    var globals = this.services.globals;
     var levelManager = this.services.levelManager;
     var level = levelManager.getLevel();
+
+    this.services.status.addMsg("p: " + this.position[0].toFixed(3) + ", " + this.position[1].toFixed(3));
+
+    // First glue him to ground
+    // Find the highest ground
+    var xCheck  = this.position[0];
+    var yCheck  = this.position[1];
+    var yInTile = gmath.emod(yCheck, level.tileHeight);
+    var nextYOff = (yInTile >= level.tileHeight / 2) ? 8 : (yInTile < level.tileHeight / 2 ? -8 : 0);
+
+    var groundHeight = level.levelHeight + 1;
+    for (var ii = 0; ii < 2; ++ii) {
+      var tile = levelManager.getTileInfoByPixel(xCheck, yCheck);
+      if (tile.collisions) {
+        this.stopFriction = tile.stopFriction || globals.stopFriction;
+        this.walkAcceleration = tile.walkAcceleration || globals.moveAcceleration;
+        groundHeight = Math.min(groundHeight, levelManager.getGroundHeight(xCheck, yCheck, tile));
+      }
+      yCheck += nextYOff;
+    }
+
+    this.services.status.addMsg("gh: " + groundHeight);
+
+    if (groundHeight < level.levelHeight) {
+      this.position[1] = groundHeight;
+    }
+
+    // Now check if we should fall
     for (var ii = 0; ii < 2; ++ii) {
       var xCheck = this.position[0] - this.width / 4 + this.width / 2 * ii;
-      var tile = levelManager.getTileInfoByPixel(xCheck, this.position[1]);
+      var yCheck = this.position[1] + 1;
+      var tile = levelManager.getTileInfoByPixel(xCheck, yCheck);
       if (tile.collisions) {
-        var xPixel = Math.floor(gmath.emod(xCheck, level.tileWidth));
-        var yCheck = gmath.emod(this.position[1], level.tileHeight);
-        var lineY = tile.udCollision[xPixel];
-        var distInTile = yCheck - lineY;
-        this.position[1] -= distInTile;
-        return false;
+        groundHeight = levelManager.getGroundHeight(xCheck, yCheck)
+        if (groundHeight - yCheck < 3) {
+          return false;
+        }
       }
     }
     this.setState('fall');
@@ -386,30 +454,52 @@ define([
   Player.prototype.checkUp = function() {
     var levelManager = this.services.levelManager;
     for (var ii = 0; ii < 2; ++ii) {
-      var tile = levelManager.getTileInfoByPixel(this.position[0] - this.width / 4 + this.width / 2 * ii, this.position[1] - this.height);
+      var yOff   = -this.height;
+      var xCheck = this.position[0] - this.width / 4 + this.width / 2 * ii;
+      var yCheck = this.position[1] + yOff;
+      var tile = levelManager.getTileInfoByPixel(xCheck, yCheck);
       if (tile.collisions) {
-        var level = levelManager.getLevel();
-        this.velocity[1] = 0;
-        this.position[1] = (gmath.unitdiv(this.position[1], level.tileHeight) + 1) * level.tileHeight;
-        if (!this.bonked) {
-          this.bonked = true;
-          this.services.audioManager.playSound('bonkhead');
+        var ceilingHeight = levelManager.getCeilingHeight(xCheck, yCheck, tile);
+        if (ceilingHeight !== undefined) {
+          if (yCheck <= ceilingHeight && this.lastPosition[1] + yOff > ceilingHeight) {
+            this.velocity[1] = 0;
+            this.position[1] = ceilingHeight + this.height + 1;
+            if (!this.bonked) {
+              this.bonked = true;
+              this.services.audioManager.playSound('bonkhead');
+            }
+            return true;
+          }
         }
-        return true;
       }
     }
     return false;
   };
 
   Player.prototype.checkDown = function() {
+    var globals = this.services.globals;
     var levelManager = this.services.levelManager;
+    var groundHeight = 1000000000;
+    var highestTile;
     for (var ii = 0; ii < 2; ++ii) {
-      var tile = levelManager.getTileInfoByPixel(this.position[0] - this.width / 4 + this.width / 2 * ii, this.position[1]);
+      var xCheck = this.position[0] - this.width / 4 + this.width / 2 * ii;
+      var yCheck = this.position[1];
+      var tile = levelManager.getTileInfoByPixel(xCheck, yCheck);
       if (tile.collisions) {
-        var level = levelManager.getLevel();
-        this.position[1] = gmath.unitdiv(this.position[1], level.tileHeight) * level.tileHeight;
+        var tileGroundHeight = levelManager.getGroundHeight(xCheck, yCheck, tile);
+        if (tileGroundHeight !== undefined && tileGroundHeight < groundHeight) {
+          highestTile = tile;
+          groundHeight = tileGroundHeight;
+        }
+      }
+    }
+
+    if (highestTile) {
+      if (yCheck >= groundHeight && this.lastPosition[1] < groundHeight) {
+        this.position[1] = groundHeight;
         this.velocity[1] = 0;
         this.services.audioManager.playSound('land');
+        this.stopFriction = tile.stopFriction || globals.stopFriction;
         this.setState('move');
         return true;
       }
@@ -437,7 +527,7 @@ define([
     }
 
     var globals = this.services.globals;
-    this.acceleration[0] = this.lastDirection * globals.moveAcceleration;
+    this.acceleration[0] = this.lastDirection * this.walkAcceleration;
     this.animTimer += globals.moveAnimSpeed * Math.abs(this.velocity[0]) * globals.elapsedTime;
     this.updatePhysics(1);
 
@@ -468,7 +558,7 @@ define([
     }
 
     var globals = this.services.globals;
-    this.velocity[0] *= globals.stopFriction;
+    this.velocity[0] *= this.stopFriction;
     if (Math.abs(this.velocity[0]) < globals.minStopVelocity) {
       this.setState('idle');
       return;
@@ -480,7 +570,7 @@ define([
     this.checkFall();
   };
 
-  Player.prototype.init_jump = function(elaspedTime) {
+  Player.prototype.init_jump = function() {
     var globals = this.services.globals;
     this.jumpTimer = 0;
     this.animTimer = 0;
@@ -489,7 +579,7 @@ define([
     this.services.audioManager.playSound('jump');
   };
 
-  Player.prototype.state_jump = function(elaspedTime) {
+  Player.prototype.state_jump = function() {
     var globals = this.services.globals;
     this.acceleration[0] = this.direction * globals.moveAcceleration;
     this.velocity[1] = globals.jumpVelocity;

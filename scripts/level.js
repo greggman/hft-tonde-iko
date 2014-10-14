@@ -108,6 +108,7 @@ define([
     this.levelHeight = this.height * this.tileHeight;
     this.dests = {};
     this.localDests = {};
+    this.things = {};
     this.isSetup = false;
   };
 
@@ -121,6 +122,14 @@ define([
       for (var xx = 0; xx < this.width; ++xx) {
         var tileId = this.getTile(xx, yy);
         var info = levelManager.getTileInfo(tileId);
+        if (info.thing) {
+          var things = this.things[info.thing];
+          if (!things) {
+            things = {};
+            this.things[info.thing] = things;
+          };
+          things[info.id] = { tx: xx, ty: yy };
+        }
         var teleportDest = info.teleportDest;
         if (teleportDest !== undefined) {
           var destMap = info.local ? this.localDests : this.dests;
@@ -141,6 +150,10 @@ define([
     }
   };
 
+  Level.prototype.getThings = function(thing) {
+    return this.things[thing];
+  };
+
   Level.prototype.getDest = function(destId, subDestId) {
     var dests = this.dests[destId];
     if (dests) {
@@ -155,7 +168,6 @@ define([
       return dests[subDestId];
     }
   };
-
 
   Level.prototype.getTile = function(tileX, tileY) {
     if (tileX >= 0 && tileX < this.width &&

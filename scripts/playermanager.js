@@ -46,7 +46,7 @@ define([
     var level = levelManager.getLevel();
     var direction = misc.randInt(2) ? -1 : 1;
     var startPosition;
-    var destId = 0;
+    var destId = 1;
     var subDestId = 0;
     if (data) {
       name = data.name;
@@ -58,7 +58,7 @@ define([
       dest = dest[misc.randInt(dest.length)];
       startPosition = { x: dest.tx, y: dest.ty };
     } else {
-      if (destId == 0) {
+      if (destId == 1) {
         startPosition = { x: level.width - 3, y: 2};
       } else {
         startPosition = { x: 2, y: 2};
@@ -67,6 +67,7 @@ define([
     if (startPosition) {
       startPosition.x = (startPosition.x + 0.5) * level.tileWidth;
       startPosition.y = (startPosition.y +   1) * level.tileHeight - 1;
+      direction = startPosition.x < level.levelWidth / 2 ? 1 : -1;
     }
     var player = new Player(this.services, level.tileWidth, level.tileHeight, direction, name, netPlayer, startPosition, data);
     this.players.push(player);

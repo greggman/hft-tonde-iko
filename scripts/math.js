@@ -41,9 +41,42 @@ define([
     return x >= 0 ? (x / n | 0) : ((x / n | 0) - 1) ;
   }
 
+  var lineIntersection = function(p0X, p0Y, p1X, p1Y, p2X, p2Y, p3X, p3Y, intersection) {
+    var s1X = p1X - p0X;
+    var s1Y = p1Y - p0Y;
+    var s2X = p3X - p2X;
+    var s2Y = p3Y - p2Y;
+
+    var s = (-s1Y * (p0X - p2X) + s1X * (p0Y - p2Y)) / (-s2X * s1Y + s1X * s2Y);
+    var t = ( s2X * (p0Y - p2Y) - s2Y * (p0X - p2X)) / (-s2X * s1Y + s1X * s2Y);
+
+    if (s >= 0 && s <= 1 && t >= 0 && t <= 1) {
+      // Collision detected
+      intersection = intersection || {};
+      intersection.x = p0X + (t * s1X);
+      intersection.y = p0Y + (t * s1Y);
+      return true;
+    }
+  };
+
+  var normalize = function(x, y, dest) {
+    dest = dest || {};
+    var len = Math.sqrt(x * x + y * y);
+    dest.x = x / len;
+    dest.y = y / len;
+    return dest;
+  };
+
+  var dot = function(v0X, v0Y, v1x, v1y) {
+    return v0X * v1x + v0Y * v1y;
+  };
+
   return {
     emod: emod,
     unitdiv: unitdiv,
+    lineIntersection: lineIntersection,
+    normalize: normalize,
+    dot: dot,
   };
 
 });

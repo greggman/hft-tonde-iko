@@ -171,11 +171,16 @@ define([
     var levelManager = this.services.levelManager;
     var tile = levelManager.getTileInfoByPixel(this.position[0], this.position[1]);
     if (tile.collisions) {
-      var level = levelManager.getLevel();
-      this.position[1] = Math.floor(this.position[1] / level.tileHeight) * level.tileHeight;
-      this.velocity[1] = 0;
-      this.services.audioManager.playSound('coinland');
-      this.setState('idle');
+      var groundHeight = levelManager.getGroundHeight(this.position[0], this.position[1], tile);
+      if (groundHeight !== undefined && this.position[1] >= groundHeight) {
+        if (groundHeight > levelManager.getLevel().levelHeight) {
+          debugger;
+        }
+        this.position[1] = groundHeight;
+        this.velocity[1] = 0;
+        this.services.audioManager.playSound('coinland');
+        this.setState('idle');
+      }
     } else if (!tile.open) {
       this.services.audioManager.playSound('coinland');
       this.chooseNewPosition();

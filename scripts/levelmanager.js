@@ -33,10 +33,12 @@
 define([
     'hft/misc/misc',
     './level',
+    './math',
     './tiles',
   ], function(
     Misc,
     Level,
+    gmath,
     Tiles) {
 
   var levels = [];
@@ -208,6 +210,55 @@ define([
   LevelManager.prototype.getLevel = function() {
     return this.level;
   };
+
+  LevelManager.prototype.getGroundHeight = function(x, y, tile) {
+    if (!tile) {
+      tile = this.getTileInfoByPixel(x, y);
+    }
+    if (!tile || !tile.collisions || !tile.udCollision) {
+      return;
+    }
+    var level = this.level;
+    var xPixel = Math.floor(gmath.emod(x, level.tileWidth));
+    var tileY = gmath.unitdiv(y, level.tileHeight) * level.tileHeight;
+    return tileY + tile.udCollision[xPixel];
+  };
+
+  LevelManager.prototype.getCeilingHeight = function(x, y, tile) {
+    if (!tile) {
+      tile = this.getTileInfoByPixel(x, y);
+    }
+    if (!tile || !tile.collisions || !tile.duCollision) {
+      return;
+    }
+    var level = this.level;
+    var xPixel = Math.floor(gmath.emod(x, level.tileWidth));
+    var tileY = gmath.unitdiv(y, level.tileHeight) * level.tileHeight;
+    return tileY + tile.duCollision[xPixel];
+  };
+
+  LevelManager.prototype.getWallPosition = function(x, y, right, tile) {
+    if (!tile) {
+      tile = this.getTileInfoByPixel(x, y);
+    }
+    if (!tile || !tile.collisions) {
+      return;
+    }
+
+    var level = this.level;
+    var yPixel = Math.floor(gmath.emod(y, level.tileHeight));
+    var tileX = gmath.unitdiv(x, level.tileWidth) * level.tileWidth;
+    if (right) {
+      if (tile.rlCollision) {
+        return tileX + tile.rlCollision[yPixel];
+      }
+    } else {
+      if (tile.lrCollision) {
+        return tileX + tile.lrCollision[yPixel];
+      }
+    }
+  };
+
 
   LevelManager.prototype.getDrawOffset = function(obj) {
     this.level.getDrawOffset(obj);

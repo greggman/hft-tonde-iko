@@ -1,12 +1,18 @@
 To Do
 =====
 
-*   setup tilesets
+*   add bonus coin? Put it somewhere hard to reach
+*   need exit graphics (use particle system)
+*   need backgrounds
 *   make levels
 *   make characters
 *   make it start fullscreen
 *   make it handle tile animation
 *   make it load play tilesets vs level building tilesets
+*   remove fixed time in gamesupport
+*   comment out debug
+    *   in launcher
+    *   in player etc..
 
 *   let you enter initials?
 
@@ -44,6 +50,7 @@ To Do
 Done
 ====
 
+*   setup tilesets
 *   add teleport destinations
 *   make controller use canvas
     *   handle rotation

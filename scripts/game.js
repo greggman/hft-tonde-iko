@@ -93,6 +93,9 @@ requirejs([
     settings.id        = "s" + x + "-" + y;
     settings.levelName = opt.levelName;
 
+    settings.numLocalPlayers = 1;
+    settings.debug = true;
+
     var options = {
       width:  width,
       height: height,

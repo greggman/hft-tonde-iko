@@ -46,9 +46,65 @@ define([
     rlCollision: [31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31],
     udCollision: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
     duCollision: [31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31],
+    lines: [
+      [{x:  0, y:  0}, {x: 32, y:  0}],
+      [{x: 32, y:  0}, {x: 32, y: 32}],
+      [{x: 32, y: 32}, {x:  0, y: 32}],
+      [{x:  0, y: 32}, {x:  0, y:  0}],
+    ],
     color: "white",
     imgName: "brick",
   };
+
+  var tileInfoOneWay = {
+    collisions: true,
+    udCollision: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    color: "white",
+    imgName: "brick",
+    lines: [
+      [{x:  0, y:  0}, {x: 32, y:  0}],
+    ],
+  };
+
+  var tileInfoSlippery = {
+    stopFriction: 0.99,
+    walkAcceleration: 200,
+    collisions: true,
+    lrCollision: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    rlCollision: [31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31],
+    udCollision: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    duCollision: [31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31],
+    lines: [
+      [{x:  0, y:  0}, {x: 32, y:  0}],
+      [{x: 32, y:  0}, {x: 32, y: 32}],
+      [{x: 32, y: 32}, {x:  0, y: 32}],
+      [{x:  0, y: 32}, {x:  0, y:  0}],
+    ],
+    color: "white",
+    imgName: "brick",
+  };
+
+  var tileInfoSlipperyOneWay = {
+    stopFriction: 0.99,
+    walkAcceleration: 200,
+    collisions: true,
+    udCollision: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    color: "white",
+    imgName: "brick",
+    lines: [
+      [{x:  0, y:  0}, {x: 32, y:  0}],
+    ],
+  };
+
+  var tileInfoEnd = { thing: "end", id: 0, end: true, };
+
+  var tileInfoDoor1 = { thing: "door", id: 0, };
+  var tileInfoDoor2 = { thing: "door", id: 1, };
+  var tileInfoDoor3 = { thing: "door", id: 2, };
+
+  var tileInfoSwitch1 = { thing: "switch", id: 0, };
+  var tileInfoSwitch2 = { thing: "switch", id: 1, };
+  var tileInfoSwitch3 = { thing: "switch", id: 2, };
 
   var tileInfoTeleport0  = { teleport: true, dest: 0, subDest: 0, };
   var tileInfoTeleport1  = { teleport: true, dest: 1, subDest: 0, };
@@ -101,6 +157,11 @@ define([
     rlCollision: [31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31],
     udCollision: [31,30,29,28,27,26,25,24,23,22,21,20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0],
     duCollision: [31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31],
+    lines: [
+      [{x:  0, y: 32}, {x: 32, y:  0}],
+      [{x: 32, y:  0}, {x: 32, y: 32}],
+      [{x: 32, y: 32}, {x:  0, y: 32}],
+    ],
   };
 
   var tileSlope45R = {
@@ -110,6 +171,11 @@ define([
     rlCollision: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31],
     udCollision: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31],
     duCollision: [31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31],
+    lines: [
+      [{x:  0, y:  0}, {x: 32, y: 32}],
+      [{x: 32, y: 32}, {x:  0, y: 32}],
+      [{x:  0, y: 32}, {x:  0, y:  0}],
+    ],
   };
 
   var nullTile = {
@@ -117,22 +183,22 @@ define([
   };
 
   var tileInfos = [
-    tileInfoSky,        //  0
-    tileInfoWall,       //  1
-    nullTile,  //  2
-    nullTile,  //  3
-    nullTile,  //  4
-    nullTile,  //  5
-    nullTile, //  6 up-through
-    nullTile, //  7 door
-    nullTile, //  8 solid-ice
-    nullTile, //  9 up-through-ice
-    nullTile, // 10
-    nullTile, // 11
-    nullTile, // 12
-    nullTile, // 13
-    nullTile, // 14,
-    nullTile, // 15,
+    tileInfoSky,             //  0
+    tileInfoWall,            //  1 solid
+    tileInfoEnd,             //  2 end
+    nullTile,                //  3
+    nullTile,                //  4
+    nullTile,                //  5
+    tileInfoOneWay,          //  6 up-through
+    tileInfoDoor1,           //  7 door1
+    tileInfoDoor2,           //  8 door2
+    tileInfoDoor3,           //  9 door3
+    tileInfoSwitch1,         // 10 switch1
+    tileInfoSwitch2,         // 11 switch2
+    tileInfoSwitch3,         // 12 switch3
+    nullTile,                // 13
+    tileInfoSlippery,        //  14 solid-ice
+    tileInfoSlipperyOneWay,  //  15 up-through-ice
 
     tileSlope45L, // 16 slope 45 left
     tileSlope45R, // 17 slope 45 right
