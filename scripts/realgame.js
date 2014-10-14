@@ -379,16 +379,21 @@ window.g = globals;
 
       // create portals
       var level = g_levelManager.getLevel();
-      var teleports = level.getThings("teleport");
-      Object.keys(teleports).forEach(function(key) {
-        teleports[key].forEach(function(teleport) {
-          new Portal(
-            g_services,
-            (teleport.tx + 0.5) * level.tileWidth,
-            (teleport.ty + 0.5) * level.tileHeight);
+      [
+        {type: "teleport", portalType: 0},
+        {type: "end",      portalType: 1},
+      ].forEach(function(type) {
+        var teleports = level.getThings(type.type);
+        Object.keys(teleports).forEach(function(key) {
+          teleports[key].forEach(function(teleport) {
+            new Portal(
+              g_services,
+              (teleport.tx + 0.5) * level.tileWidth,
+              (teleport.ty + 0.5) * level.tileHeight,
+              type.portalType);
+          });
         });
       });
-
 
       GameSupport.run(globals, mainloop);
     };

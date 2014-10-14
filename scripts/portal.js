@@ -49,6 +49,36 @@ define(
     }
   };
 
+  var createExit = function(particleSystemManager) {
+    var emitter = particleSystemManager.createParticleEmitter(onePixelTexture.texture);
+    emitter.setState(tdl.particles.ParticleStateIds.BLEND);
+    emitter.setColorRamp(
+        [1, 1, 1, 0,
+         1, 1, 1, 1,
+         1, 0, 1, 1,
+         1, 0, 1, 1,
+         1, 0, 1, 0.5,
+         1, 1, 1, 0]);
+    emitter.setParameters({
+        numParticles: 200,
+        lifeTime: 0.8,
+        timeRange: 0.7,
+        startSize: 7.0,
+        endSize: 2.0,
+        spinSpeedRange: 0},
+        function(index, parameters) {
+            var speed = Math.random() * 10 + 20;
+            var angle = Math.random() * 2 * Math.PI;
+            parameters.position = Maths.matrix4.transformPoint(
+                Maths.matrix4.rotationZ(angle), [-speed, 0, 0])
+            parameters.velocity = Maths.matrix4.transformPoint(
+                Maths.matrix4.rotationZ(angle), [speed * 0, 0, 0]);
+            parameters.acceleration = Maths.matrix4.transformPoint(
+                Maths.matrix4.rotationZ(angle), [speed * 2, 0, 0]);
+        });
+    return emitter;
+  };
+
   var createPortal = function(particleSystemManager) {
     var emitter = particleSystemManager.createParticleEmitter(onePixelTexture.texture);
     emitter.setState(tdl.particles.ParticleStateIds.BLEND);
@@ -61,28 +91,35 @@ define(
          1, 1, 1, 0]);
     emitter.setParameters({
         numParticles: 200,
-        lifeTime: 0.7,
+        lifeTime: 0.8,
         timeRange: 0.7,
         startSize: 7.0,
-        endSize: 1.0,
-        spinSpeedRange: 5},
+        endSize: 2.0,
+        spinSpeedRange: 0},
         function(index, parameters) {
-            var speed = Math.random() * 20 + 20;
+            var speed = Math.random() * 10 + 20;
             var angle = Math.random() * 2 * Math.PI;
             parameters.position = Maths.matrix4.transformPoint(
                 Maths.matrix4.rotationZ(angle), [-speed, 0, 0])
             parameters.velocity = Maths.matrix4.transformPoint(
-                Maths.matrix4.rotationZ(angle), [speed, 0, 0]);
+                Maths.matrix4.rotationZ(angle), [speed * 0, 0, 0]);
             parameters.acceleration = Maths.matrix4.transformPoint(
-                Maths.matrix4.rotationZ(angle), [speed, 0, 0]);
+                Maths.matrix4.rotationZ(angle), [speed * 2, 0, 0]);
         });
     return emitter;
   };
 
-  var Portal = function(services, x, y) {
+  var Portal = function(services, x, y, type) {
     setup();
     this.services = services;
-    this.emitter = createPortal(services.particleSystemManager);
+    switch (type) {
+      case 1:
+        this.emitter = createExit(services.particleSystemManager);
+        break;
+      default:
+        this.emitter = createPortal(services.particleSystemManager);
+        break;
+    };
     this.emitter.setTranslation(x, y, 0);
   };
 
