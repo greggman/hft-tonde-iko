@@ -44,6 +44,19 @@ define([
     [{x:  0, y: 32}, {x:  0, y:  0}],
   ];
 
+  var lrLowerHalfSolidCollision = [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+  var rlLowerHalfSolidCollision = [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31];
+  var lrLowerHalfSolidCollision = [-1,-1,-1,-1,-1,-1,-1,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+  var rlLowerHalfSolidCollision = [-1,-1,-1,-1,-1,-1,-1,-1,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31];
+  var udLowerHalfSolidCollision = [16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16];
+  var duLowerHalfSolidCollision = [31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31];
+  var lowerHalfSolidLines = [
+    [{x:  0, y: 15}, {x: 32, y: 15}],
+    [{x: 32, y: 15}, {x: 32, y: 32}],
+    [{x: 32, y: 32}, {x:  0, y: 32}],
+    [{x:  0, y: 32}, {x:  0, y: 15}],
+  ];
+
 
   var tileInfoSky = {
     collisions: false,
@@ -128,9 +141,30 @@ define([
     lines: solidLines,
   };
 
-  var tileInfoSwitch1 = { thing: "switch", id: 0, };
-  var tileInfoSwitch2 = { thing: "switch", id: 1, };
-  var tileInfoSwitch3 = { thing: "switch", id: 2, };
+  var tileInfoSwitch1 = {
+    thing: "switch", id: 0, collisions: true,
+    lrCollision: lrLowerHalfSolidCollision,
+    rlCollision: rlLowerHalfSolidCollision,
+    udCollision: udLowerHalfSolidCollision,
+    duCollision: duLowerHalfSolidCollision,
+    lines: lowerHalfSolidLines,
+  };
+  var tileInfoSwitch2 = {
+    thing: "switch", id: 1, collisions: true,
+    lrCollision: lrLowerHalfSolidCollision,
+    rlCollision: rlLowerHalfSolidCollision,
+    udCollision: udLowerHalfSolidCollision,
+    duCollision: duLowerHalfSolidCollision,
+    lines: lowerHalfSolidLines,
+  };
+  var tileInfoSwitch3 = {
+    thing: "switch", id: 2, collisions: true,
+    lrCollision: lrLowerHalfSolidCollision,
+    rlCollision: rlLowerHalfSolidCollision,
+    udCollision: udLowerHalfSolidCollision,
+    duCollision: duLowerHalfSolidCollision,
+    lines: lowerHalfSolidLines,
+  };
 
   var tileInfoArea1 = { thing: "area", id: 0, };
   var tileInfoArea2 = { thing: "area", id: 1, };

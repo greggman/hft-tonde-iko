@@ -221,7 +221,8 @@ define([
     var level = this.level;
     var xPixel = Math.floor(gmath.emod(x, level.tileWidth));
     var tileY = gmath.unitdiv(y, level.tileHeight) * level.tileHeight;
-    return tileY + tile.udCollision[xPixel];
+    var off = tile.udCollision[xPixel];
+    return off >= 0 ? tileY + off : undefined;
   };
 
   LevelManager.prototype.getCeilingHeight = function(x, y, tile) {
@@ -234,7 +235,8 @@ define([
     var level = this.level;
     var xPixel = Math.floor(gmath.emod(x, level.tileWidth));
     var tileY = gmath.unitdiv(y, level.tileHeight) * level.tileHeight;
-    return tileY + tile.duCollision[xPixel];
+    var off = tile.duCollision[xPixel];
+    return off >= 0 ? tileY + off : undefined;
   };
 
   LevelManager.prototype.getWallPosition = function(x, y, right, tile) {
@@ -250,11 +252,17 @@ define([
     var tileX = gmath.unitdiv(x, level.tileWidth) * level.tileWidth;
     if (right) {
       if (tile.rlCollision) {
-        return tileX + tile.rlCollision[yPixel];
+        var off = tile.rlCollision[yPixel];
+        if (off >= 0) {
+          return tileX + off ;
+        }
       }
     } else {
       if (tile.lrCollision) {
-        return tileX + tile.lrCollision[yPixel];
+        var off = tile.lrCollision[yPixel];
+        if (off >= 0) {
+          return tileX + off;
+        }
       }
     }
   };

@@ -439,9 +439,6 @@ this.services.status.addMsg("p: " + this.position[0].toFixed(3) + ", " + this.po
         groundHeight = Math.min(groundHeight, levelManager.getGroundHeight(xCheck, yCheck, tile));
       }
       yCheck += nextYOff;
-      if (tile.thing == "switch") {
-        level.getThings("switch")[tile.id][0].doorSwitch.switchOn();
-      }
     }
 
     this.services.status.addMsg("gh: " + groundHeight);
@@ -455,6 +452,9 @@ this.services.status.addMsg("p: " + this.position[0].toFixed(3) + ", " + this.po
       var xCheck = this.position[0] - this.width / 4 + this.width / 2 * ii;
       var yCheck = this.position[1] + 1;
       var tile = levelManager.getTileInfoByPixel(xCheck, yCheck);
+      if (tile.thing == "switch") {
+        level.getThings("switch")[tile.id][0].doorSwitch.switchOn();
+      }
       if (tile.collisions) {
         groundHeight = levelManager.getGroundHeight(xCheck, yCheck)
         if (groundHeight - yCheck < 3) {
