@@ -10,12 +10,6 @@ To Do
 *   make characters
 *   make it start fullscreen
 *   make it handle tile animation
-*   make it load play tilesets vs level building tilesets
-*   remove fixed time in gamesupport
-*   turn off debug settings in game.js?
-*   comment out debug
-    *   in launcher
-    *   in player etc..
 
 *   let you enter initials?
 
@@ -28,14 +22,20 @@ To Do
     Maybe have a countdown on the phone when you'll get
     inserted
 
-*   Make launcher
+*   Make ssh launcher for show
 
     Figure out how to start multiple machines? ssh? cygwin?
 
+*   turn off debug settings in game.js?
+*   comment out debug
+    *   in launcher
+    *   in player etc..
 
 Done
 ====
 
+*   remove fixed time in gamesupport
+*   make it load play tilesets vs level building tilesets
 *   Make version that plays locally. Use < 1.0 scale to fit on screen
 *   Make debug launch
 
