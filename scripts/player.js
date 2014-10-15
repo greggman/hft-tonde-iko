@@ -346,39 +346,14 @@ define([
     var levelManager = this.services.levelManager;
     var level = levelManager.getLevel();
     var off = this.velocity[0] < 0 ? 0 : 1;
-
     for (var ii = 0; ii < 2; ++ii) {
-      if (ii == 0) {
-        continue;
-      }
       var xCheck = this.position[0] + this.checkWallOffset[off];
-      var yCheck = this.position[1] - this.height / 4 - this.height / 2 * ii;
-
-this.services.debugRenderer.addLine(
-  this.position[0], this.position[1], xCheck, yCheck, (globals.frameCount & 2) ? 0xFF0000FF : 0x00FF00FF);
-
-      var tile = levelManager.getTileInfoByPixel(xCheck, yCheck);
+      var tile = levelManager.getTileInfoByPixel(xCheck, this.position[1] - this.height / 4 - this.height / 2 * ii);
       if (tile.collisions) {
-        var wallPosition = levelManager.getWallPosition(xCheck, yCheck, this.velocity[0] < 0, tile);
-        if (wallPosition !== undefined) {
-          var xoff;
-          if (this.velocity[0] < 0) {
-            xoff = Math.max(0, wallPosition - xCheck);
-          } else {
-            xoff = Math.min(0, wallPosition - xCheck);
-          }
-          if (xoff != 0) {
-            if ((this.velocity[0] <= 0 && tile.slopeRight) ||
-                (this.velocity[0] >= 0 && tile.slopeLeft)) {
-              //
-            } else {
-              var oldP = this.position[0];
-              this.position[0] += xoff * 1.001;
-              this.velocity[0] = 0;
-            }
-          }
-        }
-//console.log("" + ii + " xChk: " + xCheck.toFixed(3) + " yChk: " + yCheck.toFixed(3) + " distIn: " + distInTile.toFixed(3) + " xoff: " + xoff.toFixed(3) + " oldP: " + oldP.toFixed(3) + " newP: " + this.position[0].toFixed(3))
+        this.velocity[0] = 0;
+        var distInTile = xCheck % level.tileWidth;
+        var xoff = off ? -distInTile : level.tileWidth - distInTile;
+        this.position[0] += xoff;
       }
       if (tile.teleport) {
         if (tile.local) {
@@ -422,45 +397,16 @@ this.services.debugRenderer.addLine(
     var levelManager = this.services.levelManager;
     var level = levelManager.getLevel();
 
-this.services.status.addMsg("p: " + this.position[0].toFixed(3) + ", " + this.position[1].toFixed(3));
-
-    // First glue him to ground
-    // Find the highest ground
-    var xCheck  = this.position[0];
-    var yCheck  = this.position[1];
-    var yInTile = gmath.emod(yCheck, level.tileHeight);
-    var nextYOff = (yInTile >= level.tileHeight / 2) ? 8 : (yInTile < level.tileHeight / 2 ? -8 : 0);
-
-    var groundHeight = level.levelHeight + 1;
+    var levelManager = this.services.levelManager;
     for (var ii = 0; ii < 2; ++ii) {
-      var tile = levelManager.getTileInfoByPixel(xCheck, yCheck);
+      var tile = levelManager.getTileInfoByPixel(this.position[0] - this.width / 4 + this.width / 2 * ii, this.position[1]);
       if (tile.collisions) {
         this.stopFriction = tile.stopFriction || globals.stopFriction;
         this.walkAcceleration = tile.walkAcceleration || globals.moveAcceleration;
-        groundHeight = Math.min(groundHeight, levelManager.getGroundHeight(xCheck, yCheck, tile));
-      }
-      yCheck += nextYOff;
-    }
-
-    this.services.status.addMsg("gh: " + groundHeight);
-
-    if (groundHeight < level.levelHeight) {
-      this.position[1] = groundHeight;
-    }
-
-    // Now check if we should fall
-    for (var ii = 0; ii < 2; ++ii) {
-      var xCheck = this.position[0] - this.width / 4 + this.width / 2 * ii;
-      var yCheck = this.position[1] + 1;
-      var tile = levelManager.getTileInfoByPixel(xCheck, yCheck);
-      if (tile.thing == "switch") {
-        level.getThings("switch")[tile.id][0].doorSwitch.switchOn();
-      }
-      if (tile.collisions) {
-        groundHeight = levelManager.getGroundHeight(xCheck, yCheck)
-        if (groundHeight - yCheck < 3) {
-          return false;
+        if (tile.thing == "switch") {
+          level.getThings("switch")[tile.id][0].doorSwitch.switchOn();
         }
+        return false;
       }
     }
     this.setState('fall');
@@ -470,23 +416,16 @@ this.services.status.addMsg("p: " + this.position[0].toFixed(3) + ", " + this.po
   Player.prototype.checkUp = function() {
     var levelManager = this.services.levelManager;
     for (var ii = 0; ii < 2; ++ii) {
-      var yOff   = -this.height;
-      var xCheck = this.position[0] - this.width / 4 + this.width / 2 * ii;
-      var yCheck = this.position[1] + yOff;
-      var tile = levelManager.getTileInfoByPixel(xCheck, yCheck);
+      var tile = levelManager.getTileInfoByPixel(this.position[0] - this.width / 4 + this.width / 2 * ii, this.position[1] - this.height);
       if (tile.collisions) {
-        var ceilingHeight = levelManager.getCeilingHeight(xCheck, yCheck, tile);
-        if (ceilingHeight !== undefined) {
-          if (yCheck <= ceilingHeight && this.lastPosition[1] + yOff > ceilingHeight) {
-            this.velocity[1] = 0;
-            this.position[1] = ceilingHeight + this.height + 1;
-            if (!this.bonked) {
-              this.bonked = true;
-              this.services.audioManager.playSound('bonkhead');
-            }
-            return true;
-          }
+        var level = levelManager.getLevel();
+        this.velocity[1] = 0;
+        this.position[1] = (Math.floor(this.position[1] / level.tileHeight) + 1) * level.tileHeight;
+        if (!this.bonked) {
+          this.bonked = true;
+          this.services.audioManager.playSound('bonkhead');
         }
+        return true;
       }
     }
     return false;
@@ -495,27 +434,14 @@ this.services.status.addMsg("p: " + this.position[0].toFixed(3) + ", " + this.po
   Player.prototype.checkDown = function() {
     var globals = this.services.globals;
     var levelManager = this.services.levelManager;
-    var groundHeight = 1000000000;
-    var highestTile;
     for (var ii = 0; ii < 2; ++ii) {
-      var xCheck = this.position[0] - this.width / 4 + this.width / 2 * ii;
-      var yCheck = this.position[1];
-      var tile = levelManager.getTileInfoByPixel(xCheck, yCheck);
+      var tile = levelManager.getTileInfoByPixel(this.position[0] - this.width / 4 + this.width / 2 * ii, this.position[1]);
       if (tile.collisions) {
-        var tileGroundHeight = levelManager.getGroundHeight(xCheck, yCheck, tile);
-        if (tileGroundHeight !== undefined && tileGroundHeight < groundHeight) {
-          highestTile = tile;
-          groundHeight = tileGroundHeight;
-        }
-      }
-    }
-
-    if (highestTile) {
-      if (yCheck >= groundHeight && this.lastPosition[1] < groundHeight) {
-        this.position[1] = groundHeight;
+        var level = levelManager.getLevel();
+        this.position[1] = Math.floor(this.position[1] / level.tileHeight) * level.tileHeight;
         this.velocity[1] = 0;
-        this.services.audioManager.playSound('land');
         this.stopFriction = tile.stopFriction || globals.stopFriction;
+        this.services.audioManager.playSound('land');
         this.setState('move');
         return true;
       }
