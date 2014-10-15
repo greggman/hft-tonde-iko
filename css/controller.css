@@ -70,6 +70,14 @@ html, body {
   height: 128px;
 }
 
+#android {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  font-size: xx-large;
+  color: white;
+  text-align: center;
+}
 
 @media only screen and (max-height : 208px) {
     .button {

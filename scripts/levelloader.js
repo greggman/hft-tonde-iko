@@ -46,6 +46,7 @@ define([
     TiledLoader) {
 
   // note sure where to put these.
+  // They must end in "-real.png" for now.
   var realImageMappings = {
     "assets/bricks.png": "assets/bricks-real.png",
   };

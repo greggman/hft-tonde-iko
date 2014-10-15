@@ -93,6 +93,10 @@ define([
     }
   };
 
+  PlayerManager.prototype.getNumPlayers = function() {
+    return this.players.length;
+  };
+
   return PlayerManager;
 });
 

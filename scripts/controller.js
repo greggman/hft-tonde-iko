@@ -67,15 +67,24 @@ requirejs(
   var g_update;
   var g_oldOrientation;
 
+  function $(id) {
+    return document.getElementById(id);
+  }
+
+  // check for old android
+  var rxaosp = window.navigator.userAgent.match(/Android.*AppleWebKit\/([\d.]+)/);
+  var isaosp = (rxaosp && rxaosp[1]<537);
+
+  if (isaosp) {
+    $("android").style.display = "block";
+    return;
+  }
+
   var globals = {
     debug: false,
   };
   Misc.applyUrlSettings(globals);
   MobileHacks.fixHeightHack();
-
-  function $(id) {
-    return document.getElementById(id);
-  }
 
   var startClient = function() {
 
@@ -346,12 +355,13 @@ window.p = pointers;
         ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
         ctx.fillStyle = "blue";
         ctx.fillRect(5, 5, ctx.canvas.width - 10, ctx.canvas.height - 10);
-        ctx.fillStyle = "white";
-        var s = "w:" + window.innerWidth + "," + window.innerHeight + " s:" + window.screenX + "," + window.screenY +
-          " atl: " +   window.screen.availLeft + "," + window.screen.availTop + " awh: " + window.screen.availWidth + "," + window.screen.availHeight +
-          " or: " + window.orientation;
-        ctx.fillText(s, 10, 20);
-        ctx.fillText(JSON.stringify(pointers), 10, 40);
+
+//        ctx.fillStyle = "white";
+//        var s = "w:" + window.innerWidth + "," + window.innerHeight + " s:" + window.screenX + "," + window.screenY +
+//          " atl: " +   window.screen.availLeft + "," + window.screen.availTop + " awh: " + window.screen.availWidth + "," + window.screen.availHeight +
+//          " or: " + window.orientation;
+//        ctx.fillText(s, 10, 20);
+//        ctx.fillText(JSON.stringify(pointers), 10, 40);
 
         // orientation:   0 = portrait
         //              -90 = rotate left

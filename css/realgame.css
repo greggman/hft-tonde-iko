@@ -56,4 +56,71 @@ html, body {
   font-weight: bolder;
   text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
 }
+#score {
+  z-index: 10;
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  width: 220px;
+  height: 100%;
+  background-color: #248;
+  border-left: 10px solid black;
+}
+#score h1 {
+  padding: 10px;
+  margin: 0px;
+  background-color: #00A;
+  color: white;
+}
+#score h2 {
+  padding: 10px;
+  margin: 0px;
+  background-color: #68A;
+  font-size: x-large;
+}
+#score canvas {
+  position: absolute;
+  top: 4px;
+  left: 10px;
+  width: 32px;
+  height: 32px;
+  gborder: 3px solid purple;
+}
 
+#score .name {
+  width: 3em;
+  display: inline-block;
+}
+/* the entire line */
+#score .scoreline {
+  position: relative;
+  padding: 10px;
+  width: 220px;
+  height: 40px;
+  display: block;
+  gborder: 1px solid yellow;
+}
+
+#score .scoreline:nth-child(2n) {
+  background-color: #24A;
+}
+
+/* holds the image */
+#score .scorespan {
+  width: 32px;
+  height: 32px;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  gborder: 1px solid red;
+}
+
+/* holds the msg and name */
+#score .info {
+  font-weight: bold;
+  color: white;
+  position: absolute:
+  display: block;
+  padding-left: 40px;
+  gborder: 5px solid green;
+}

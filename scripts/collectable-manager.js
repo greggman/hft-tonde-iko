@@ -69,11 +69,15 @@ define([
     var globals = this.services.globals;
     this.bonusTime -= globals.elapsedTime;
     if (this.bonusTime <= 0) {
-      this.targetCount = maxCollectables;
-      var endTime = this.targetCount * globals.bonusSpeed * 1/60;
-      if (this.collectables.length == 0 || -this.bonusTime > endTime) {
-        this.targetCount = 1;
-        this.resetBonusTime();
+      if (this.services.playerManager.getNumPlayers() == 0) {
+        this.bonusTime = 30 + Math.random() * 15;
+      } else {
+        this.targetCount = maxCollectables;
+        var endTime = this.targetCount * globals.bonusSpeed * 1/60;
+        if (this.collectables.length == 0 || -this.bonusTime > endTime) {
+          this.targetCount = 1;
+          this.resetBonusTime();
+        }
       }
     }
 

@@ -58,6 +58,7 @@ requirejs(
     './particlesystemmanager',
     './playermanager',
     './portal',
+    './scoremanager',
   ], function(
     GameServer,
     GameSupport,
@@ -80,7 +81,8 @@ requirejs(
     LevelManager,
     ParticleSystemManager,
     PlayerManager,
-    Portal) {
+    Portal,
+    ScoreManager) {
 
   var g_debug = false;
   var g_services = {};
@@ -363,8 +365,6 @@ window.g = globals;
       }
       GameSupport.init(server, globals);
 
-      startLocalPlayers();
-
       new CollectableManager(g_services);
 
       // create portals
@@ -386,6 +386,14 @@ window.g = globals;
           });
         }
       });
+
+      if (globals.levelName == "level5-0") {
+        $("score").style.display = "block";
+        g_services.scoreManager = new ScoreManager(
+          g_services, $("top-today"), $("top-hour"), $("top-10mins"));
+      }
+
+      startLocalPlayers();
 
       GameSupport.run(globals, mainloop);
     };
