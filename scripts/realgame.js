@@ -120,7 +120,12 @@ window.s = g_services;
     scale: 1,
     minBonusTime: 60,
     maxBonusTime: 180,
-    bonusSpeed: 4,  // every 4 frames
+    bonusSpeed: 4,  // every 4 frames (add a coin every N frames)
+
+    doorOpenDuration: 0.1,
+    doorWaitTime: 5,    // time 1 player has to wait for door.
+    doorOpenTime: 0.25, // time door stays open
+
     drawOffset: {},
     duckBlueRange: [180 / 360, 275 / 360],  // color range for colorizing duck but not beak
   };
@@ -385,6 +390,7 @@ window.g = globals;
       GameSupport.run(globals, mainloop);
     };
 
+    document.title = "Tonde-Iko: " + (globals.levelName ? globals.levelName : "*level*");
     if (globals.levelName) {
       LevelLoader.load(gl, "assets/" + globals.levelName + ".json", function(err, level) {
         if (err) {

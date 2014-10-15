@@ -71,12 +71,62 @@ define([
     return v0X * v1x + v0Y * v1y;
   };
 
+  var clamp = function(value, min, max) {
+    return Math.min(max, Math.max(min, value));
+  };
+
+  var clampedLerp = function(min, max, lerp0to1) {
+    return min + (max - min) * clamp(lerp0to1, 0, 1);
+  };
+
+  var clampedLerpRange = function(min, max, range, value) {
+    return clampedLerp(min, max, value / range);
+  };
+
+
+  var Rect = function(x, y, w, h) {
+    if (w < 0) {
+      x = x + w;
+      w = -w;
+    }
+    if (h < 0) {
+      y = y + h;
+      h = -h;
+    }
+    this.x = x;
+    this.y = y;
+    this.w = w;
+    this.h = h;
+  };
+
+  Rect.prototype.union = function(other) {
+    var xMax = Math.max(this.x + this.w, other.x + other.w);
+    var yMax = Math.max(this.y + this.h, other.y + other.h);
+    this.x = Math.min(this.x, other.x);
+    this.y = Math.min(this.y, other.y);
+    this.w = xMax - this.x;
+    this.h = yMax - this.y;
+  };
+
+  Rect.prototype.clone = function() {
+    return new Rect(this.x, this.y, this.w, this.h);
+  };
+
+  Rect.prototype.isPointIn = function(x, y) {
+    return x >= this.x && x < this.x + this.w &&
+           y >= this.y && y < this.y + this.h;
+  };
+
   return {
+    clamp: clamp,
+    clampedLerp: clampedLerp,
+    clampedLerpRange: clampedLerpRange,
     emod: emod,
     unitdiv: unitdiv,
     lineIntersection: lineIntersection,
     normalize: normalize,
     dot: dot,
+    Rect: Rect,
   };
 
 });

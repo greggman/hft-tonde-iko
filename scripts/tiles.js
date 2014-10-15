@@ -33,6 +33,16 @@
 define([
   ], function() {
 
+  var lrSolidCollision = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+  var rlSolidCollision = [31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31];
+  var udSolidCollision = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+  var duSolidCollision = [31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31];
+  var solidLines = [
+    [{x:  0, y:  0}, {x: 32, y:  0}],
+    [{x: 32, y:  0}, {x: 32, y: 32}],
+    [{x: 32, y: 32}, {x:  0, y: 32}],
+    [{x:  0, y: 32}, {x:  0, y:  0}],
+  ];
 
 
   var tileInfoSky = {
@@ -42,16 +52,11 @@ define([
 
   var tileInfoWall = {
     collisions: true,
-    lrCollision: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-    rlCollision: [31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31],
-    udCollision: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-    duCollision: [31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31],
-    lines: [
-      [{x:  0, y:  0}, {x: 32, y:  0}],
-      [{x: 32, y:  0}, {x: 32, y: 32}],
-      [{x: 32, y: 32}, {x:  0, y: 32}],
-      [{x:  0, y: 32}, {x:  0, y:  0}],
-    ],
+    lrCollision: lrSolidCollision,
+    rlCollision: rlSolidCollision,
+    udCollision: udSolidCollision,
+    duCollision: duSolidCollision,
+    lines: solidLines,
     color: "white",
     imgName: "brick",
   };
@@ -98,13 +103,38 @@ define([
 
   var tileInfoEnd = { thing: "end", id: 0, end: true, };
 
-  var tileInfoDoor1 = { thing: "door", id: 0, };
-  var tileInfoDoor2 = { thing: "door", id: 1, };
-  var tileInfoDoor3 = { thing: "door", id: 2, };
+  var tileInfoDoor1 = {
+    thing: "door", id: 0, collisions: true,
+    lrCollision: lrSolidCollision,
+    rlCollision: rlSolidCollision,
+    udCollision: udSolidCollision,
+    duCollision: duSolidCollision,
+    lines: solidLines,
+  };
+  var tileInfoDoor2 = {
+    thing: "door", id: 1, collisions: true,
+    lrCollision: lrSolidCollision,
+    rlCollision: rlSolidCollision,
+    udCollision: udSolidCollision,
+    duCollision: duSolidCollision,
+    lines: solidLines,
+  };
+  var tileInfoDoor3 = {
+    thing: "door", id: 2, collisions: true,
+    lrCollision: lrSolidCollision,
+    rlCollision: rlSolidCollision,
+    udCollision: udSolidCollision,
+    duCollision: duSolidCollision,
+    lines: solidLines,
+  };
 
   var tileInfoSwitch1 = { thing: "switch", id: 0, };
   var tileInfoSwitch2 = { thing: "switch", id: 1, };
   var tileInfoSwitch3 = { thing: "switch", id: 2, };
+
+  var tileInfoArea1 = { thing: "area", id: 0, };
+  var tileInfoArea2 = { thing: "area", id: 1, };
+  var tileInfoArea3 = { thing: "area", id: 2, };
 
   var tileInfoTeleport0  = { thing: "teleport", teleport: true, dest: 0, subDest: 0, };
   var tileInfoTeleport1  = { thing: "teleport", teleport: true, dest: 1, subDest: 0, };
@@ -255,9 +285,9 @@ define([
     tileInfoLocalTeleport1,   // 0x41
     tileInfoLocalTeleport2,   // 0x42
     tileInfoLocalTeleport3,   // 0x43
-    nullTile,            // 0x44
-    nullTile,            // 0x45
-    nullTile,            // 0x46
+    tileInfoArea1,            // 0x44
+    tileInfoArea2,            // 0x45
+    tileInfoArea3,            // 0x46
     nullTile,            // 0x47
     nullTile,            // 0x48
     nullTile,            // 0x49

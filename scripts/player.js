@@ -421,7 +421,7 @@ this.services.debugRenderer.addLine(
     var levelManager = this.services.levelManager;
     var level = levelManager.getLevel();
 
-    this.services.status.addMsg("p: " + this.position[0].toFixed(3) + ", " + this.position[1].toFixed(3));
+this.services.status.addMsg("p: " + this.position[0].toFixed(3) + ", " + this.position[1].toFixed(3));
 
     // First glue him to ground
     // Find the highest ground
@@ -439,6 +439,9 @@ this.services.debugRenderer.addLine(
         groundHeight = Math.min(groundHeight, levelManager.getGroundHeight(xCheck, yCheck, tile));
       }
       yCheck += nextYOff;
+      if (tile.thing == "switch") {
+        level.getThings("switch")[tile.id][0].doorSwitch.switchOn();
+      }
     }
 
     this.services.status.addMsg("gh: " + groundHeight);

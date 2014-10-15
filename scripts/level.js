@@ -193,6 +193,11 @@ define([
     obj.y = ((gl.canvas.height - this.levelHeight) / 2) | 0;
   };
 
+  Level.prototype.setTile = function(tx, ty, tileId) {
+    this.uint16view[(ty * this.width + tx) * 2] = tileId;
+    this.dirty = true;
+  };
+
   Level.prototype.draw = function(levelManager, options) {
     if (this.dirty) {
       this.tilemap.uploadTilemap();

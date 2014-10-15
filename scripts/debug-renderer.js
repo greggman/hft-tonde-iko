@@ -144,6 +144,44 @@ define([
     this.addLine(x, y, x + 1, y + 1, opt_color);
   };
 
+  DebugRenderer.prototype.addBox = function(x, y, w, h, opt_color) {
+    this.addLine(x    , y    , x + w, y    , opt_color);
+    this.addLine(x + w, y    , x + w, y + h);
+    this.addLine(x + w, y + h, x    , y + h);
+    this.addLine(x    , y + h, x    , y    );
+  };
+
+  DebugRenderer.prototype.addRect = function(r, opt_color) {
+    this.addBox(r.x, r.y, r.w, r.h, opt_color);
+  };
+
+  DebugRenderer.prototype.addPlus = function(x, y, r, opt_color) {
+    this.addLine(x - r, y    , x + r, y    , opt_color);
+    this.addLine(x    , y + r, x    , y + r);
+  };
+
+  DebugRenderer.prototype.addX = function(x, y, r, opt_color) {
+    this.addLine(x - r, y - r, x + r, y + r, opt_color);
+    this.addLine(x - r, y + r, x + r, y - r);
+  };
+
+  DebugRenderer.prototype.addCircle = function(x, y, r, opt_color) {
+    var segments = 16;
+    var oldX = 0;
+    var oldY = r;
+    if (opt_color) {
+      this.setColor(opt_color);
+    }
+    for (var ii = 1; ii <= segments; ++ii) {
+      var angle = Math.PI * 2 * ii / segments;
+      var x = Math.sin(angle) * r;
+      var y = Math.cos(angle) * r;
+      this.addLine(oldX, oldY, x, y);
+      oldX = x;
+      oldY = y;
+    }
+  };
+
   DebugRenderer.prototype.draw = function(offset) {
     if (this.numLines) {
       var newLowestCleared = this.numLines;
