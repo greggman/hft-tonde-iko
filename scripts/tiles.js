@@ -44,6 +44,8 @@ define([
     [{x:  0, y: 32}, {x:  0, y:  0}],
   ];
 
+  // NOTE: These collisions don't match up. The LR collisions go from 8-31
+  // but the UD collisions go from 16-31
   var lrLowerHalfSolidCollision = [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
   var rlLowerHalfSolidCollision = [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31];
   var lrLowerHalfSolidCollision = [-1,-1,-1,-1,-1,-1,-1,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
