@@ -87,7 +87,14 @@ define([
     return new Models.Model(program, arrays, textures, gl.LINES);
   };
 
-  var DebugRenderer = function() {
+  var DebugRenderer = function(debug) {
+    if (!debug) {
+      var noop = function() {};
+      Object.keys(DebugRenderer.prototype).forEach(function(key) {
+        this[key] = noop;
+      }.bind(this));
+      return;
+    }
     this.model = makeLineModel();
     this.maxLines = 1;
     this.numLines = 0;

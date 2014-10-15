@@ -220,7 +220,7 @@ window.g = globals;
   if (globals.shared.canvasHeight) { globals.resize = false; canvas.height = globals.shared.canvasHeight; }
   var gl = WebGL.setupWebGL(canvas, {alpha:false}, function() {});
   g_services.spriteManager = new SpriteManager();
-  g_services.debugRenderer = new DebugRenderer();
+  g_services.debugRenderer = new DebugRenderer(globals.debug);
   g_services.particleSystemManager = new ParticleSystemManager();
 
   var resize = function() {
@@ -392,7 +392,7 @@ window.g = globals;
 
     document.title = "Tonde-Iko: " + (globals.levelName ? globals.levelName : "*level*");
     if (globals.levelName) {
-      LevelLoader.load(gl, "assets/" + globals.levelName + ".json", function(err, level) {
+      LevelLoader.load(globals.debug, gl, "assets/" + globals.levelName + ".json", function(err, level) {
         if (err) {
           throw err;
         }

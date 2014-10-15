@@ -192,6 +192,8 @@ requirejs([
   };
 
   $("button1").addEventListener('click', function() {
+    var oldCanvasWidth  = settings.shared.canvasWidth;
+    var oldCanvasHeight = settings.shared.canvasHeight;
     settings.shared.canvasWidth  = undefined;
     settings.shared.canvasHeight = undefined;
     var oldColumns = gridSize.columns;
@@ -206,6 +208,8 @@ requirejs([
     grid.setDimensions(gridSize.columns, gridSize.rows);
     fillGrid();
     startController();
+    settings.shared.canvasWidth  = oldCanvasWidth;
+    settings.shared.canvasHeight = oldCanvasHeight;
   }, false);
 
   $("button2").addEventListener('click', startController, false);

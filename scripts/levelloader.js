@@ -45,6 +45,11 @@ define([
     Level,
     TiledLoader) {
 
+  // note sure where to put these.
+  var realImageMappings = {
+    "assets/bricks.png": "assets/bricks-real.png",
+  };
+
   var createTexture = function(img) {
     var tex = Textures.loadTexture(img);
     tex.setParameter(gl.TEXTURE_MIN_FILTER, gl.NEAREST);
@@ -130,7 +135,7 @@ define([
       }
 
       ++loadCount;
-      var meaningUrl = ts.image.src.substring(0, ts.image.src.length - 4) + "-meaning.json";
+      var meaningUrl = (ts.image.src.substring(0, ts.image.src.length - 4) + "-meaning.json").replace("-real", "");
       TiledLoader.loadMap(meaningUrl, function(err, meaningMap) {
         --loadCount;
         if (err) {
@@ -228,7 +233,7 @@ define([
   };
 
 
-  var load = function(gl, url, callback) {
+  var load = function(debug, gl, url, callback) {
     TiledLoader.loadMap(url, function(err, map) {
       if (err) {
         console.error(err);
@@ -239,7 +244,9 @@ define([
 
       var images = {};
       map.tilesets.forEach(function(ts) {
-        images[ts.image] = { url: "assets/" + ts.image };
+        var imgUrl = "assets/" + ts.image;
+        imgUrl = debug ? imgUrl : (realImageMappings[imgUrl] || imgUrl);
+        images[ts.image] = { url: imgUrl };
       });
 
       ImageLoader.loadImages(images, function() {
