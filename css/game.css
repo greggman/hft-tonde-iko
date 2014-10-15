@@ -105,3 +105,10 @@ body {
     font-size: x-large;
     font-weight: bold;
 }
+label {
+    color: white;
+    background-color: #66A;
+    padding: 0.3em;
+    border-radius: 0.3em;
+    margin: 0.1em;
+}

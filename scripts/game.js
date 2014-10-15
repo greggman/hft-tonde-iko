@@ -54,6 +54,23 @@ requirejs([
     },
   };
 
+  var settingsOptions = {
+    numLocalPlayers: 1,
+    debug: true,
+    fixedFramerate: 1/60,
+  };
+
+  Object.keys(settingsOptions).forEach(function(name) {
+    var label = document.createElement("label");
+    var input = document.createElement("input");
+    input.type = "checkbox";
+    input.checked = settingsOptions[name];
+    input.id = "setting-" + name;
+    label.appendChild(input);
+    label.appendChild(document.createTextNode(name));
+    $("options").appendChild(label);
+  });
+
   var grid = new Grid(gridSize);
 
   var makeWindowFunc = function(options) {
@@ -93,9 +110,9 @@ requirejs([
     settings.id        = "s" + x + "-" + y;
     settings.levelName = opt.levelName;
 
-    settings.numLocalPlayers = 1;
-    settings.debug = true;
-    settings.fixedFramerate = 1/60;
+    Object.keys(settingsOptions).forEach(function(name) {
+      settings[name] = $("setting-" + name).checked ? settingsOptions[name] : undefined
+    });
 
     var options = {
       width:  width,
@@ -126,13 +143,17 @@ requirejs([
       div.className = "comp-button";
       div.appendChild(document.createTextNode("" + x + "-" + y));
       div.addEventListener('click',
-        makeLaunchFunc(x, y, {
-          left: 10,
-          top:  10,
-          width: 1280,
-          height: 720,
-          levelName: "level" + x + "-" + y,
-        }), false);
+        function(x, y) {
+          return function() {
+            makeLaunchFunc(x, y, {
+              left: 10,
+              top:  10,
+              width: 1280,
+              height: 720,
+              levelName: "level" + x + "-" + y,
+            })();
+          };
+        }(x, y), false);
       element.appendChild(div);
     });
   };
@@ -173,11 +194,17 @@ requirejs([
   $("button1").addEventListener('click', function() {
     settings.shared.canvasWidth  = undefined;
     settings.shared.canvasHeight = undefined;
+    var oldColumns = gridSize.columns;
+    var oldRows    = gridSize.rows;
     gridSize.columns = 3;
-    gridSize.rows = 1;
+    gridSize.rows    = 1;
     grid.setDimensions(gridSize.columns, gridSize.rows);
     fillGrid();
     launch();
+    gridSize.columns = oldColumns;
+    gridSize.rows    = oldRows;
+    grid.setDimensions(gridSize.columns, gridSize.rows);
+    fillGrid();
     startController();
   }, false);
 
