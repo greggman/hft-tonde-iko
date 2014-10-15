@@ -41,7 +41,7 @@ define([
 
   function ScoreManager(services, topTodayElement, topHourElement, top10Mins) {
     this.services = services;
-    this.maxScores_ = 6;
+    this.maxScores_ = 7;
     this.orderedPlayers_ = [];
     this.zeros_ = "";
 

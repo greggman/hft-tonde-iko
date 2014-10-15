@@ -410,6 +410,7 @@ this.services.debugRenderer.addLine(
             direction: this.direction,// Send the direction so if we're moving we're still moving.
             facing: this.facing,      // Send the facing so we're facing the sme way
             velocity: this.velocity,  // Send the velocity so where going the right speed
+            score: this.score;        // Send the score
           });
         }
       }

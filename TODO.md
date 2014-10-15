@@ -1,6 +1,7 @@
 To Do
 =====
 
+*   should there be a time limit?
 *   remove gear
 *   add input timeout, test with android
 *   add bonus coin? Put it somewhere hard to reach
