@@ -55,16 +55,17 @@ requirejs([
   };
 
   var settingsOptions = {
-    numLocalPlayers: 1,
-    debug: true,
-    fixedFramerate: 1/60,
+     numLocalPlayers: { value: 1,      on: true,  },
+     debug:           { value: true,   on: true,  },
+     fixedFramerate:  { value: 1 / 60, on: false, },
+     showFPS:         { value: true,   on: false, },
   };
 
   Object.keys(settingsOptions).forEach(function(name) {
     var label = document.createElement("label");
     var input = document.createElement("input");
     input.type = "checkbox";
-    input.checked = settingsOptions[name];
+    input.checked = settingsOptions[name].on ? true : undefined;
     input.id = "setting-" + name;
     label.appendChild(input);
     label.appendChild(document.createTextNode(name));
@@ -111,7 +112,7 @@ requirejs([
     settings.levelName = opt.levelName;
 
     Object.keys(settingsOptions).forEach(function(name) {
-      settings[name] = $("setting-" + name).checked ? settingsOptions[name] : undefined
+      settings[name] = $("setting-" + name).checked ? settingsOptions[name].value : undefined
     });
 
     var options = {
