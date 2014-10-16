@@ -35,20 +35,31 @@ define([
     'hft/misc/strings',
     '../bower_components/hft-utils/dist/2d',
     '../bower_components/hft-utils/dist/imageutils',
+    './canvas-utils',
     './math',
   ], function(
     Misc,
     Strings,
     M2D,
     ImageUtils,
+    CanvasUtils,
     gmath) {
 
   var availableColors = [];
   var nameFontOptions = {
     font: "20px sans-serif",
+    xOffset: 1,
     yOffset: 18,
     height: 20,
-    fillStyle: "black",
+    padding: 3,
+    fillStyle: "white",
+  };
+
+  var setCanvasFontStyles = function(ctx, options) {
+    if (options.font        ) { ctx.font         = options.font;        }
+    if (options.fillStyle   ) { ctx.fillStyle    = options.fillStyle;   }
+    if (options.textAlign   ) { ctx.textAlign    = options.textAlign;   }
+    if (options.testBaseline) { ctx.textBaseline = options.textBaselne; }
   };
 
   /**
@@ -146,6 +157,17 @@ define([
   Player.prototype.setName = function(name) {
     if (name != this.playerName) {
       this.playerName = name;
+      nameFontOptions.prepFn = function(ctx) {
+        var h = (195/360 + this.color.h) % 1;
+        var s = gmath.clamp(1 + this.color.s, 0, 1);
+        var v = gmath.clamp(0.8 + this.color.v, 0, 1);
+        var rgb = ImageUtils.hsvToRgb(h, s, v);
+        ctx.beginPath();
+        CanvasUtils.roundedRect(ctx, 0, 0, ctx.canvas.width, ctx.canvas.height, 10);
+        ctx.fillStyle = "rgb(" + rgb.join(",") + ")";
+        ctx.fill();
+      }.bind(this);
+
       this.nameImage = this.services.createTexture(
           ImageUtils.makeTextImage(name, nameFontOptions));
     }
@@ -577,7 +599,7 @@ define([
     var nameSprite = this.nameSprite;
     nameSprite.uniforms.u_texture = this.nameImage;
     nameSprite.x = off.x + ((              this.position[0])      | 0) * globals.scale;
-    nameSprite.y = off.y + ((height / -2 + this.position[1] - 24) | 0) * globals.scale;
+    nameSprite.y = off.y + ((height / -2 + this.position[1] - 36) | 0) * globals.scale;
     nameSprite.width  = this.nameImage.img.width  * globals.scale;
     nameSprite.height = this.nameImage.img.height * globals.scale;
   };
