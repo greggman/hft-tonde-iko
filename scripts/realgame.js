@@ -382,6 +382,7 @@ window.g = globals;
         var server = new GameServer({
           allowMultipleGames: true,
           id: globals.id,
+          master: globals.levelName && globals.levelName == "level0-0",
         });
         g_services.server = server;
         server.addEventListener('playerconnect', g_playerManager.startPlayer.bind(g_playerManager));
