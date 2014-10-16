@@ -243,7 +243,7 @@ window.g = globals;
   var canvas = $("playfield");
   if (globals.shared.canvasWidth ) { globals.resize = false; canvas.width  = globals.shared.canvasWidth;  }
   if (globals.shared.canvasHeight) { globals.resize = false; canvas.height = globals.shared.canvasHeight; }
-  var gl = WebGL.setupWebGL(canvas, {alpha:false}, function() {});
+  var gl = WebGL.setupWebGL(canvas, {alpha:false, antialias: false}, function() {});
   g_services.spriteManager = new SpriteManager();
   g_services.debugRenderer = new DebugRenderer(globals.debug);
   g_services.particleSystemManager = new ParticleSystemManager();
