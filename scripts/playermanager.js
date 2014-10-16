@@ -31,13 +31,16 @@
 "use strict";
 
 define([
-    './player'
+    './player',
+    './ball'
   ], function(
-    Player) {
+    Player,
+    Ball) {
 
   var PlayerManager = function(services) {
     this.services = services;
     this.players = [];
+    this.balls = []
   };
 
   PlayerManager.prototype.startPlayer = function(netPlayer, name, data) {
@@ -71,6 +74,8 @@ define([
     }
     var player = new Player(this.services, level.tileWidth, level.tileHeight, direction, name, netPlayer, startPosition, data);
     this.players.push(player);
+    var ball = new Ball(this.services, level.tileWidth, level.tileHeight, direction, name, netPlayer, startPosition, data, player);
+    this.balls.push(ball);
     return player;
   }
 

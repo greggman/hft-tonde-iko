@@ -111,7 +111,10 @@ window.s = g_services;
     jumpVelocity: -350,
     minStopVelocity: 25,      // below this we're idling
     stopFriction: 0.95,       // amount of velocity to keep each frame
+    ballElasticity: 0.75,
+    ballStopVelocity: 10,
     gravity: 1200,
+    ballGravity:300,
     frameCount: 0,
     idleAnimSpeed: 4,
     moveAnimSpeed: 0.2,
@@ -318,6 +321,7 @@ window.g = globals;
     brick: { url: "assets/bricks.png",      },
     coin:  { url: "assets/coin_anim.png",   scale: 4, slices: 8, },
     door:  { url: "assets/door.png",        },
+    ball:  { url: "assets/ball.png",        },    
     "switch":  { url: "assets/switch.png",  },
   };
   g_services.images = images;
