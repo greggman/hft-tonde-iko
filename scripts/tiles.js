@@ -172,9 +172,9 @@ define([
 
   var tileInfoSuperCoin = { thing: "supercoin", id: 0, };
 
-  var tileInfoArea1 = { thing: "area", id: 0, };
-  var tileInfoArea2 = { thing: "area", id: 1, };
-  var tileInfoArea3 = { thing: "area", id: 2, };
+  var tileInfoArea1 = { open: true, thing: "area", id: 0, };
+  var tileInfoArea2 = { open: true, thing: "area", id: 1, };
+  var tileInfoArea3 = { open: true, thing: "area", id: 2, };
 
   var tileInfoTeleport0  = { thing: "teleport", teleport: true, dest: 0, subDest: 0, };
   var tileInfoTeleport1  = { thing: "teleport", teleport: true, dest: 1, subDest: 0, };
