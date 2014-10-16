@@ -1,7 +1,9 @@
 To Do
 =====
 
-*   should there be a time limit?
+*   add "I'm the master" open to game so hft knows which game gets the players
+*   add player to high score at end
+*   show player his score on phone
 *   remove gear
 *   add input timeout, test with android
 *   add bonus coin? Put it somewhere hard to reach
@@ -34,6 +36,7 @@ To Do
 Done
 ====
 
+*   make up through collsions work
 *   remove fixed time in gamesupport
 *   make it load play tilesets vs level building tilesets
 *   Make version that plays locally. Use < 1.0 scale to fit on screen

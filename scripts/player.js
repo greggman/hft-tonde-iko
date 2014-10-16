@@ -349,7 +349,7 @@ define([
     for (var ii = 0; ii < 2; ++ii) {
       var xCheck = this.position[0] + this.checkWallOffset[off];
       var tile = levelManager.getTileInfoByPixel(xCheck, this.position[1] - this.height / 4 - this.height / 2 * ii);
-      if (tile.collisions) {
+      if (tile.collisions && (!tile.sideBits || (tile.sideBits & 0x3))) {
         this.velocity[0] = 0;
         var distInTile = xCheck % level.tileWidth;
         var xoff = off ? -distInTile : level.tileWidth - distInTile;
@@ -400,7 +400,7 @@ define([
     var levelManager = this.services.levelManager;
     for (var ii = 0; ii < 2; ++ii) {
       var tile = levelManager.getTileInfoByPixel(this.position[0] - this.width / 4 + this.width / 2 * ii, this.position[1]);
-      if (tile.collisions) {
+      if (tile.collisions && (!tile.sideBits || (tile.sideBits & 0x8))) {
         this.stopFriction = tile.stopFriction || globals.stopFriction;
         this.walkAcceleration = tile.walkAcceleration || globals.moveAcceleration;
         if (tile.thing == "switch") {
@@ -417,7 +417,7 @@ define([
     var levelManager = this.services.levelManager;
     for (var ii = 0; ii < 2; ++ii) {
       var tile = levelManager.getTileInfoByPixel(this.position[0] - this.width / 4 + this.width / 2 * ii, this.position[1] - this.height);
-      if (tile.collisions) {
+      if (tile.collisions && (!tile.sideBits || (tile.sideBits & 0x4))) {
         var level = levelManager.getLevel();
         this.velocity[1] = 0;
         this.position[1] = (Math.floor(this.position[1] / level.tileHeight) + 1) * level.tileHeight;
@@ -434,15 +434,18 @@ define([
   Player.prototype.checkDown = function() {
     var globals = this.services.globals;
     var levelManager = this.services.levelManager;
+    var level = levelManager.getLevel();
     for (var ii = 0; ii < 2; ++ii) {
       var tile = levelManager.getTileInfoByPixel(this.position[0] - this.width / 4 + this.width / 2 * ii, this.position[1]);
-      if (tile.collisions) {
-        var level = levelManager.getLevel();
-        this.position[1] = Math.floor(this.position[1] / level.tileHeight) * level.tileHeight;
-        this.velocity[1] = 0;
-        this.stopFriction = tile.stopFriction || globals.stopFriction;
-        this.services.audioManager.playSound('land');
-        this.setState('move');
+      if (tile.collisions && (!tile.sideBits || (tile.sideBits & 0x8))) {
+        var ty = gmath.unitdiv(this.position[1], level.tileHeight) * level.tileHeight;
+        if (this.lastPosition[1] <= ty) {
+          this.position[1] = Math.floor(this.position[1] / level.tileHeight) * level.tileHeight;
+          this.velocity[1] = 0;
+          this.stopFriction = tile.stopFriction || globals.stopFriction;
+          this.services.audioManager.playSound('land');
+          this.setState('move');
+        }
         return true;
       }
     }

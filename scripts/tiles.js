@@ -78,6 +78,7 @@ define([
 
   var tileInfoOneWay = {
     collisions: true,
+    sideBits: 0x8,  // UDLR
     udCollision: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
     color: "white",
     imgName: "brick",
