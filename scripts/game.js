@@ -49,8 +49,8 @@ requirejs([
 
   var settings = {
     shared: {
-      canvasWidth: 1920,
-      canvasHeight: 1080,
+      canvasWidth: 1280,
+      canvasHeight: 720,
     },
   };
 

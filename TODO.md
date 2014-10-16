@@ -1,7 +1,7 @@
 To Do
 =====
 
-*   add "I'm the master" open to game so hft knows which game gets the players
+*   switch to 40x24
 *   add player to high score at end
 *   show player his score on phone
 *   remove gear
@@ -36,6 +36,7 @@ To Do
 Done
 ====
 
+*   add "I'm the master" open to game so hft knows which game gets the players
 *   make up through collsions work
 *   remove fixed time in gamesupport
 *   make it load play tilesets vs level building tilesets

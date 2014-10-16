@@ -50,28 +50,39 @@ define([
 
     if (typeof(tiles) == 'string') {
       var t = [];
-      /// Add a border
-      this.width += 2;
-      this.height += 2;
+
+      if (options.border !== false) {
+        /// Add a border
+        this.width += 2;
+        this.height += 2;
+      }
 
       // Add lines of original plus abounds
       var wallTile = Level.charToTileId['#'].tileId;
 
       // Add top line
-      for (var ii = 0; ii < this.width; ++ii) {
-        t.push(wallTile);
+      if (options.border !== false) {
+        for (var ii = 0; ii < this.width; ++ii) {
+          t.push(wallTile);
+        }
       }
       for (var yy = 0; yy < height; ++yy) {
-        t.push(wallTile);
+        if (options.border !== false) {
+          t.push(wallTile);
+        }
         for (var xx = 0; xx < width; ++xx) {
           var ch = tiles.substr(yy * width + xx, 1);
           t.push(Level.charToTileId[ch].tileId);
         }
-        t.push(wallTile);
+        if (options.border !== false) {
+          t.push(wallTile);
+        }
       }
-      // Add bottom line
-      for (var ii = 0; ii < this.width; ++ii) {
-        t.push(wallTile);
+      if (options.border !== false) {
+        // Add bottom line
+        for (var ii = 0; ii < this.width; ++ii) {
+          t.push(wallTile);
+        }
       }
       tiles = t;
       this.tiles = new Uint32Array(tiles);
@@ -209,8 +220,6 @@ define([
     opt.scaleY = options.scale || 1;
     opt.width  = this.width  * this.tileWidth  * options.scale;
     opt.height = this.height * this.tileHeight * options.scale;
-
-
     this.getDrawOffset(opt);
     opt.canvasWidth = gl.canvas.width;
     opt.canvasHeight = gl.canvas.height;

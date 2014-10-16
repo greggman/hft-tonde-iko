@@ -71,6 +71,7 @@ define([
       tileset: tileset,
       width:   10,
       height:  15,
+      border: false,
       tiles:   [ // 01234567890123456789
           " YYY      ", // 0
           "          ", // 1
