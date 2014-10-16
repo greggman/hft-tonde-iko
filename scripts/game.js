@@ -55,10 +55,11 @@ requirejs([
   };
 
   var settingsOptions = {
-     numLocalPlayers: { value: 1,      on: true,  },
-     debug:           { value: true,   on: true,  },
-     fixedFramerate:  { value: 1 / 60, on: false, },
-     showFPS:         { value: true,   on: false, },
+     numLocalPlayers:  { label: "local player", value: 1,      on: true,  },
+     debug:            { label: "debug",        value: true,   on: true,  },
+     fixedFramerate:   { label: "force 60fps",  value: 1 / 60, on: false, },
+     showFPS:          { label: "show fps",     value: true,   on: false, },
+     stressTest:       { label: "stress",       value: true,   on: false, },
   };
 
   Object.keys(settingsOptions).forEach(function(name) {
@@ -68,7 +69,7 @@ requirejs([
     input.checked = settingsOptions[name].on ? true : undefined;
     input.id = "setting-" + name;
     label.appendChild(input);
-    label.appendChild(document.createTextNode(name));
+    label.appendChild(document.createTextNode(settingsOptions[name].label));
     $("options").appendChild(label);
   });
 

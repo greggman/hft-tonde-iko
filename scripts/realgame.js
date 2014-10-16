@@ -102,6 +102,7 @@ window.s = g_services;
   var globals = {
     haveServer: true,
     numLocalPlayers: 0,  // num players when local (ie, debugger)
+    stressPlayerCount: 50,
     debug: false,
     tileInspector: false,
     showState: false,
@@ -135,6 +136,11 @@ window.g = globals;
 
   function startLocalPlayers() {
     var localPlayers = [];
+    var count = 0;
+
+    if (globals.stressTest) {
+      globals.numLocalPlayers = Math.max(globals.numLocalPlayers, globals.stressPlayerCount)
+    }
 
     var addLocalPlayer = function() {
       var netPlayer = new LocalNetPlayer();
@@ -146,7 +152,11 @@ window.g = globals;
         oldLeftRight: 0,
         jump: false,
       });
-      player.position[0] += 16 * localPlayers.length;
+      var levelManager = g_services.levelManager;
+      var level = levelManager.getLevel();
+      var p = levelManager.getRandomOpenPosition();
+      player.position[0] = p.x;
+      player.position[1] = p.y;
     };
 
     var removeLocalPlayer = function(playerId) {
@@ -158,6 +168,19 @@ window.g = globals;
 
     for (var ii = 0; ii < globals.numLocalPlayers; ++ii) {
       addLocalPlayer();
+    }
+
+    if (globals.stressTest) {
+      setInterval(function() {
+        for (var ii = 0; ii < 5; ++ii) {
+          var lp = localPlayers[Misc.randInt(localPlayers.length - 1) + 1];
+          if (lp) {
+            lp.netPlayer.sendEvent('jump', {
+              jump: Math.random() > 0.5,
+            });
+          }
+        }
+      }, 20);
     }
 
     var handleLeftRight = function(playerId, pressed, bit) {
