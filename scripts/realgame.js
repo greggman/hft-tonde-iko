@@ -106,7 +106,7 @@ window.s = g_services;
     debug: false,
     tileInspector: false,
     showState: false,
-    moveAcceleration: 500,
+    moveAcceleration: 1000,
     maxVelocity: [200, 1000],
     jumpDuration: 0.2,        // how long the jump velocity can be applied
     jumpVelocity: -350,
@@ -115,7 +115,7 @@ window.s = g_services;
     gravity: 1200,
     frameCount: 0,
     idleAnimSpeed: 4,
-    moveAnimSpeed: 0.2,
+    moveAnimSpeed: 0.1,
     coinAnimSpeed: 10,
     coinAnimSpeedRange: 2,
     jumpFirstFrameTime: 0.1,
