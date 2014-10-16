@@ -169,6 +169,8 @@ define([
     lines: lowerHalfSolidLines,
   };
 
+  var tileInfoSuperCoin = { thing: "supercoin", id: 0, };
+
   var tileInfoArea1 = { thing: "area", id: 0, };
   var tileInfoArea2 = { thing: "area", id: 1, };
   var tileInfoArea3 = { thing: "area", id: 2, };
@@ -253,8 +255,8 @@ define([
     tileInfoSky,             //  0
     tileInfoWall,            //  1 solid
     tileInfoEnd,             //  2 end
-    nullTile,                //  3
-    nullTile,                //  4
+    tileInfoOneWay,          //  3 ladder
+    tileInfoSuperCoin,       //  4
     nullTile,                //  5
     tileInfoOneWay,          //  6 up-through
     tileInfoDoor1,           //  7 door1
