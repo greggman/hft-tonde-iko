@@ -209,10 +209,11 @@ define([
         // Tiled is 1 based (0 = no tile). We're 0 based so subtract 1.
         var data = new Uint32Array(l.data.length);
         for (var ii = 0; ii < l.data.length; ++ii) {
-          var id = Math.max(0, l.data[ii]);
+          var tile = Math.max(0, l.data[ii]);
+          var id  = tile & 0xFFFFFF;
           var xid = id % superAcross;
           var yid = id / superAcross | 0;
-          data[ii] = xid + yid * 256;
+          data[ii] = xid + yid * 256 + (tile & 0xFF000000);
         }
         return new Level({
           tileset: tileset,
