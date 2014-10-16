@@ -60,6 +60,7 @@ requirejs([
      fixedFramerate:   { label: "force 60fps",  value: 1 / 60, on: false, },
      showFPS:          { label: "show fps",     value: true,   on: false, },
      stressTest:       { label: "stress",       value: true,   on: false, },
+     mute:             { label: "mute",         value: true,   on: false, },
   };
 
   Object.keys(settingsOptions).forEach(function(name) {
