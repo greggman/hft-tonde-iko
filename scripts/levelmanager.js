@@ -218,6 +218,11 @@ define([
   };
 
   LevelManager.prototype.getTileInfoByPixel = function(x, y) {
+    if (y < 0 || y >= this.level.levelHeight) {
+      return Tiles.getInfo(1);
+    } else if (x < 0 || x >= this.level.levelWidth) {
+      return Tiles.getInfo(0);
+    }
     var tileId = this.level.getTileByPixel(x, y);
     return this.getTileInfo(tileId);
   }

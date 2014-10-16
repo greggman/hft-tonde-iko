@@ -495,6 +495,19 @@ window.g = globals;
       }
     }
     g_services.particleSystemManager.draw(globals.drawOffset);
+
+    gl.enable(gl.SCISSOR_TEST);
+    gl.clearColor(0,0,0,1);
+    gl.scissor(0, 0, gl.canvas.width, xtraY);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.scissor(0, gl.canvas.height - xtraY, gl.canvas.width, xtraY);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.scissor(0, 0, xtraX, gl.canvas.height);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.scissor(gl.canvas.width - xtraX, 0, xtraX, gl.canvas.height);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.disable(gl.SCISSOR_TEST);
+
     g_services.debugRenderer.draw(globals.drawOffset);
     g_services.status.draw();
   };

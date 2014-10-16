@@ -186,11 +186,13 @@ define([
   };
 
   Level.prototype.getTile = function(tileX, tileY) {
-    if (tileX >= 0 && tileX < this.width &&
-        tileY >= 0 && tileY < this.height) {
-      return this.uint16view[(tileY * this.width + tileX) * 2];
+    if (tileY < 0 || tileY >= this.height) {
+      return 1;
     }
-    return -1;
+    if (tileX < 0 || tileX >= this.width) {
+      return 0;
+    }
+    return this.uint16view[(tileY * this.width + tileX) * 2];
   };
 
   Level.prototype.getTileByPixel = function(x, y) {

@@ -54,7 +54,7 @@ define([
     if (data && data.dest === undefined) {
       // We teleported by hitting the edge of the level
       startPosition = {
-        x: data.position[0] < level.levelWidth / 2 ? level.levelWidth - level.tileWidth / 2 : level.tileWidth / 2,
+        x: data.position[0] < level.levelWidth / 2 ? level.levelWidth + level.tileWidth / 4 : -level.tileWidth / 4,
         y: data.position[1],
       };
     } else {

@@ -370,9 +370,13 @@ define([
     for (var ii = 0; ii < 2; ++ii) {
       var xCheck = this.position[0] + this.checkWallOffset[off];
       if (xCheck < 0) {
-        this.teleportToOtherGame(-1);
+        if (xCheck < -level.tileWidth / 2) {
+          this.teleportToOtherGame(-1);
+        }
       } else if (xCheck >= level.levelWidth) {
-        this.teleportToOtherGame(1);
+        if (xCheck >= level.levelWidth + level.tileWidth / 2) {
+          this.teleportToOtherGame(1);
+        }
       } else {
         var tile = levelManager.getTileInfoByPixel(xCheck, this.position[1] - this.height / 4 - this.height / 2 * ii);
         if (tile.collisions && (!tile.sideBits || (tile.sideBits & 0x3))) {
