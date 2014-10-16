@@ -50,24 +50,34 @@ define([
     var subDestId = 0;
     if (data) {
       name = data.name;
-      destId = data.dest;
-      subDestId = data.subDest;
     }
-    var dest = level.getDest(destId, subDestId);
-    if (dest) {
-      dest = dest[misc.randInt(dest.length)];
-      startPosition = { x: dest.tx, y: dest.ty };
+    if (data && data.dest === undefined) {
+      // We teleported by hitting the edge of the level
+      startPosition = {
+        x: data.position[0] < level.levelWidth / 2 ? level.levelWidth - level.tileWidth / 2 : level.tileWidth / 2,
+        y: data.position[1],
+      };
     } else {
-      if (destId == 1) {
-        startPosition = { x: level.width - 3, y: 2};
-      } else {
-        startPosition = { x: 2, y: 2};
+      if (data) {
+        destId = data.dest;
+        subDestId = data.subDest;
       }
-    }
-    if (startPosition) {
-      startPosition.x = (startPosition.x + 0.5) * level.tileWidth;
-      startPosition.y = (startPosition.y +   1) * level.tileHeight - 1;
-      direction = startPosition.x < level.levelWidth / 2 ? 1 : -1;
+      var dest = level.getDest(destId, subDestId);
+      if (dest) {
+        dest = dest[misc.randInt(dest.length)];
+        startPosition = { x: dest.tx, y: dest.ty };
+      } else {
+        if (destId == 1) {
+          startPosition = { x: level.width - 3, y: 2};
+        } else {
+          startPosition = { x: 2, y: 2};
+        }
+      }
+      if (startPosition) {
+        startPosition.x = (startPosition.x + 0.5) * level.tileWidth;
+        startPosition.y = (startPosition.y +   1) * level.tileHeight - 1;
+        direction = startPosition.x < level.levelWidth / 2 ? 1 : -1;
+      }
     }
     var player = new Player(this.services, level.tileWidth, level.tileHeight, direction, name, netPlayer, startPosition, data);
     this.players.push(player);

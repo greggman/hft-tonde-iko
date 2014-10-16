@@ -341,6 +341,27 @@ define([
     }
   };
 
+  Player.prototype.teleportToOtherGame = function(dir, dest, subDest) {
+    // HACK!
+    var globals = this.services.globals;
+    var parts = /s(\d+)-(\d+)/.exec(globals.id);
+    var id = parseInt(parts[1]) + parseInt(parts[2]) * globals.columns;
+    var numScreens = globals.columns * globals.rows;
+    id = gmath.emod(id + dir, numScreens);
+    var id = "s" + (id % globals.columns) + "-" + (Math.floor(id / globals.columns));
+    this.netPlayer.switchGame(id, {
+      name: this.playerName,    // Send the name because otherwise we'll make a new one up
+      dest: dest,               // Send the dest so we know where to start
+      subDest: subDest,         // Send the subDest so we know which subDest to start
+      color: this.color,        // Send the color so we don't pick a new one
+      direction: this.direction,// Send the direction so if we're moving we're still moving.
+      facing: this.facing,      // Send the facing so we're facing the sme way
+      velocity: this.velocity,  // Send the velocity so where going the right speed
+      score: this.score,        // Send the score
+      position: this.position,  // Send the position incase there's no dest.
+    });
+  };
+
   Player.prototype.checkWall = function() {
     var globals = this.services.globals;
     var levelManager = this.services.levelManager;
@@ -348,45 +369,33 @@ define([
     var off = this.velocity[0] < 0 ? 0 : 1;
     for (var ii = 0; ii < 2; ++ii) {
       var xCheck = this.position[0] + this.checkWallOffset[off];
-      var tile = levelManager.getTileInfoByPixel(xCheck, this.position[1] - this.height / 4 - this.height / 2 * ii);
-      if (tile.collisions && (!tile.sideBits || (tile.sideBits & 0x3))) {
-        this.velocity[0] = 0;
-        var distInTile = xCheck % level.tileWidth;
-        var xoff = off ? -distInTile : level.tileWidth - distInTile;
-        this.position[0] += xoff;
-      }
-      if (tile.teleport) {
-        if (tile.local) {
-          var dest = level.getLocalDest(tile.dest);
-          if (!dest) {
-            console.error("missing local dest for dest: " + tile.dest);
-            return;
-          }
+      if (xCheck < 0) {
+        this.teleportToOtherGame(-1);
+      } else if (xCheck >= level.levelWidth) {
+        this.teleportToOtherGame(1);
+      } else {
+        var tile = levelManager.getTileInfoByPixel(xCheck, this.position[1] - this.height / 4 - this.height / 2 * ii);
+        if (tile.collisions && (!tile.sideBits || (tile.sideBits & 0x3))) {
+          this.velocity[0] = 0;
+          var distInTile = xCheck % level.tileWidth;
+          var xoff = off ? -distInTile : level.tileWidth - distInTile;
+          this.position[0] += xoff;
+        }
+        if (tile.teleport) {
+          if (tile.local) {
+            var dest = level.getLocalDest(tile.dest);
+            if (!dest) {
+              console.error("missing local dest for dest: " + tile.dest);
+              return;
+            }
 
-          dest = dest[Misc.randInt(dest.length)];
-          this.position[0] = (dest.tx + 0.5) * level.tileWidth;
-          this.position[1] = (dest.ty +   1) * level.tileHeight - 1;
-        } else {
-          // HACK!
-          var parts = /s(\d+)-(\d+)/.exec(globals.id);
-          var id = parseInt(parts[1]) + parseInt(parts[2]) * globals.columns;
-          var numScreens = globals.columns * globals.rows;
-          if (tile.dest == 0 || tile.dest == 2) {
-            id = gmath.emod(id - 1, numScreens);
-          } else if (tile.dest == 1 || tile.dest == 3) {
-            id = (id + 1) % numScreens;
+            dest = dest[Misc.randInt(dest.length)];
+            this.position[0] = (dest.tx + 0.5) * level.tileWidth;
+            this.position[1] = (dest.ty +   1) * level.tileHeight - 1;
+          } else {
+            var dir = (tile.dest == 0 || tile.dest == 2) ? -1 : 1;
+            this.teleportToOtherGame(dir, tile.dest, tile.subDest);
           }
-          var id = "s" + (id % globals.columns) + "-" + (Math.floor(id / globals.columns));
-          this.netPlayer.switchGame(id, {
-            name: this.playerName,    // Send the name because otherwise we'll make a new one up
-            dest: tile.dest,          // Send the dest so we know where to start
-            subDest: tile.subDest,    // Send the subDest so we know which subDest to start
-            color: this.color,        // Send the color so we don't pick a new one
-            direction: this.direction,// Send the direction so if we're moving we're still moving.
-            facing: this.facing,      // Send the facing so we're facing the sme way
-            velocity: this.velocity,  // Send the velocity so where going the right speed
-            score: this.score,        // Send the score
-          });
         }
       }
     }
