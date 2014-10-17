@@ -72,7 +72,8 @@ define([
       this.ballStopVelocity = globals.ballStopVelocity;
       this.walkAcceleration = globals.moveAcceleration;
       this.idleAnimSpeed = (0.8 + Math.random() * 0.4) * globals.idleAnimSpeed;
-
+      this.points = 0;
+      
       if (data.color) {
         this.color = data.color;
       } else {
@@ -121,7 +122,7 @@ define([
 
       this.setName(name);
       this.direction = data.direction || 0;         // direction player is pushing (-1, 0, 1)
-      this.facing = data.facing || direction;    // direction player is facing (-1, 1)
+      this.facing = 1; //data.facing || direction;    // direction player is facing (-1, 1)
       this.score = 0;
       this.addPoints(0);
 
@@ -148,7 +149,7 @@ define([
   }());
 
   Ball.prototype.setName = function(name) {
-   	name = name + "'s";
+   	name = this.points.toString();
     if (name != this.playerName) {
       this.playerName = name;
       this.nameImage = this.services.createTexture(
@@ -410,6 +411,8 @@ define([
             dest = dest[Misc.randInt(dest.length)];
             this.position[0] = (dest.tx + 0.5) * level.tileWidth;
             this.position[1] = (dest.ty +   1) * level.tileHeight - 1;
+            this.points += 1;
+            this.setName(this.playerName);
           } else {
             var dir = (tile.dest == 0 || tile.dest == 2) ? -1 : 1;
             this.teleportToOtherGame(dir, tile.dest, tile.subDest);
@@ -441,15 +444,44 @@ define([
   };
 
   Ball.prototype.checkBall = function(){
-  	var dx = this.position[0] - (this.player.position[0]);
+	if (!this.checkBallPlayer) {
+	  this.checkBallPlayer = function(player) {
+  			var dx = this.position[0] - (player.position[0]);
+  			var dx2 = dx * dx;
+  			var radius = 28;
+  			var radius2 = radius * radius;
+  			if (dx2 > radius2) return;
+  			var dy = this.position[1] - (player.position[1] + 12);
+  			var dy2 = dy*dy;
+  			if (dy2 > radius2) return;
+  			this.velocity[0] += dx;
+  			this.velocity[1] += dy;
+  			var len = Math.sqrt(dx2 + dy2);
+  			if (len > 0.1)
+  			{
+  				dx /= len;
+  				dy /= len;
+  				var dot = dx*player.velocity[0] + dy * player.velocity[1];
+  				this.velocity[0] += dx * dot * 0.5;
+  				this.velocity[1] += dy * dot * 0.5;
+  			}
+  			return false;	  
+	  }.bind(this);
+       
+	}
+	this.services.playerManager.forEachPlayer(this.checkBallPlayer);
+  //		this.checkBallPlayer(this.player);
+  }
+/*
+  Ball.prototype.checkBallPlayer = function(player){
+  	var dx = this.position[0] - (player.position[0]);
   	var dx2 = dx * dx;
   	var radius = 28;
   	var radius2 = radius * radius;
   	if (dx2 > radius2) return;
-  	var dy = this.position[1] - (this.player.position[1] + 12);
+  	var dy = this.position[1] - (player.position[1] + 12);
   	var dy2 = dy*dy;
   	if (dy2 > radius2) return;
-  	//this.velocity[1] += this.services.globals.jumpVelocity;
   	this.velocity[0] += dx;
   	this.velocity[1] += dy;
   	var len = Math.sqrt(dx2 + dy2);
@@ -457,12 +489,13 @@ define([
   	{
   		dx /= len;
   		dy /= len;
-  		var dot = dx*this.player.velocity[0] + dy * this.player.velocity[1];
+  		var dot = dx*player.velocity[0] + dy * player.velocity[1];
   		this.velocity[0] += dx * dot * 0.5;
   		this.velocity[1] += dy * dot * 0.5;
   	}
-  	
+  	return false;
   };
+*/
   
   Ball.prototype.checkUp = function() {
     var levelManager = this.services.levelManager;
@@ -475,7 +508,8 @@ define([
 	      this.velocity[1] = 0;
 	    }
         this.position[1] = (Math.floor(this.position[1] / level.tileHeight) + 1) * level.tileHeight;
-        if (!this.bonked) {
+        this.velocity[0] *= this.stopFriction;
+       if (!this.bonked) {
           this.bonked = true;
           this.services.audioManager.playSound('bonkhead');
         }
@@ -500,6 +534,7 @@ define([
 	        this.velocity[1] = 0;
 	      }
           this.stopFriction = tile.stopFriction || globals.stopFriction;
+		  this.velocity[0] *= this.stopFriction;
           if (!this.landed) {
           	this.landed = true;
           	this.services.audioManager.playSound('land');
@@ -632,7 +667,7 @@ define([
     var nameSprite = this.nameSprite;
     nameSprite.uniforms.u_texture = this.nameImage;
     nameSprite.x = off.x + ((              this.position[0])      | 0) * globals.scale;
-    nameSprite.y = off.y + ((height / -2 + this.position[1] - 24) | 0) * globals.scale;
+    nameSprite.y = off.y + ((height / -2 + this.position[1] - 0) | 0) * globals.scale;
     nameSprite.width  = this.nameImage.img.width  * globals.scale;
     nameSprite.height = this.nameImage.img.height * globals.scale;
   };
