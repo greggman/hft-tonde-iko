@@ -107,6 +107,7 @@ window.s = g_services;
     showState: false,
     moveAcceleration: 500,
     maxVelocity: [200, 1000],
+    maxVelocityBall: [200, 500],
     jumpDuration: 0.2,        // how long the jump velocity can be applied
     jumpVelocity: -350,
     minStopVelocity: 25,      // below this we're idling

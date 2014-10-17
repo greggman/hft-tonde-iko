@@ -45,7 +45,7 @@ define([
 
   var availableColors = [];
   var nameFontOptions = {
-    font: "20px sans-serif",
+    font: "16px sans-serif",
     yOffset: 18,
     height: 20,
     fillStyle: "black",
@@ -148,6 +148,7 @@ define([
   }());
 
   Ball.prototype.setName = function(name) {
+   	name = name + "'s";
     if (name != this.playerName) {
       this.playerName = name;
       this.nameImage = this.services.createTexture(
@@ -285,11 +286,11 @@ define([
     var axis = axis || 3;
     if (axis & 1) {
 //      this.velocity[0] += this.acceleration[0] * elapsedTime;
-      this.velocity[0] = Misc.clampPlusMinus(this.velocity[0], globals.maxVelocity[0]);
+      this.velocity[0] = Misc.clampPlusMinus(this.velocity[0], globals.maxVelocityBall[0]);
     }
     if (axis & 2) {
       this.velocity[1] += (this.acceleration[1] + globals.ballGravity) * elapsedTime;
-      this.velocity[1] = Misc.clampPlusMinus(this.velocity[1], globals.maxVelocity[1]);
+      this.velocity[1] = Misc.clampPlusMinus(this.velocity[1], globals.maxVelocityBall[1]);
     }
   };
 
@@ -442,10 +443,12 @@ define([
   Ball.prototype.checkBall = function(){
   	var dx = this.position[0] - (this.player.position[0]);
   	var dx2 = dx * dx;
-  	if (dx2 > 24*24) return;
-  	var dy = this.position[1] - (this.player.position[1] - this.height*0.5); // adjust upward from feet to get to center of bird.
+  	var radius = 28;
+  	var radius2 = radius * radius;
+  	if (dx2 > radius2) return;
+  	var dy = this.position[1] - (this.player.position[1] + 12);
   	var dy2 = dy*dy;
-  	if (dy2 > 24*24) return;
+  	if (dy2 > radius2) return;
   	//this.velocity[1] += this.services.globals.jumpVelocity;
   	this.velocity[0] += dx;
   	this.velocity[1] += dy;
@@ -455,8 +458,8 @@ define([
   		dx /= len;
   		dy /= len;
   		var dot = dx*this.player.velocity[0] + dy * this.player.velocity[1];
-  		this.velocity[0] += dx * dot;
-  		this.velocity[1] += dy * dot;
+  		this.velocity[0] += dx * dot * 0.5;
+  		this.velocity[1] += dy * dot * 0.5;
   	}
   	
   };
