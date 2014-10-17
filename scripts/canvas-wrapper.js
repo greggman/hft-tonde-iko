@@ -77,7 +77,7 @@ define([
         if (stack.length) {
           ctx.currentTransform = stack.pop();
         } else {
-          ctx.currentTransform = new Transform();
+          throw "transform stack empty!";
         }
         restore();
       };
@@ -97,7 +97,13 @@ define([
       };
     }(ctx.setTransform.bind(ctx));
 
-    ctx.restore();
+    ctx.currentTransform = new Transform();
+
+    ctx.validateTransformStack = function() {
+      if (stack.length != 0) {
+        throw ("transform stack not 0");
+      }
+    };
 
     return ctx;
   };
