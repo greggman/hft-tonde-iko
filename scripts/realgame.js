@@ -50,9 +50,11 @@ requirejs(
     '../bower_components/hft-utils/dist/imageloader',
     '../bower_components/hft-utils/dist/imageutils',
     '../bower_components/hft-utils/dist/spritemanager',
+    './avatars',
     './collectable-manager',
     './door',
     './debug-renderer',
+    './image-cutter',
     './levelloader',
     './levelmanager',
     './particlesystemmanager',
@@ -74,9 +76,11 @@ requirejs(
     ImageLoader,
     ImageUtils,
     SpriteManager,
+    avatars,
     CollectableManager,
     Door,
     DebugRenderer,
+    ImageCutter,
     LevelLoader,
     LevelManager,
     ParticleSystemManager,
@@ -114,8 +118,6 @@ window.s = g_services;
     stopFriction: 0.95,       // amount of velocity to keep each frame
     gravity: 1200,
     frameCount: 0,
-    idleAnimSpeed: 4,
-    moveAnimSpeed: 0.1,
     coinAnimSpeed: 10,
     coinAnimSpeedRange: 2,
     jumpFirstFrameTime: 0.1,
@@ -130,7 +132,6 @@ window.s = g_services;
     doorOpenTime: 0.25, // time door stays open
 
     drawOffset: {},
-    duckBlueRange: [180 / 360, 275 / 360],  // color range for colorizing duck but not beak
   };
 window.g = globals;
 
@@ -144,7 +145,7 @@ window.g = globals;
 
     var addLocalPlayer = function() {
       var netPlayer = new LocalNetPlayer();
-      var player = g_playerManager.startPlayer(netPlayer, "Player" + (localPlayers.length + 1));
+      var player = g_playerManager.startPlayer(netPlayer, Strings.padLeft(localPlayers.length + 1, 2, "0"), undefined, true);
       localPlayers.push({
         player: player,
         netPlayer: netPlayer,
@@ -247,6 +248,7 @@ window.g = globals;
   g_services.spriteManager = new SpriteManager();
   g_services.debugRenderer = new DebugRenderer(globals.debug);
   g_services.particleSystemManager = new ParticleSystemManager();
+  g_services.avatars = avatars;
 
   var resize = function() {
     if (!globals.resizeOnce || (globals.resize !== false && Misc.resize(canvas))) {
@@ -335,37 +337,37 @@ window.g = globals;
   // colorize: number of colors to make
   // slizes: number = width of all slices, array = width of each consecutive slice
   var images = {
-    idle:  { url: "assets/spr_idle.png",    scale: 2, slices: 16, },
-    move:  { url: "assets/spr_run.png",     scale: 2, slices: 16, },
-    jump:  { url: "assets/spr_jump.png",    scale: 2, slices: [16, 17, 17, 18, 16, 16] },
     brick: { url: "assets/bricks.png",      },
     coin:  { url: "assets/coin_anim.png",   scale: 4, slices: 8, },
     door:  { url: "assets/door.png",        },
     "switch":  { url: "assets/switch.png",  },
   };
+
+  // Add all the avatar files to the list of images to load.
+  avatars.forEach(function(avatar) {
+    Object.keys(avatar.anims).forEach(function(animName) {
+      var name = avatar.name + "-" + animName;
+      images[name] = avatar.anims[animName];
+    });
+  });
+
   g_services.images = images;
   var processImages = function() {
     Object.keys(images).forEach(function(name) {
       var image = images[name];
-      var frames = [];
-      if (image.slices) {
-        var numFrames = image.slices.length ? image.slices.length : image.img.width / image.slices;
-        var x = 0;
-        for (var jj = 0; jj < numFrames; ++jj) {
-          var width = image.slices.length ? image.slices[jj] : image.slices;
-          var frame = ImageUtils.cropImage(image.img, x, 0, width, image.img.height);
-          frame = ImageUtils.scaleImage(frame, width * image.scale, frame.height * image.scale);
-          frame = createTexture(frame);
-          frames.push(frame);
-          x += width;
-        }
-        image.frames = frames;
-      } else {
-        image.frames = [createTexture(image.img)];
-      }
+      ImageCutter.cutImage(image, {fn: createTexture});
     });
 
     var startGame = function() {
+
+      // Now that the images are loaded copy them back into the avatar data
+      avatars.forEach(function(avatar) {
+        Object.keys(avatar.anims).forEach(function(animName) {
+          var name = avatar.name + "-" + animName;
+          avatar.anims[animName].frames = images[name].frames;
+        });
+      });
+
       var tileset = {
         tileWidth: 32,
         tileHeight: 32,

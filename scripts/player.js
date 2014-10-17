@@ -45,7 +45,6 @@ define([
     CanvasUtils,
     gmath) {
 
-  var availableColors = [];
   var nameFontOptions = {
     font: "20px sans-serif",
     xOffset: 1,
@@ -67,7 +66,8 @@ define([
    * @constructor
    */
   var Player = (function() {
-    return function(services, width, height, direction, name, netPlayer, startPosition, data) {
+    return function(services, width, height, direction, name, netPlayer, startPosition, data, isLocalPlayer) {
+      var isNewPlayer = data === undefined;
       data = data || {};
       var globals = services.globals;
       this.services = services;
@@ -79,32 +79,13 @@ define([
       this.acceleration = [0, 0];
       this.stopFriction = globals.stopFriction;
       this.walkAcceleration = globals.moveAcceleration;
-      this.idleAnimSpeed = (0.8 + Math.random() * 0.4) * globals.idleAnimSpeed;
 
-      if (data.color) {
-        this.color = data.color;
-      } else {
-        if (availableColors.length == 0) {
-          for (var ii = 0; ii < 32; ++ii) {
-            var h = ii / 32;
-            var s = (ii % 2) * -0.6;
-            var v = (ii % 2) * 0.1;
-            availableColors.push({
-              id: 0,
-              h: h,
-              s: s,
-              v: v,
-              hsv: [h, s, v, 0],
-              range: globals.duckBlueRange,
-            });
-          }
-        }
-        var colorNdx = Math.floor(Math.random() * availableColors.length);
-        this.color = availableColors[colorNdx];
-  window.p = this;
-        netPlayer.sendCmd('setColor', this.color);
-        availableColors.splice(colorNdx, 1);
-      }
+      this.sprite = this.services.spriteManager.createSprite();
+      this.nameSprite = this.services.spriteManager.createSprite();
+
+      this.setAvatar(data.avatarNdx || Misc.randInt(this.services.avatars.length));
+      this.setColor(data.color || { h: Math.random(), s: 0, v: 0 });
+
       this.animTimer = 0;
       this.width = width;
       this.height = height;
@@ -118,17 +99,14 @@ define([
       this.workVector = {};
       this.tileVector = {};
 
-      this.sprite = this.services.spriteManager.createSprite();
-      this.nameSprite = this.services.spriteManager.createSprite();
-
       netPlayer.addEventListener('disconnect', Player.prototype.handleDisconnect.bind(this));
       netPlayer.addEventListener('move', Player.prototype.handleMoveMsg.bind(this));
       netPlayer.addEventListener('jump', Player.prototype.handleJumpMsg.bind(this));
-      netPlayer.addEventListener('setName', Player.prototype.handleNameMsg.bind(this));
       netPlayer.addEventListener('busy', Player.prototype.handleBusyMsg.bind(this));
+      netPlayer.addEventListener('go', Player.prototype.handleGoMsg.bind(this));
 
       this.setName(name);
-      this.direction = data.direction || 0;         // direction player is pushing (-1, 0, 1)
+      this.direction = data.direction || 0;      // direction player is pushing (-1, 0, 1)
       this.facing = data.facing || direction;    // direction player is facing (-1, 1)
       this.score = 0;
       this.addPoints(0);
@@ -138,6 +116,8 @@ define([
         this.velocity[0] = data.velocity[0];
         this.velocity[1] = data.velocity[1];
         this.setState('move');
+      } else if (isNewPlayer && !isLocalPlayer) {
+        this.setState('waitForGo');
       } else {
         this.setState('idle');
       }
@@ -154,13 +134,32 @@ define([
     };
   }());
 
+  Player.prototype.setColor = function(color) {
+    this.color = {
+       h: color.h,
+       s: color.s,
+       v: color.v,
+       hsv: [color.h, color.s, color.v, 0],
+    };
+    this.sprite.uniforms.u_hsvaAdjust = this.color.hsv.slice();
+  };
+
+  Player.prototype.setAvatar = function(avatarNdx) {
+    this.avatarNdx = avatarNdx;
+    this.avatar = this.services.avatars[avatarNdx];
+    this.anims  = this.avatar.anims;
+    this.idleAnimSpeed = (0.8 + Math.random() * 0.4) * this.avatar.idleAnimSpeed;
+    this.sprite.uniforms.u_adjustRange = this.avatar.range.slice();
+  };
+
   Player.prototype.setName = function(name) {
     if (name != this.playerName) {
       this.playerName = name;
       nameFontOptions.prepFn = function(ctx) {
-        var h = (195/360 + this.color.h) % 1;
-        var s = gmath.clamp(1 + this.color.s, 0, 1);
-        var v = gmath.clamp(0.8 + this.color.v, 0, 1);
+
+        var h = (this.avatar.baseHSV[0] + this.color.h) % 1;
+        var s = gmath.clamp(this.avatar.baseHSV[1] + this.color.s, 0, 1);
+        var v = gmath.clamp(this.avatar.baseHSV[2] + this.color.v, 0, 1);
         var rgb = ImageUtils.hsvToRgb(h, s, v);
         ctx.beginPath();
         CanvasUtils.roundedRect(ctx, 0, 0, ctx.canvas.width, ctx.canvas.height, 10);
@@ -179,8 +178,7 @@ define([
     var position = startPosition || levelManager.getRandomOpenPosition();
     this.position = [position.x, position.y];
     this.lastPosition = [this.position[0], this.position[1]];
-    this.sprite.uniforms.u_hsvaAdjust = this.color.hsv.slice();
-    this.sprite.uniforms.u_adjustRange = this.color.range.slice();
+    this.setAvatar(this.avatarNdx);
   };
 
   Player.prototype.updateMoveVector = function() {
@@ -245,7 +243,6 @@ define([
     this.services.entitySystem.removeEntity(this);
     this.services.drawSystem.removeEntity(this);
     this.services.playerManager.removePlayer(this);
-    availableColors.push(this.color);
   };
 
   Player.prototype.handleDisconnect = function() {
@@ -270,14 +267,20 @@ define([
     }
   };
 
-  Player.prototype.handleNameMsg = function(msg) {
-    if (!msg.name) {
-      this.sendCmd('setName', {
-        name: this.playerName
-      });
-    } else {
-      this.setName(msg.name.replace(/[<>]/g, ''));
-    }
+  Player.prototype.handleGoMsg = function(msg) {
+    this.color = {
+      h: msg.h,
+      s: msg.s,
+      v: msg.v,
+    };
+
+    this.setColor(msg.color);
+    this.setAvatar(msg.avatar);
+    this.setName(msg.name.replace(/[<>]/g, ''));
+
+    this.position[0] = this.lastPosition[0];
+    this.position[1] = this.lastPosition[1];
+    this.setState("idle");
   };
 
   Player.prototype.sendCmd = function(cmd, data) {
@@ -327,7 +330,7 @@ define([
     this.acceleration[0] = 0;
     this.acceleration[1] = 0;
     this.animTimer = 0;
-    this.anim = this.services.images.idle.frames;
+    this.anim = this.anims.idle.frames;
   };
 
   Player.prototype.state_idle = function() {
@@ -344,7 +347,7 @@ define([
 
   Player.prototype.init_fall = function() {
     this.animTimer = 1;
-    this.anim = this.services.images.jump.frames;
+    this.anim = this.anims.jump.frames;
   };
 
   Player.prototype.state_fall = function() {
@@ -373,6 +376,7 @@ define([
     var id = "s" + (id % globals.columns) + "-" + (Math.floor(id / globals.columns));
     this.netPlayer.switchGame(id, {
       name: this.playerName,    // Send the name because otherwise we'll make a new one up
+      avatarNdx: this.avatarNdx,// Send the avatarNdx so we get the same player
       dest: dest,               // Send the dest so we know where to start
       subDest: subDest,         // Send the subDest so we know which subDest to start
       color: this.color,        // Send the color so we don't pick a new one
@@ -497,7 +501,7 @@ define([
 
   Player.prototype.init_move = function() {
     this.animTimer = 0;
-    this.anim = this.services.images.move.frames;
+    this.anim = this.anims.move.frames;
     this.lastDirection = this.direction;
   };
 
@@ -508,7 +512,7 @@ define([
 
     var globals = this.services.globals;
     this.acceleration[0] = this.lastDirection * this.walkAcceleration;
-    this.animTimer += globals.moveAnimSpeed * Math.abs(this.velocity[0]) * globals.elapsedTime;
+    this.animTimer += this.avatar.moveAnimSpeed * Math.abs(this.velocity[0]) * globals.elapsedTime;
     this.updatePhysics(1);
 
     this.checkWall();
@@ -544,7 +548,7 @@ define([
       return;
     }
 
-    this.animTimer += globals.moveAnimSpeed * Math.abs(this.velocity[0]) * globals.elapsedTime;
+    this.animTimer += this.avatar.moveAnimSpeed * Math.abs(this.velocity[0]) * globals.elapsedTime;
     this.updatePhysics(1);
     this.checkWall();
     this.checkFall();
@@ -555,7 +559,7 @@ define([
     this.jumpTimer = 0;
     this.animTimer = 0;
     this.bonked = false;
-    this.anim = this.services.images.jump.frames;
+    this.anim = this.anims.jump.frames;
     this.services.audioManager.playSound('jump');
   };
 
@@ -575,6 +579,20 @@ define([
     }
   };
 
+  Player.prototype.init_waitForGo = function() {
+    this.lastPosition[0] = this.position[0];
+    this.lastPosition[1] = this.position[1];
+    this.anim = this.anims.idle.frames;
+
+    // move us off the screen so no collisions happen
+    this.position[0] = -1000;
+    this.position[1] = -1000;
+  };
+
+  Player.prototype.state_waitForGo = function() {
+    // Do nada.
+  };
+
   Player.prototype.draw = function() {
     var globals = this.services.globals;
     var images = this.services.images;
@@ -585,8 +603,8 @@ define([
     var off = {};
     this.services.levelManager.getDrawOffset(off);
 
-    var width  = 32;
-    var height = 32;
+    var width  = img.img.width  * this.avatar.scale; //32;
+    var height = img.img.height * this.avatar.scale; //32;
 
     var sprite = this.sprite;
     sprite.uniforms.u_texture = img;

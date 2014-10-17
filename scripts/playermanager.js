@@ -40,7 +40,7 @@ define([
     this.players = [];
   };
 
-  PlayerManager.prototype.startPlayer = function(netPlayer, name, data) {
+  PlayerManager.prototype.startPlayer = function(netPlayer, name, data, isLocalPlayer) {
     var misc = this.services.misc;
     var levelManager = this.services.levelManager;
     var level = levelManager.getLevel();
@@ -79,7 +79,7 @@ define([
         direction = startPosition.x < level.levelWidth / 2 ? 1 : -1;
       }
     }
-    var player = new Player(this.services, level.tileWidth, level.tileHeight, direction, name, netPlayer, startPosition, data);
+    var player = new Player(this.services, level.tileWidth, level.tileHeight, direction, name, netPlayer, startPosition, data, isLocalPlayer);
     this.players.push(player);
     return player;
   }

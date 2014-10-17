@@ -1,4 +1,4 @@
-5/*
+/*
  * Copyright 2014, Gregg Tavares.
  * All rights reserved.
  *
@@ -34,6 +34,7 @@
 requirejs(
   [ 'hft/commonui',
     'hft/gameclient',
+    'hft/misc/cookies',
     'hft/misc/input',
     'hft/misc/misc',
     'hft/misc/mobilehacks',
@@ -41,10 +42,14 @@ requirejs(
     '../bower_components/hft-utils/dist/audio',
     '../bower_components/hft-utils/dist/imageloader',
     '../bower_components/hft-utils/dist/imageutils',
+    './avatars',
+    './canvas-utils',
     './canvas-wrapper',
+    './image-cutter',
   ], function(
     CommonUI,
     GameClient,
+    Cookie,
     Input,
     Misc,
     MobileHacks,
@@ -52,7 +57,11 @@ requirejs(
     AudioManager,
     ImageLoader,
     ImageUtils,
-    CanvasWrapper) {
+    avatars,
+    CanvasUtils,
+    CanvasWrapper,
+    ImageCutter) {
+  var g_state = "select";
   var g_client;
   var g_audioManager;
   var g_clock;
@@ -61,11 +70,19 @@ requirejs(
   var g_leftRight = 0;
   var g_oldLeftRight = 0;
   var g_jump = false;
+  var g_avatarImage;
   var g_avatar;
   var ctx;
   var g_canvas;
   var g_update;
   var g_oldOrientation;
+  var g_spinner;
+  var g_playerCookie = new Cookie("hft-tondeiko-player");
+  var g_oldLetter = [
+    {},
+    {},
+  ];
+  var g_oldAvatarButton = [];
 
   function $(id) {
     return document.getElementById(id);
@@ -86,31 +103,76 @@ requirejs(
   Misc.applyUrlSettings(globals);
   MobileHacks.fixHeightHack();
 
+  var assert = function(g) {
+    if (!g) {
+      throw "assert";
+    }
+  };
+
+  var assert01 = function(v) {
+    assert(typeof(v) === 'number');
+    assert(v >= 0 && v <= 1);
+  };
+
+  var readCookie = function() {
+    var s = g_playerCookie.get();
+    try {
+      var d = JSON.parse(s);
+      assert(typeof d.avatar == 'number');
+      assert(d.avatar >= 0 && d.avatar < avatars.length);
+      assert(typeof d.name == 'string');
+      assert(d.name.length == 2);
+      assert(d.name.substr(0, 1) >= 'A' && d.name.substr(0, 1) <= 'Z');
+      assert(d.name.substr(1, 1) >= 'A' && d.name.substr(1, 1) <= 'Z');
+      assert01(d.color.h);
+      assert01(d.color.s);
+      assert01(d.color.v);
+      globals.save = d;
+    } catch (e) {
+      console.error(e);
+      globals.save = {
+        avatar: 0,
+        name: String.fromCharCode(Misc.randInt(26) + 0x41, Misc.randInt(26) + 0x41),
+        color: {
+          h: Math.random(),
+          s: 0,
+          v: 0,
+        },
+      };
+    }
+    g_avatar = avatars[globals.save.avatar];
+  };
+
+  var saveCookie = function() {
+    g_playerCookie.set(JSON.stringify(globals.save));
+  };
+
+  readCookie();
+
   var startClient = function() {
+
+    avatars.forEach(function(avatar) {
+      var name = avatar.name + "-idle";
+      ImageCutter.cutImage(images[name], { numFrames: 1 });
+      avatar.anims.idle.frames = images[name].frames;
+    });
 
     g_canvas = $("buttons");
     ctx = CanvasWrapper.wrap(g_canvas.getContext("2d"));
     g_client = new GameClient();
 //    $("foo").innerHTML = navigator.appVersion;
 
-    //
     var handleScore = function() {
     };
 
-    var handleDeath = function() {
-    };
 
-    var handleSetColor = function(msg) {
-      var coloredImage = ImageUtils.adjustHSV(images.idle.img, msg.h, msg.s, msg.v, msg.range)
-      var frame = ImageUtils.cropImage(coloredImage, 0, 0, 16, 16);
-      var frame = ImageUtils.scaleImage(frame, 128, 128);
-      g_avatar = frame;
-      g_update = true;
+    var makeAvatar = function() {
+      var img = ImageUtils.adjustHSV(g_avatar.anims.idle.frames[0], globals.save.color.h, globals.save.color.s, globals.save.color.v, g_avatar.range);
+      g_avatarImage = ImageUtils.scaleImage(img, img.width * 4, img.height * 4);
     };
 
     g_client.addEventListener('score', handleScore);
-    g_client.addEventListener('die', handleDeath);
-    g_client.addEventListener('setColor', handleSetColor);
+    makeAvatar();
 
     var sounds = {};
     g_audioManager = new AudioManager(sounds);
@@ -184,14 +246,16 @@ document.addEventListener('touchstart', function(e) {
     var pointers = {
     };
 
-    var setPointer = function(id, pos) {
+    var setPointer = function(id, pos, pressed) {
       var pointer = pointers[id];
       if (!pointer) {
         pointer = { };
         pointers[id] = pointer;
       }
       pointer.pos = pos;
-      pointer.pressed = true;
+      if (pressed) {
+        pointer.pressed = true;
+      }
     };
 
     var clearPointer = function(id, pos) {
@@ -206,7 +270,7 @@ document.addEventListener('touchstart', function(e) {
 window.p = pointers;
     $("buttons").addEventListener('pointerdown', function(e) {
       var pos = Input.getRelativeCoordinates(e.target, e);
-      setPointer(e.pointerId, pos);
+      setPointer(e.pointerId, pos, true);
       g_update = true;
     }, false);
 
@@ -245,11 +309,36 @@ window.p = pointers;
     metalGrad.addColorStop(0.600, 'rgba(198, 198, 198, 1.000)');
     metalGrad.addColorStop(1.000, 'rgba(100, 100, 100, 1.000)');
 
+    var getRainbowGradient = (function() {
+      var rainbowGrad;
+      var rainbowGradWidth;
+
+      return function(width) {
+        if (!rainbowGrad || width != rainbowGradWidth) {
+          rainbowGradWidth = width;
+          rainbowGrad = ctx.createLinearGradient(0.0, 0.0, width, 0);
+          var baseHSV = g_avatar.baseHSV;
+          for (var ii = 0; ii <= 12; ++ii) {
+            var color = ImageUtils.hsvToRgb(
+              (baseHSV[0] * 0 + ii / 12) % 1,
+              1 /* baseHSV[1] */,
+              1 /* baseHSV[2] */);
+            rainbowGrad.addColorStop(ii / 12, "rgb(" + color.join(",") + ")");
+          }
+        }
+        return rainbowGrad;
+      };
+    }());
+
     var inRect = function(ctx, width, height, x, y) {
       x = x || 0;
       y = y || 0;
       var inv = ctx.currentTransform.duplicate();
       inv.invert();
+      ctx.save();
+//      ctx.strokeStyle = "#0F0";
+//      ctx.strokeRect(x, y, width, height);
+      ctx.restore();
       for (var id in pointers) {
         if (pointers.hasOwnProperty(id)) {
           var p = pointers[id];
@@ -257,12 +346,26 @@ window.p = pointers;
             var pnt = inv.transformPoint(p.pos.x, p.pos.y);
             if (pnt[0] >= x && pnt[0] < x + width &&
                 pnt[1] >= y && pnt[1] < y + height) {
-              return true;
+              return {
+                x: (pnt[0] - x) / width,
+                y: (pnt[1] - y) / height,
+              };
             }
           }
         }
       }
-      return false;
+    };
+
+    var drawRect = function(ctx, x, y, width, height) {
+//      CanvasUtils.roundedRect(ctx, x, y, width, height, width / 10);
+      var x2 = x + width;
+      var y2 = y + height;
+      ctx.moveTo(x, y);
+      ctx.lineTo(x2, y);
+      ctx.lineTo(x2, y2);
+      ctx.lineTo(x, y2);
+      ctx.lineTo(x, y);
+      ctx.closePath();
     };
 
     var drawTriangle = function(ctx, width, height) {
@@ -317,6 +420,7 @@ window.p = pointers;
       ctx.save();
       ctx.translate(width - 20, height / 2);
       ctx.rotate(Math.PI);
+
       drawTriangle(ctx, height * 0.6, height * 0.7);
       ctx.restore();
 
@@ -339,6 +443,49 @@ window.p = pointers;
       return inButton ? 0x4 : 0x0;
     };
 
+    var drawLetterSelector = function(ctx, width, height, letter) {
+      ctx.fillStyle = "#6C9";
+      ctx.strokeStyle = 'black';
+
+      ctx.beginPath();
+      drawRect(ctx, -width / 2, -height / 2, width, height);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.font = "bold " + (width * 0.8).toFixed(0) + "px sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = "black";
+
+      ctx.fillText(letter, 0, 2);
+
+      var color = "#3C6";
+      var hColor = "white";
+      ctx.fillStyle = color;
+      ctx.strokeStyle = "black";
+
+      var buttonBits = 0;
+      var tWidth = width * 0.9;
+
+      ctx.save();
+      ctx.translate(0, -width * 1.55);
+      ctx.rotate(Math.PI / 2);
+      var inTop = inRect(ctx, tWidth, tWidth, 0, -tWidth * 0.5);
+      ctx.fillStyle = inTop ? hColor : color;
+      drawTriangle(ctx, tWidth, tWidth);
+      ctx.restore();
+
+      ctx.save();
+      ctx.translate(0, width * 1.55);
+      ctx.rotate(-Math.PI / 2);
+      var inBottom = inRect(ctx, tWidth, tWidth, 0, -tWidth * 0.5);
+      ctx.fillStyle = inBottom ? hColor : color;
+      drawTriangle(ctx, tWidth, tWidth);
+      ctx.restore();
+
+      return (inTop ? 0x1 : 0) | (inBottom ? 0x2 : 0);
+    };
+
     var render = function() {
 
       g_update = hackedResizeBecauseFuckedupIOSSucksDonkeyShit(g_canvas) || g_update;
@@ -350,11 +497,267 @@ window.p = pointers;
 
       if (g_update) {
         g_update = false;
-        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-        ctx.fillStyle = "yellow";
-        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+        var drawController = function() {
+          var depth = 5;
+
+          var xOffset  = 40;
+          var lrWidth  = 250;
+          var lrHeight = 100;
+          var lrX      = xOffset;
+          var lrY      = virtualHeight - 40 - lrHeight;
+          var upWidth  = lrHeight;
+          var upHeight = lrHeight;
+          var upX      = virtualWidth - xOffset - upWidth;
+          var upY      = lrY;
+
+          var avatarWidth = 128;
+          var avatarHeight = 128;
+          var avatarX = lrX + lrWidth + (upX - (lrX + lrWidth)) / 2;
+          var avatarY = lrY / 2 - avatarHeight / 2;
+
+          if (g_avatarImage) {
+            ctx.save();
+            ctx.translate(avatarX, avatarY);
+            ctx.drawImage(g_avatarImage, -avatarWidth / 2, 0);
+            ctx.restore();
+          }
+
+          var buttonBits = 0;
+
+          ctx.save();
+          {
+            ctx.translate(lrX, lrY);
+            buttonBits |= drawLRButton(ctx, lrWidth, lrHeight, depth);
+          }
+          ctx.restore();
+
+          ctx.save();
+          {
+            ctx.translate(upX, upY);
+            buttonBits |= drawUpButton(ctx, upWidth, upHeight, depth);
+
+            handleLeftRightTouch(buttonBits & 0x3);
+            handleJump(buttonBits & 0x4);
+          }
+          ctx.restore();
+
+        };
+
+        var drawBoldText = function(text, x, y) {
+          ctx.font = "bold 40px sans-serif";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(text, x, y);
+        };
+
+        var adjustLetter = function(b, ndx) {
+          var dir = ((b & 0x1) ? 1 : 0) + ((b & 0x2) ? -1 : 0);
+          if (dir && g_oldLetter[ndx].oldDir != dir) {
+            var letterCode = (globals.save.name.charCodeAt(ndx) + dir - 0x41 + 26) % 26 + 0x41;
+            var letters = [globals.save.name.substr(0, 1), globals.save.name.substr(1, 1)];
+            letters[ndx] = String.fromCharCode(letterCode);
+            globals.save.name = letters[0] + letters[1];
+            saveCookie();
+          }
+          g_oldLetter[ndx].oldDir = dir;
+        };
+
+        var selectAvatar = function(button, ndx, dir) {
+          if (button && button != g_oldAvatarButton[ndx]) {
+            globals.save.color.h = (globals.save.color.h + 1 + g_avatar.baseHSV[0]) % 1;
+            globals.save.avatar = (globals.save.avatar + dir + avatars.length) % avatars.length;
+            g_avatar = avatars[globals.save.avatar];
+            globals.save.color.h = (globals.save.color.h + 1 - g_avatar.baseHSV[0]) % 1;
+            makeAvatar();
+          }
+          g_oldAvatarButton[ndx] = button;
+        };
+
+        var drawOptionScreen = function() {
+
+          var drawInitialsInput = function() {
+
+            ctx.fillStyle = "white";
+            drawBoldText("Initials", virtualWidth / 10 * 2, virtualHeight / 10 * 1);
+
+            // letter left
+            ctx.save();
+              ctx.translate(virtualWidth / 10 * 1.1, virtualHeight / 2);
+              var b = drawLetterSelector(ctx, width, height, globals.save.name.substr(0, 1));
+              adjustLetter(b, 0);
+            ctx.restore();
+
+            // letter right
+            ctx.save();
+              ctx.translate(virtualWidth / 10 * 2.9, virtualHeight / 2);
+              var b = drawLetterSelector(ctx, width, height, globals.save.name.substr(1, 1));
+              adjustLetter(b, 1);
+            ctx.restore();
+          };
+
+          var drawAvatarSelection = function() {
+
+            ctx.fillStyle = "white";
+            drawBoldText("Avatar", virtualWidth / 10 * 7, virtualHeight / 20 * 1);
+
+            ctx.save();
+            ctx.translate(0, -avatarHeight * 1.1);
+            {
+              ctx.translate(virtualWidth / 10 * 7, virtualHeight / 2);
+              ctx.beginPath();
+              drawRect(ctx, -avatarWidth / 2, -avatarHeight / 2, avatarWidth, avatarHeight);
+              var color = "#24A";
+              var hColor = "white";
+              ctx.fillStyle = color;
+              ctx.strokeStyle = "black";
+              ctx.fill();
+              ctx.stroke();
+
+              // left avatar tri
+              var tHeight = avatarWidth * 0.8;
+              var tWidth  = tHeight * 0.9
+              var offset = 1.33;
+              ctx.save();
+              {
+                ctx.translate(-avatarWidth * offset, 0);
+                var inLeft = inRect(ctx, tWidth, tHeight, 0, tHeight * -0.5);
+                selectAvatar(inLeft, 0, -1);
+                ctx.fillStyle = inLeft ? hColor : color;
+                drawTriangle(ctx, tWidth, tHeight);
+              }
+              ctx.restore();
+
+              // right avatar tri
+              ctx.save();
+              {
+                ctx.translate(avatarWidth * offset, 0);
+                ctx.rotate(Math.PI);
+                var inRight = inRect(ctx, tWidth, tHeight, 0, tHeight * -0.5);
+                selectAvatar(inRight, 1, 1);
+                ctx.fillStyle = inRight ? hColor : color;
+                drawTriangle(ctx, tWidth, tHeight);
+              }
+              ctx.restore();
+
+              if (g_avatarImage) {
+                ctx.save();
+                {
+                  ctx.scale(0.6, 0.6);
+                  ctx.translate(-g_avatarImage.width / 2, -g_avatarImage.height / 2);
+                  ctx.drawImage(g_avatarImage, 0, 0);
+                }
+                ctx.restore();
+              }
+
+              ctx.save()
+              {
+                ctx.translate(-avatarWidth * 1.3, avatarHeight * 0.6);
+                ctx.beginPath();
+                var rWidth = avatarWidth * 2.6;
+                var rHeight = avatarHeight * 0.8;
+                var rYOff = avatarHeight / 10;
+                var inHue = inRect(ctx, rWidth, rHeight, 0, rYOff);
+                if (inHue) {
+                  globals.save.color.h = (inHue.x + 1 - g_avatar.baseHSV[0]) % 1;
+                  makeAvatar();
+                }
+                ctx.fillStyle = getRainbowGradient(rWidth);
+                ctx.strokeStyle = "black";
+                drawRect(ctx, 0, rYOff, rWidth, rHeight);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.lineWidth = 5;
+                ctx.beginPath();
+                var adjustedHue = (globals.save.color.h + g_avatar.baseHSV[0]) % 1;
+                ctx.translate(rWidth * adjustedHue, avatarHeight / 10);
+                drawRect(ctx, -5, -5, 10, rHeight + 10);
+//                drawRect(ctx, 0, 0, 1, rHeight);
+                ctx.strokeStyle = "white";
+                ctx.stroke();
+                ctx.lineWidth = 1;
+                ctx.strokeStyle = "#444";
+                ctx.stroke();
+              }
+              ctx.restore();
+            }
+            ctx.restore();
+
+            return {
+              left: inLeft,
+              right: inRight,
+              hue: inHue,
+            }
+          };
+
+          var drawGoButton = function() {
+            ctx.save();
+            {
+              ctx.translate(virtualWidth / 10 * 7, virtualHeight / 10 * 8.5);
+              ctx.beginPath();
+              var width = virtualWidth / 10 * 6 * 0.84;
+              var height = virtualHeight / 10 * 2;
+              drawRect(ctx, -width / 2, -height / 2, width, height);
+              var inGo = inRect(ctx, width, height, -width / 2, -height / 2);
+              ctx.fillStyle = inGo ? "white" : "#F80";
+              ctx.strokeStyle = "black";
+              ctx.fill();
+              ctx.stroke();
+
+              ctx.fillStyle = "white";
+              ctx.strokeStyle = "black";
+              drawBoldText("GO!", 0, 0);
+            }
+            ctx.restore();
+            return inGo;
+          };
+
+          ctx.save();
+          ctx.fillStyle = "#888";
+          ctx.fillRect(0, 0, virtualWidth, virtualHeight);
+
+          var xScale = virtualWidth / 456;
+          var yScale = virtualHeight / 368;
+          virtualWidth = 456;
+          virtualHeight = 368;
+          ctx.scale(xScale, yScale);
+
+          var width = virtualWidth / 5 * 0.8;
+          var height = width;
+          var avatarWidth = width * 1.2;
+          var avatarHeight = height * 1.2;
+
+          ctx.fillStyle = "#444";
+          ctx.fillRect(0, 0, virtualWidth / 10 * 4, virtualHeight);
+          ctx.fillStyle = "#666";
+          ctx.fillRect(virtualWidth / 10 * 4, 0, virtualWidth, virtualHeight / 10 * 7);
+          ctx.fillStyle = "#000";
+          ctx.fillRect(virtualWidth / 10 * 4, 0, 6, virtualHeight);
+          ctx.fillRect(virtualWidth / 10 * 4, virtualHeight / 10 * 7, virtualWidth, 6);
+
+          ctx.save();
+          ctx.translate(0, virtualHeight / 20 + 1);
+          drawInitialsInput();
+          ctx.restore();
+
+          ctx.save();
+          ctx.translate(0, virtualHeight / 20 + 1);
+          drawAvatarSelection();
+          ctx.restore();
+
+          var inGo =drawGoButton();
+
+          ctx.restore();
+          return inGo;
+        };
+
+
         ctx.fillStyle = "blue";
-        ctx.fillRect(5, 5, ctx.canvas.width - 10, ctx.canvas.height - 10);
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+//        ctx.fillStyle = "yellow";
+//        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+//        ctx.fillRect(5, 5, ctx.canvas.width - 10, ctx.canvas.height - 10);
 
 //        ctx.fillStyle = "white";
 //        var s = "w:" + window.innerWidth + "," + window.innerHeight + " s:" + window.screenX + "," + window.screenY +
@@ -368,84 +771,67 @@ window.p = pointers;
         //               90 = rotate right
 
         ctx.save();
-        var virtualWidth;
-        var virtualHeight;
-        switch (window.orientation) {
-          case 0:  // portrait
-            virtualWidth = ctx.canvas.height;
-            virtualHeight = ctx.canvas.width;
-            ctx.translate(ctx.canvas.width - 1, 0);
-            ctx.rotate(Math.PI / 2);
-            break;
-          case  90:  // rotate right
-            virtualWidth = ctx.canvas.width;
-            virtualHeight = ctx.canvas.height;
-            //ctx.translate(ctx.canvas.width - 1, ctx.canvas.height - 1);
-            //ctx.rotate(Math.PI);
-            break;
-          default:  // rotate left
-            virtualWidth = ctx.canvas.width;
-            virtualHeight = ctx.canvas.height;
-            break;
-        }
-
-        var depth = 5;
-
-        var xOffset  = 40;
-        var lrWidth  = 250;
-        var lrHeight = 100;
-        var lrX      = xOffset;
-        var lrY      = virtualHeight - 40 - lrHeight;
-        var upWidth  = lrHeight;
-        var upHeight = lrHeight;
-        var upX      = virtualWidth - xOffset - upWidth;
-        var upY      = lrY;
-
-        var avatarWidth = 128;
-        var avatarHeight = 128;
-        var avatarX = lrX + lrWidth + (upX - (lrX + lrWidth)) / 2;
-        var avatarY = lrY / 2 - avatarHeight / 2;
-
-        if (g_avatar) {
-          ctx.save();
-          ctx.translate(avatarX, avatarY);
-          ctx.drawImage(g_avatar, -avatarWidth / 2, 0, avatarWidth, avatarHeight);
-          ctx.restore();
-        }
-
-        var buttonBits = 0;
-
-        ctx.save();
-        ctx.translate(lrX, lrY);
-        buttonBits |= drawLRButton(ctx, lrWidth, lrHeight, depth);
-        ctx.restore();
-
-        ctx.save();
-        ctx.translate(upX, upY);
-        buttonBits |= drawUpButton(ctx, upWidth, upHeight, depth);
-
-        handleLeftRightTouch(buttonBits & 0x3);
-        handleJump(buttonBits & 0x4);
-        ctx.restore();
-
-        ctx.restore();
-
-        ctx.fillStyle = "red";
-        Object.keys(pointers).forEach(function(id) {
-          var p = pointers[id];
-          if (p.pressed) {
-            ctx.fillRect(p.pos.x - 5, p.pos.y - 5, 10, 10);
+        {
+          var virtualWidth;
+          var virtualHeight;
+          switch (window.orientation) {
+            case 0:  // portrait
+              virtualWidth = ctx.canvas.height;
+              virtualHeight = ctx.canvas.width;
+              ctx.translate(ctx.canvas.width - 1, 0);
+              ctx.rotate(Math.PI / 2);
+              break;
+            case  90:  // rotate right
+              virtualWidth = ctx.canvas.width;
+              virtualHeight = ctx.canvas.height;
+              //ctx.translate(ctx.canvas.width - 1, ctx.canvas.height - 1);
+              //ctx.rotate(Math.PI);
+              break;
+            default:  // rotate left
+              virtualWidth = ctx.canvas.width;
+              virtualHeight = ctx.canvas.height;
+              break;
           }
-        });
+
+          ctx.virtualWidth = virtualWidth;
+          ctx.virtualHeight = virtualHeight;
+
+          switch (g_state) {
+            case "select":
+              if (drawOptionScreen()) {
+                g_client.sendCmd('go', globals.save);
+                g_state = "control";
+              }
+              break;
+            case "control":
+              drawController();
+              break;
+          }
+
+          //   ctx.fillStyle = "red";
+          //   Object.keys(pointers).forEach(function(id) {
+          //     var p = pointers[id];
+          //     if (p.pressed) {
+          //       ctx.fillRect(p.pos.x - 5, p.pos.y - 5, 10, 10);
+          //     }
+          //   });
+
+        }
+        ctx.restore();
+
+        ctx.validateTransformStack();
       }
       requestAnimationFrame(render);
     };
     render();
   };
 
-  var images = {
-    idle:  { url: "assets/spr_idle.png", },
-  };
+  var images = { };
+
+  avatars.forEach(function(avatar) {
+    var name = avatar.name + "-idle";
+    images[name] = avatar.anims.idle;
+  });
 
   ImageLoader.loadImages(images, startClient);
 });

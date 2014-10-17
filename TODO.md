@@ -1,10 +1,12 @@
 To Do
 =====
 
-*   switch to 40x24
+*   let you enter initials?
+*   put background on initials
+
+*   switch to 40x22
 *   add player to high score at end
 *   show player his score on phone
-*   remove gear
 *   add input timeout, test with android
 *   add bonus coin? Put it somewhere hard to reach
 *   need backgrounds
@@ -12,8 +14,6 @@ To Do
 *   make characters
 *   make it start fullscreen
 *   make it handle tile animation
-
-*   let you enter initials?
 
 *   Make end that disconnects you
 *   Make queue to get into the game
@@ -36,6 +36,7 @@ To Do
 Done
 ====
 
+*   remove gear
 *   add "I'm the master" open to game so hft knows which game gets the players
 *   make up through collsions work
 *   remove fixed time in gamesupport
