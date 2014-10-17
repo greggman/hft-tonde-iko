@@ -2,16 +2,16 @@ To Do
 =====
 
 *   switch to 40x22
+
 *   add player to high score at end
 *   show player his score on phone
 *   add input timeout, test with android
-*   add bonus coin? Put it somewhere hard to reach
+
 *   need backgrounds
 *   make levels
 *   make characters
-*   make it start fullscreen
-*   make it handle tile animation
 
+*   make it start fullscreen
 *   Make end that disconnects you
 *   Make ssh launcher for show
 
