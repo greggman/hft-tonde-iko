@@ -36,14 +36,21 @@ define([
 
   var avatars = [
     { name: "blocky",
-      baseColor: [0x17, 0x7C, 0x69],
-      range: [0.4, 0.6],
-      scale: 1,
+      baseColor: [0x17, 0x7C, 0x69],  // the base color of the part that changes colors
+      range: [0.4, 0.6],              // the hue range to adjust. Only hues in this range will be affected
+      scale: 1,                       // Can be used to slightly scale a sprite that's too small
       idleAnimSpeed: 4,
       moveAnimSpeed: 0.2,
+
+      // for the animations:
+      //   scale:  how much to scale UP the sprite using nearest neighbor
+      //   slices: how large each slice is before it's scaled. Now this can also be an array
+      //           in which case each entry is the width of a slice starting from the left.
+      //   if slices is NOT specifed the entire file is just one frame.
+
       anims: {
         move: { url: "assets/avatars/blocky/blocky_walkright.png", scale: 2, slices: 16, },
-        idle: { url: "assets/avatars/blocky/blocky_right.png", scale: 2, slices: 16, },
+        idle: { url: "assets/avatars/blocky/blocky_right.png",     scale: 2, slices: 16, },
         jump: { url: "assets/avatars/blocky/blocky_walkright.png", scale: 2, slices: 16, },
       },
     },

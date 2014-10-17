@@ -1,9 +1,6 @@
 To Do
 =====
 
-*   let you enter initials?
-*   put background on initials
-
 *   switch to 40x22
 *   add player to high score at end
 *   show player his score on phone
@@ -16,26 +13,22 @@ To Do
 *   make it handle tile animation
 
 *   Make end that disconnects you
-*   Make queue to get into the game
-*   add sounds to controller.
-*   disallow old android
-
-    This way we can throttle players? Do we need this?
-    Maybe have a countdown on the phone when you'll get
-    inserted
-
 *   Make ssh launcher for show
 
     Figure out how to start multiple machines? ssh? cygwin?
 
-*   turn off debug settings in game.js?
-*   comment out debug
-    *   in launcher
-    *   in player etc..
 
 Done
 ====
 
+*   add sounds to controller.
+*   turn off debug settings in game.js?
+*   comment out debug
+    *   in launcher
+    *   in player etc..
+*   disallow old android
+*   let you enter initials?
+*   put background on initials
 *   remove gear
 *   add "I'm the master" open to game so hft knows which game gets the players
 *   make up through collsions work
