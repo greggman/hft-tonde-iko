@@ -53,6 +53,7 @@ requirejs(
     './avatars',
     './collectable-manager',
     './door',
+    './ball',
     './debug-renderer',
     './image-cutter',
     './levelloader',
@@ -79,6 +80,7 @@ requirejs(
     avatars,
     CollectableManager,
     Door,
+    Ball,
     DebugRenderer,
     ImageCutter,
     LevelLoader,
@@ -130,6 +132,10 @@ window.s = g_services;
     doorOpenDuration: 0.1,
     doorWaitTime: 5,    // time 1 player has to wait for door.
     doorOpenTime: 0.25, // time door stays open
+    maxVelocityBall: [200, 500],
+    ballElasticity: 0.75,
+    ballStopVelocity: 10,
+    ballGravity:300,
 
     drawOffset: {},
   };
@@ -340,6 +346,7 @@ window.g = globals;
     brick: { url: "assets/bricks.png",      },
     coin:  { url: "assets/coin_anim.png",   scale: 4, slices: 8, },
     door:  { url: "assets/door.png",        },
+    ball:  { url: "assets/ball.png",        },    
     "switch":  { url: "assets/switch.png",  },
   };
 
@@ -399,6 +406,7 @@ window.g = globals;
         {type: "teleport", portalType: 0, constructor: Portal},
         {type: "end",      portalType: 1, constructor: Portal},
         {type: "door",                    constructor: Door},
+        {type: "ball",                    constructor: Ball},
       ].forEach(function(type) {
         var teleports = level.getThings(type.type);
         if (teleports) {

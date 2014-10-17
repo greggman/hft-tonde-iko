@@ -171,6 +171,7 @@ define([
   };
 
   var tileInfoSuperCoin = { thing: "supercoin", id: 0, };
+  var tileInfoBall = { thing: "ball", id: 0, };
 
   var tileInfoArea1 = { open: true, thing: "area", id: 0, };
   var tileInfoArea2 = { open: true, thing: "area", id: 1, };
@@ -258,7 +259,7 @@ define([
     tileInfoEnd,             //  2 end
     tileInfoOneWay,          //  3 ladder
     tileInfoSuperCoin,       //  4
-    nullTile,                //  5
+    tileInfoBall,            //  5 ball
     tileInfoOneWay,          //  6 up-through
     tileInfoDoor1,           //  7 door1
     tileInfoDoor2,           //  8 door2
