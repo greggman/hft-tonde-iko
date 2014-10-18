@@ -44,6 +44,7 @@ define([
     gmath) {
 
   var availableColors = [];
+  var nextColor = 0;
   var nameFontOptions = {
     font: "16px sans-serif",
     yOffset: 18,
@@ -81,10 +82,9 @@ define([
 //      } else 
       {
         if (availableColors.length == 0) {
-          for (var ii = 0; ii < 32; ++ii) {
-            var h = ii / 32;
-            var s = (ii % 2) * -0.6;
-            var v = (ii % 2) * 0.1;
+            var h = -.5;
+            var s = 0;
+            var v = 0;
             availableColors.push({
               id: 0,
               h: h,
@@ -93,12 +93,34 @@ define([
               hsv: [h, s, v, 0],
               range: [180 / 360, 275 / 360],
             });
-          }
+            h = 0;
+            availableColors.push({
+              id: 0,
+              h: h,
+              s: s,
+              v: v,
+              hsv: [h, s, v, 0],
+              range: [180 / 360, 275 / 360],
+            });            
+//          for (var ii = 0; ii < 32; ++ii) {
+//            var h = ii / 32;
+//            var s = (ii % 2) * -0.6;
+//            var v = (ii % 2) * 0.1;
+//            availableColors.push({
+//              id: 0,
+//              h: h,
+//              s: s,
+//              v: v,
+//              hsv: [h, s, v, 0],
+//              range: [180 / 360, 275 / 360],
+//            });
+//          }
         }
-        var colorNdx = Math.floor(Math.random() * availableColors.length);
+        var colorNdx = nextColor++; //Math.floor(Math.random() * availableColors.length);
+        if (colorNdx >= availableColors.length)
+        	colorNdx = 0;
         this.color = availableColors[colorNdx];
-  		window.p = this;
-        availableColors.splice(colorNdx, 1);
+        //availableColors.splice(colorNdx, 1);
       }
 	    this.width = 32; level.tileWidth;
 	    this.height = 32; level.tileHeight;
