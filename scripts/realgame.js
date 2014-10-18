@@ -508,8 +508,9 @@ window.g = globals;
     gl.disable(gl.SCISSOR_TEST);
     gl.disable(gl.BLEND);
 
+    // test particles
     if (globals.frameCount % 60 == 0) {
-      g_services.particleEffectManager.spawnConfetti(Misc.randInt(1280), Misc.randInt(720));
+      //g_services.particleEffectManager.spawnConfetti(Misc.randInt(1280), Misc.randInt(720));
     }
 
     var layerNdx = 0;
