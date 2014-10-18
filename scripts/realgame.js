@@ -331,12 +331,14 @@ window.g = globals;
   };
   g_services.status = new Status();
 
-  var createTexture = function(img) {
+  var createTexture = function(img, filter) {
     var tex = Textures.loadTexture(img);
-    tex.setParameter(gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    tex.setParameter(gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-    tex.setParameter(gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    tex.setParameter(gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    if (filter !== false) {
+      tex.setParameter(gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+      tex.setParameter(gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+      tex.setParameter(gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      tex.setParameter(gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    }
     return tex;
   };
 
@@ -357,7 +359,11 @@ window.g = globals;
       var anim = avatar.anims[animName];
       if (anim.urls) {
         anim.urls.forEach(function(url) {
-          images[url] = { url: url, scale: anim.scale, };
+          images[url] = {
+            url: url,
+            scale: anim.scale,
+            filter: anim.filter !== undefined ? anim.filter : avatar.filter,
+          };
         });
       } else {
         var name = avatar.name + "-" + animName;
