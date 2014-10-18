@@ -346,8 +346,15 @@ window.g = globals;
   // Add all the avatar files to the list of images to load.
   avatars.forEach(function(avatar) {
     Object.keys(avatar.anims).forEach(function(animName) {
-      var name = avatar.name + "-" + animName;
-      images[name] = avatar.anims[animName];
+      var anim = avatar.anims[animName];
+      if (anim.urls) {
+        anim.urls.forEach(function(url) {
+          images[url] = { url: url, scale: anim.scale, };
+        });
+      } else {
+        var name = avatar.name + "-" + animName;
+        images[name] = anim;
+      }
     });
   });
 
@@ -363,8 +370,15 @@ window.g = globals;
       // Now that the images are loaded copy them back into the avatar data
       avatars.forEach(function(avatar) {
         Object.keys(avatar.anims).forEach(function(animName) {
-          var name = avatar.name + "-" + animName;
-          avatar.anims[animName].frames = images[name].frames;
+          var anim = avatar.anims[animName];
+          if (anim.urls) {
+            anim.frames = anim.urls.map(function(url) {
+              return images[url].frames[0];
+            });
+          } else {
+            var name = avatar.name + "-" + animName;
+            anim.frames = images[name].frames;
+          }
         });
       });
 

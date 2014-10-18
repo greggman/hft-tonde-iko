@@ -83,7 +83,7 @@ define([
       this.sprite = this.services.spriteManager.createSprite();
       this.nameSprite = this.services.spriteManager.createSprite();
 
-      this.setAvatar(data.avatarNdx || Misc.randInt(this.services.avatars.length));
+      this.setAvatar(data.avatarNdx !== undefined ? data.avatarNdx : Misc.randInt(this.services.avatars.length));
       this.setColor(data.color || { h: Math.random(), s: 0, v: 0 });
 
       this.animTimer = 0;

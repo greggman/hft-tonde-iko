@@ -128,7 +128,8 @@ requirejs(
       assert01(d.color.s);
       assert01(d.color.v);
       globals.save = d;
-    } catch (e) {
+    }  catch (e) {
+      console.error("bad cookie: " + s);
       console.error(e);
       globals.save = {
         avatar: 0,
@@ -519,6 +520,7 @@ window.p = pointers;
           if (g_avatarImage) {
             ctx.save();
             ctx.translate(avatarX, avatarY);
+            ctx.scale(g_avatar.scale, g_avatar.scale);
             ctx.drawImage(g_avatarImage, -avatarWidth / 2, 0);
             ctx.restore();
           }
@@ -644,6 +646,7 @@ window.p = pointers;
                 ctx.save();
                 {
                   ctx.scale(0.6, 0.6);
+                  ctx.scale(g_avatar.scale, g_avatar.scale);
                   ctx.translate(-g_avatarImage.width / 2, -g_avatarImage.height / 2);
                   ctx.drawImage(g_avatarImage, 0, 0);
                 }
@@ -830,7 +833,14 @@ window.p = pointers;
 
   avatars.forEach(function(avatar) {
     var name = avatar.name + "-idle";
-    images[name] = avatar.anims.idle;
+    var idle = avatar.anims.idle;
+    if (idle.urls) {
+      var p = { url: idle.urls[0] };
+      images[name] = p
+      avatar.anims.idle = p;
+    } else {
+      images[name] = idle;
+    }
   });
 
   ImageLoader.loadImages(images, startClient);

@@ -35,6 +35,216 @@ define([
   ], function(ImageUtils) {
 
   var avatars = [
+    { name: "wasler",
+      baseColor: [0xFF,0x00,0x00],
+      range: [0.00, 0.02],
+      scale: 0.5,
+      idleAnimSpeed: 4,
+      moveAnimSpeed: 0.2,
+      anims: {
+        move: {
+          urls: [
+            "assets/avatars/wasler/walk/r/1.png",
+            "assets/avatars/wasler/walk/r/2.png",
+            "assets/avatars/wasler/walk/r/3.png",
+          ],
+        },
+        idle: {
+          urls: [
+            "assets/avatars/wasler/idle/r/1.png",
+            "assets/avatars/wasler/idle/r/2.png",
+            "assets/avatars/wasler/idle/r/3.png",
+          ],
+        },
+        jump: {
+          urls: [
+            "assets/avatars/wasler/jump/r/1.png",
+            "assets/avatars/wasler/jump/r/2.png",
+            "assets/avatars/wasler/jump/r/3.png",
+          ],
+        },
+      },
+    },
+    { name: "sara",
+      baseColor: [0x25,0x41,0x89],
+      range: [0.2, 0.9],
+      scale: 0.5,
+      idleAnimSpeed: 4,
+      moveAnimSpeed: 0.2,
+      anims: {
+        move: {
+          urls: [
+            "assets/avatars/sara/walk/r/1.png",
+            "assets/avatars/sara/walk/r/2.png",
+            "assets/avatars/sara/walk/r/3.png",
+          ],
+        },
+        idle: {
+          urls: [
+            "assets/avatars/sara/idle/r/1.png",
+            "assets/avatars/sara/idle/r/2.png",
+            "assets/avatars/sara/idle/r/3.png",
+          ],
+        },
+        jump: {
+          urls: [
+            "assets/avatars/sara/jump/r/1.png",
+            "assets/avatars/sara/jump/r/2.png",
+            "assets/avatars/sara/jump/r/3.png",
+          ],
+        },
+      },
+    },
+    { name: "gnu",
+      baseColor: [0xB6, 0x7A, 0x3D],
+      range: [0, 0.05],
+      scale: 0.5,
+      idleAnimSpeed: 4,
+      moveAnimSpeed: 0.2,
+      anims: {
+        move: {
+          urls: [
+            "assets/avatars/gnu/walk/r/1.png",
+            "assets/avatars/gnu/walk/r/2.png",
+            "assets/avatars/gnu/walk/r/3.png",
+          ],
+        },
+        idle: {
+          urls: [
+            "assets/avatars/gnu/idle/r/1.png",
+            "assets/avatars/gnu/idle/r/2.png",
+            "assets/avatars/gnu/idle/r/3.png",
+          ],
+        },
+        jump: {
+          urls: [
+            "assets/avatars/gnu/jump/r/1.png",
+            "assets/avatars/gnu/jump/r/2.png",
+            "assets/avatars/gnu/jump/r/3.png",
+          ],
+        },
+      },
+    },
+    { name: "wilber",
+      baseColor: [0x6D,0x4C,0x10],
+      range: [0.1, 0.2],
+      scale: 0.5,
+      idleAnimSpeed: 4,
+      moveAnimSpeed: 0.2,
+      anims: {
+        move: {
+          urls: [
+            "assets/avatars/wilber/walk/r/1.png",
+            "assets/avatars/wilber/walk/r/2.png",
+            "assets/avatars/wilber/walk/r/3.png",
+          ],
+        },
+        idle: {
+          urls: [
+            "assets/avatars/wilber/idle/r/1.png",
+            "assets/avatars/wilber/idle/r/2.png",
+            "assets/avatars/wilber/idle/r/3.png",
+          ],
+        },
+        jump: {
+          urls: [
+            "assets/avatars/wilber/jump/r/1.png",
+            "assets/avatars/wilber/jump/r/2.png",
+            "assets/avatars/wilber/jump/r/3.png",
+          ],
+        },
+      },
+    },
+    { name: "kisi",
+      baseColor: [0x00,0x32,0x66],
+      range: [0.5, 1],
+      scale: 0.5,
+      idleAnimSpeed: 4,
+      moveAnimSpeed: 0.2,
+      anims: {
+        move: {
+          urls: [
+            "assets/avatars/kisi/walk/r/1.png",
+            "assets/avatars/kisi/walk/r/2.png",
+            "assets/avatars/kisi/walk/r/3.png",
+          ],
+        },
+        idle: {
+          urls: [
+            "assets/avatars/kisi/idle/r/1.png",
+            "assets/avatars/kisi/idle/r/2.png",
+            "assets/avatars/kisi/idle/r/3.png",
+          ],
+        },
+        jump: {
+          urls: [
+            "assets/avatars/kisi/jump/r/1.png",
+            "assets/avatars/kisi/jump/r/2.png",
+            "assets/avatars/kisi/jump/r/3.png",
+          ],
+        },
+      },
+    },
+    { name: "tux",
+      baseColor: [0xFF,0xA4,0x04],
+      range: [0.05, 1],
+      scale: 0.5,
+      idleAnimSpeed: 4,
+      moveAnimSpeed: 0.2,
+      anims: {
+        move: {
+          urls: [
+            "assets/avatars/tux/walk/r/1.png",
+            "assets/avatars/tux/walk/r/2.png",
+            "assets/avatars/tux/walk/r/3.png",
+          ],
+        },
+        idle: {
+          urls: [
+            "assets/avatars/tux/idle/r/1.png",
+            "assets/avatars/tux/idle/r/2.png",
+            "assets/avatars/tux/idle/r/3.png",
+          ],
+        },
+        jump: {
+          urls: [
+            "assets/avatars/tux/jump/r/1.png",
+            "assets/avatars/tux/jump/r/2.png",
+            "assets/avatars/tux/jump/r/3.png",
+          ],
+        },
+      },
+    },
+    { name: "kit",
+      baseColor: [0xFF,0x57,0x00],
+      range: [0, 1],
+      scale: 0.5,
+      idleAnimSpeed: 4,
+      moveAnimSpeed: 0.2,
+      anims: {
+        move: {
+          urls: [
+            "assets/avatars/kit/walk/r/1.png",
+            "assets/avatars/kit/walk/r/2.png",
+            "assets/avatars/kit/walk/r/3.png",
+          ],
+        },
+        idle: {
+          urls: [
+            "assets/avatars/kit/idle/r/1.png",
+            "assets/avatars/kit/idle/r/2.png",
+            "assets/avatars/kit/idle/r/3.png",
+          ],
+        },
+        jump: {
+          urls: [
+            "assets/avatars/kit/jump/r/1.png",
+            "assets/avatars/kit/jump/r/2.png",
+            "assets/avatars/kit/jump/r/3.png",
+          ],
+        },
+      },
+    },
     { name: "blocky",
       baseColor: [0x17, 0x7C, 0x69],  // the base color of the part that changes colors
       range: [0.4, 0.6],              // the hue range to adjust. Only hues in this range will be affected
