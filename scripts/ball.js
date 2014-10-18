@@ -262,6 +262,7 @@ return ; ///////////////////////////////////////////////////////////////////////
     var didBounce = false;
     for (var ii = 0; ii < 2; ++ii) {
       var xCheck = this.position[0] + this.checkWallOffset[off];
+      /*
       if (xCheck < 0) {
         if (xCheck < -level.tileWidth / 2) {
           this.teleportToOtherGame(-1);
@@ -271,8 +272,9 @@ return ; ///////////////////////////////////////////////////////////////////////
           this.teleportToOtherGame(1);
         }
       } else {
+      */
         var tile = levelManager.getTileInfoByPixel(xCheck, this.position[1] - this.height / 4 - this.height / 2 * ii);
-        if (tile.collisions && (!tile.sideBits || (tile.sideBits & 0x3))) {
+        if (tile.solidForAI) {
           if (!didBounce) {
             this.velocity[0] = -this.velocity[0] * this.ballElasticity; //0; jma
             if (Math.abs(this.velocity[0]) < this.ballStopVelocity) {
@@ -280,7 +282,7 @@ return ; ///////////////////////////////////////////////////////////////////////
             }
             didBounce = true;
           }
-          var distInTile = xCheck % level.tileWidth;
+          var distInTile = gmath.emod(xCheck, level.tileWidth);
           var xoff = off ? -distInTile : level.tileWidth - distInTile;
           this.position[0] += xoff;
         }
@@ -302,7 +304,9 @@ return ; ///////////////////////////////////////////////////////////////////////
             this.teleportToOtherGame(dir, tile.dest, tile.subDest);
           }
         }
+      /*
       }
+      */
     }
   };
 
@@ -341,13 +345,13 @@ return ; ///////////////////////////////////////////////////////////////////////
     var levelManager = this.services.levelManager;
     for (var ii = 0; ii < 2; ++ii) {
       var tile = levelManager.getTileInfoByPixel(this.position[0] - this.width / 4 + this.width / 2 * ii, this.position[1] - this.height);
-      if (tile.collisions && (!tile.sideBits || (tile.sideBits & 0x4))) {
+      if (tile.solidForAI) {
         var level = levelManager.getLevel();
         this.velocity[1] = -this.velocity[1] * this.ballElasticity; // 0;
         if (Math.abs(this.velocity[1]) < this.ballStopVelocity) {
           this.velocity[1] = 0;
         }
-        this.position[1] = (Math.floor(this.position[1] / level.tileHeight) + 1) * level.tileHeight;
+        this.position[1] = (gmath.unitdiv(this.position[1], level.tileHeight) + 1) * level.tileHeight;
         this.velocity[0] *= this.stopFriction;
         if (!this.bonked) {
           this.bonked = true;
@@ -365,7 +369,7 @@ return ; ///////////////////////////////////////////////////////////////////////
     var level = levelManager.getLevel();
     for (var ii = 0; ii < 2; ++ii) {
       var tile = levelManager.getTileInfoByPixel(this.position[0] - this.width / 4 + this.width / 2 * ii, this.position[1]);
-      if (tile.collisions && (!tile.sideBits || (tile.sideBits & 0x8))) {
+      if (tile.solidForAI) {
         var ty = gmath.unitdiv(this.position[1], level.tileHeight) * level.tileHeight;
         if (!this.oneWay || this.lastPosition[1] <= ty) {
           this.position[1] = Math.floor(this.position[1] / level.tileHeight) * level.tileHeight;

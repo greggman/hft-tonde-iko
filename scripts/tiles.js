@@ -65,8 +65,13 @@ define([
     open: true,
   };
 
+  var tileInfoEdge = {
+    solidForAI: true,
+  };
+
   var tileInfoWall = {
     collisions: true,
+    solidForAI: true,
     lrCollision: lrSolidCollision,
     rlCollision: rlSolidCollision,
     udCollision: udSolidCollision,
@@ -92,6 +97,7 @@ define([
     stopFriction: 0.99,
     walkAcceleration: 200,
     collisions: true,
+    solidForAI: true,
     lrCollision: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
     rlCollision: [31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31],
     udCollision: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
@@ -110,6 +116,7 @@ define([
     stopFriction: 0.99,
     walkAcceleration: 200,
     collisions: true,
+    solidForAI: true,
     udCollision: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
     color: "white",
     imgName: "brick",
@@ -122,6 +129,7 @@ define([
 
   var tileInfoDoor1 = {
     thing: "door", id: 0, collisions: true,
+    solidForAI: true,
     lrCollision: lrSolidCollision,
     rlCollision: rlSolidCollision,
     udCollision: udSolidCollision,
@@ -130,6 +138,7 @@ define([
   };
   var tileInfoDoor2 = {
     thing: "door", id: 1, collisions: true,
+    solidForAI: true,
     lrCollision: lrSolidCollision,
     rlCollision: rlSolidCollision,
     udCollision: udSolidCollision,
@@ -138,6 +147,7 @@ define([
   };
   var tileInfoDoor3 = {
     thing: "door", id: 2, collisions: true,
+    solidForAI: true,
     lrCollision: lrSolidCollision,
     rlCollision: rlSolidCollision,
     udCollision: udSolidCollision,
@@ -147,6 +157,7 @@ define([
 
   var tileInfoSwitch1 = {
     thing: "switch", id: 0, collisions: true,
+    solidForAI: true,
     lrCollision: lrLowerHalfSolidCollision,
     rlCollision: rlLowerHalfSolidCollision,
     udCollision: udLowerHalfSolidCollision,
@@ -155,6 +166,7 @@ define([
   };
   var tileInfoSwitch2 = {
     thing: "switch", id: 1, collisions: true,
+    solidForAI: true,
     lrCollision: lrLowerHalfSolidCollision,
     rlCollision: rlLowerHalfSolidCollision,
     udCollision: udLowerHalfSolidCollision,
@@ -163,6 +175,7 @@ define([
   };
   var tileInfoSwitch3 = {
     thing: "switch", id: 2, collisions: true,
+    solidForAI: true,
     lrCollision: lrLowerHalfSolidCollision,
     rlCollision: rlLowerHalfSolidCollision,
     udCollision: udLowerHalfSolidCollision,
@@ -223,6 +236,7 @@ define([
 
   var tileSlope45L = {
     collisions: true,
+    solidForAI: true,
     slopeLeft: true,
     lrCollision: [31,30,29,28,27,26,25,24,23,22,21,20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0],
     rlCollision: [31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31],
@@ -237,6 +251,7 @@ define([
 
   var tileSlope45R = {
     collisions: true,
+    solidForAI: true,
     slopeRight: true,
     lrCollision: [31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31],
     rlCollision: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31],
@@ -267,9 +282,9 @@ define([
     tileInfoSwitch1,         // 10 switch1
     tileInfoSwitch2,         // 11 switch2
     tileInfoSwitch3,         // 12 switch3
-    nullTile,                // 13
-    tileInfoSlippery,        //  14 solid-ice
-    tileInfoSlipperyOneWay,  //  15 up-through-ice
+    tileInfoEdge,            // 13 used for off the edge of the level left or right
+    tileInfoSlippery,        // 14 solid-ice
+    tileInfoSlipperyOneWay,  // 15 up-through-ice
 
     tileSlope45L, // 16 slope 45 left
     tileSlope45R, // 17 slope 45 right

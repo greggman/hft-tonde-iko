@@ -113,6 +113,7 @@ define([
       tileset: tileset,
       width:   20,
       height:  10,
+      border: false,
       tiles:   [ // 01234567890123456789
           "                    ", // 0
           "                    ", // 1
@@ -221,7 +222,7 @@ define([
     if (y < 0 || y >= this.level.levelHeight) {
       return Tiles.getInfo(1);
     } else if (x < 0 || x >= this.level.levelWidth) {
-      return Tiles.getInfo(0);
+      return Tiles.getInfo(13);
     }
     var tileId = this.level.getTileByPixel(x, y);
     return this.getTileInfo(tileId);
