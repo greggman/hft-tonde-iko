@@ -331,7 +331,8 @@ window.g = globals;
   };
   g_services.status = new Status();
 
-  var createTexture = function(img, filter) {
+  var createTexture = function(img, filter, preMult) {
+    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, preMult === false ? false : true);
     var tex = Textures.loadTexture(img);
     if (filter !== false) {
       tex.setParameter(gl.TEXTURE_MIN_FILTER, gl.NEAREST);
@@ -339,6 +340,7 @@ window.g = globals;
       tex.setParameter(gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
       tex.setParameter(gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     }
+    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
     return tex;
   };
 
@@ -346,7 +348,7 @@ window.g = globals;
   // colorize: number of colors to make
   // slizes: number = width of all slices, array = width of each consecutive slice
   var images = {
-    brick: { url: "assets/bricks.png",      },
+    brick: { url: "assets/bricks.png",      preMult: false, },
     coin:  { url: "assets/coin_anim.png",   scale: 4, slices: 8, },
     door:  { url: "assets/door.png",        },
     ball:  { url: "assets/ball.png",        },    
@@ -517,7 +519,14 @@ window.g = globals;
       }
     }
     g_services.drawSystem.processEntities();
+
+
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+    gl.blendEquation(gl.FUNC_ADD);
     g_services.spriteManager.draw();
+    gl.disable(gl.BLEND);
+
     if (globals.playLevel) {
       // Draw the remaining layers
       for(; layerNdx < numLayers; ++layerNdx) {
