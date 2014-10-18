@@ -43,7 +43,6 @@ define([
     ImageUtils,
     gmath) {
 
-  var availableColors = [];
   var nextColor = 0;
   var nameFontOptions = {
     font: "16px sans-serif",
@@ -77,60 +76,24 @@ define([
       this.idleAnimSpeed = (0.8 + Math.random() * 0.4) * globals.idleAnimSpeed;
       this.points = 0;
       
-//      if (data.color) {
-//        this.color = data.color;
-//      } else 
-      {
-        if (availableColors.length == 0) {
-            var h = -.5;
-            var s = 0;
-            var v = 0;
-            availableColors.push({
-              id: 0,
-              h: h,
-              s: s,
-              v: v,
-              hsv: [h, s, v, 0],
-              range: [180 / 360, 275 / 360],
-            });
-            h = 0;
-            availableColors.push({
-              id: 0,
-              h: h,
-              s: s,
-              v: v,
-              hsv: [h, s, v, 0],
-              range: [180 / 360, 275 / 360],
-            });            
-//          for (var ii = 0; ii < 32; ++ii) {
-//            var h = ii / 32;
-//            var s = (ii % 2) * -0.6;
-//            var v = (ii % 2) * 0.1;
-//            availableColors.push({
-//              id: 0,
-//              h: h,
-//              s: s,
-//              v: v,
-//              hsv: [h, s, v, 0],
-//              range: [180 / 360, 275 / 360],
-//            });
-//          }
-        }
-        var colorNdx = nextColor++; //Math.floor(Math.random() * availableColors.length);
-        if (colorNdx >= availableColors.length)
-        	colorNdx = 0;
-        this.color = availableColors[colorNdx];
-        //availableColors.splice(colorNdx, 1);
-      }
-	    this.width = 32; level.tileWidth;
-	    this.height = 32; level.tileHeight;
-	    var startPosition = {
-	      x: (data.tx + 0.5) * 32, //level.tileWidth,
-	      y: (data.ty + 0.5) * 32, //level.tileHeight
-	    };
-	    this.id = data.tileInfo.id;
+      var h = (++nextColor) % 2 ? 0 : 0.4;
+      this.color = {
+        id: 0,
+        h: h,
+        s: 0,
+        v: 0,
+        hsv: [h, 0, 0, 0],
+        range: [180 / 360, 275 / 360],
+      };
+      this.width  = 32;
+      this.height = 32;
+      var startPosition = {
+        x: (data.tx + 0.5) * level.tileWidth,
+        y: (data.ty + 0.5) * level.tileHeight
+      };
+      this.id = data.tileInfo.id;
 
-        this.data = data;
+      this.data = data;
       
       
       this.animTimer = 0;
@@ -203,8 +166,9 @@ define([
   };
 
   Ball.prototype.setState = function(state) {
-  if (state != 'move')
-  	return;
+    if (state != 'move') {
+      return;
+    }
     this.state = state;
     var init = this["init_" + state];
     if (init) {
@@ -223,7 +187,7 @@ define([
   };
 
   Ball.prototype.removeFromGame = function() {
-return ; ////////////////////////////////////////////////////////////////////////////////////////////// fix this todo jma  
+return ; ////////////////////////////////////////////////////////////////////////////////////////////// fix this todo jma
     this.services.spriteManager.deleteSprite(this.sprite);
     this.services.spriteManager.deleteSprite(this.nameSprite);
     this.services.entitySystem.removeEntity(this);
@@ -310,11 +274,11 @@ return ; ///////////////////////////////////////////////////////////////////////
         var tile = levelManager.getTileInfoByPixel(xCheck, this.position[1] - this.height / 4 - this.height / 2 * ii);
         if (tile.collisions && (!tile.sideBits || (tile.sideBits & 0x3))) {
           if (!didBounce) {
-	          this.velocity[0] = -this.velocity[0] * this.ballElasticity; //0; jma
-	          if (Math.abs(this.velocity[0]) < this.ballStopVelocity) {
-	          	this.velocity[0] = 0;
-	          }
-          	didBounce = true;
+            this.velocity[0] = -this.velocity[0] * this.ballElasticity; //0; jma
+            if (Math.abs(this.velocity[0]) < this.ballStopVelocity) {
+              this.velocity[0] = 0;
+            }
+            didBounce = true;
           }
           var distInTile = xCheck % level.tileWidth;
           var xoff = off ? -distInTile : level.tileWidth - distInTile;
@@ -343,32 +307,34 @@ return ; ///////////////////////////////////////////////////////////////////////
   };
 
   Ball.prototype.checkBall = function(){
-	if (!this.checkBallPlayer) {
-	  this.checkBallPlayer = function(player) {
-  			var dx = this.position[0] - (player.position[0]);
-  			var dx2 = dx * dx;
-  			var radius = 28;
-  			var radius2 = radius * radius;
-  			if (dx2 > radius2) return;
-  			var dy = this.position[1] - (player.position[1] + 12);
-  			var dy2 = dy*dy;
-  			if (dy2 > radius2) return;
-  			this.velocity[0] += dx;
-  			this.velocity[1] += dy;
-  			var len = Math.sqrt(dx2 + dy2);
-  			if (len > 0.1)
-  			{
-  				dx /= len;
-  				dy /= len;
-  				var dot = dx*player.velocity[0] + dy * player.velocity[1];
-  				this.velocity[0] += dx * dot * 0.5;
-  				this.velocity[1] += dy * dot * 0.5;
-  			}
-  			return false;	  
-	  }.bind(this);
-       
-	}
-	this.services.playerManager.forEachPlayer(this.checkBallPlayer);
+    if (!this.checkBallPlayer) {
+      this.checkBallPlayer = function(player) {
+        var dx = this.position[0] - (player.position[0]);
+        var dx2 = dx * dx;
+        var radius = 28;
+        var radius2 = radius * radius;
+        if (dx2 > radius2) {
+          return;
+        }
+        var dy = this.position[1] - (player.position[1] + 12);
+        var dy2 = dy*dy;
+        if (dy2 > radius2) {
+          return;
+        }
+        this.velocity[0] += dx;
+        this.velocity[1] += dy;
+        var len = Math.sqrt(dx2 + dy2);
+        if (len > 0.1) {
+          dx /= len;
+          dy /= len;
+          var dot = dx*player.velocity[0] + dy * player.velocity[1];
+          this.velocity[0] += dx * dot * 0.5;
+          this.velocity[1] += dy * dot * 0.5;
+        }
+        return false;
+      }.bind(this);
+    }
+    this.services.playerManager.forEachPlayer(this.checkBallPlayer);
   }
   
   Ball.prototype.checkUp = function() {
@@ -378,12 +344,12 @@ return ; ///////////////////////////////////////////////////////////////////////
       if (tile.collisions && (!tile.sideBits || (tile.sideBits & 0x4))) {
         var level = levelManager.getLevel();
         this.velocity[1] = -this.velocity[1] * this.ballElasticity; // 0;
-	    if (Math.abs(this.velocity[1]) < this.ballStopVelocity) {
-	      this.velocity[1] = 0;
-	    }
+        if (Math.abs(this.velocity[1]) < this.ballStopVelocity) {
+          this.velocity[1] = 0;
+        }
         this.position[1] = (Math.floor(this.position[1] / level.tileHeight) + 1) * level.tileHeight;
         this.velocity[0] *= this.stopFriction;
-       if (!this.bonked) {
+        if (!this.bonked) {
           this.bonked = true;
           this.services.audioManager.playSound('bonkhead');
         }
@@ -404,14 +370,14 @@ return ; ///////////////////////////////////////////////////////////////////////
         if (!this.oneWay || this.lastPosition[1] <= ty) {
           this.position[1] = Math.floor(this.position[1] / level.tileHeight) * level.tileHeight;
           this.velocity[1] = -Math.abs(this.velocity[1]) * this.ballElasticity; //0;
-	      if (Math.abs(this.velocity[1]) < this.ballStopVelocity) {
-	        this.velocity[1] = 0;
-	      }
+          if (Math.abs(this.velocity[1]) < this.ballStopVelocity) {
+            this.velocity[1] = 0;
+          }
           this.stopFriction = tile.stopFriction || globals.stopFriction;
-		  this.velocity[0] *= this.stopFriction;
+          this.velocity[0] *= this.stopFriction;
           if (!this.landed) {
-          	this.landed = true;
-          	this.services.audioManager.playSound('land');
+            this.landed = true;
+            this.services.audioManager.playSound('land');
           }
         }
         return true;
@@ -422,10 +388,10 @@ return ; ///////////////////////////////////////////////////////////////////////
 
   Ball.prototype.checkLand = function() {
     if (this.velocity[1] > 0) {
-    	this.bonked = false;
+      this.bonked = false;
       return this.checkDown();
     } else if (this.velocity[1] < 0){
-    	this.landed = false;
+      this.landed = false;
       return this.checkUp();
     }
   };
@@ -445,7 +411,7 @@ return ; ///////////////////////////////////////////////////////////////////////
 //jma    this.acceleration[0] = this.lastDirection * this.walkAcceleration;
     this.animTimer += globals.moveAnimSpeed * Math.abs(this.velocity[0]) * globals.elapsedTime;
     //this.updatePhysics(1);
-	this.checkBall();
+    this.checkBall();
     this.updatePhysics();
 
     this.checkWall();
