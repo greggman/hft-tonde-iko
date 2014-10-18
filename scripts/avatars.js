@@ -396,7 +396,7 @@ define([
       //   if slices is NOT specifed the entire file is just one frame.
 
       anims: {
-        move: { url: "assets/avatars/blocky/blocky_walkright.png", scale: 2, slices: 16, },
+        move: { url: "assets/avatars/blocky/blocky_walkright.png", scale: 2, slices: 17, },
         idle: { url: "assets/avatars/blocky/blocky_right.png",     scale: 2, slices: 16, },
         jump: { url: "assets/avatars/blocky/blocky_walkright.png", scale: 2, slices: 16, },
       },
