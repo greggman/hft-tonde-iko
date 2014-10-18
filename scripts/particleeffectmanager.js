@@ -65,9 +65,9 @@ define(
         timeRange: 0.0,
         startSize: 7.0,
         endSize: 7.0,
-        spinSpeedRange: Math.PI * 2},
+        spinSpeedRange: Math.PI * 4},
         function(index, parameters) {
-            var speed = Math.random() * 10 + 20;
+            var speed = Math.random() * 25 + 5;
             var angle = Math.random() * 2 * Math.PI;
             var color = ImageUtils.hsvToRgb(Math.random(), 0.7, 1);
             parameters.startTime = Math.random() * 0.2;
