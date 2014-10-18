@@ -132,7 +132,7 @@ requirejs(
       console.error("bad cookie: " + s);
       console.error(e);
       globals.save = {
-        avatar: 0,
+        avatar: Misc.randInt(avatars.length),
         name: String.fromCharCode(Misc.randInt(26) + 0x41, Misc.randInt(26) + 0x41),
         color: {
           h: Math.random(),
