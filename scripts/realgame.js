@@ -143,7 +143,6 @@ window.g = globals;
 
   function startLocalPlayers() {
     var localPlayers = [];
-    var count = 0;
 
     if (globals.stressTest) {
       globals.numLocalPlayers = Math.max(globals.numLocalPlayers, globals.stressPlayerCount)
@@ -151,7 +150,11 @@ window.g = globals;
 
     var addLocalPlayer = function() {
       var netPlayer = new LocalNetPlayer();
-      var data = { avatarNdx: globals.avatarNdx };
+      var data = {
+        avatarNdx: globals.avatarNdx,
+        dest: localPlayers.length == 0 ? 1 : undefined,
+        subDest: localPlayers.length == 0 ? 0 : undefined,
+      };
       var player = g_playerManager.startPlayer(netPlayer, Strings.padLeft(localPlayers.length + 1, 2, "0"), data, true);
       localPlayers.push({
         player: player,
@@ -160,11 +163,6 @@ window.g = globals;
         oldLeftRight: 0,
         jump: false,
       });
-      var levelManager = g_services.levelManager;
-      var level = levelManager.getLevel();
-      var p = levelManager.getRandomOpenPosition();
-      player.position[0] = p.x;
-      player.position[1] = p.y;
     };
 
     var removeLocalPlayer = function(playerId) {
@@ -331,7 +329,8 @@ window.g = globals;
   };
   g_services.status = new Status();
 
-  var createTexture = function(img, filter) {
+  var createTexture = function(img, filter, preMult) {
+    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, preMult === false ? false : true);
     var tex = Textures.loadTexture(img);
     if (filter !== false) {
       tex.setParameter(gl.TEXTURE_MIN_FILTER, gl.NEAREST);
@@ -339,6 +338,7 @@ window.g = globals;
       tex.setParameter(gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
       tex.setParameter(gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     }
+    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
     return tex;
   };
 
@@ -346,7 +346,7 @@ window.g = globals;
   // colorize: number of colors to make
   // slizes: number = width of all slices, array = width of each consecutive slice
   var images = {
-    brick: { url: "assets/bricks.png",      },
+    brick: { url: "assets/bricks.png",      preMult: false, },
     coin:  { url: "assets/coin_anim.png",   scale: 4, slices: 8, },
     door:  { url: "assets/door.png",        },
     ball:  { url: "assets/ball.png",        },    
@@ -407,18 +407,6 @@ window.g = globals;
       g_services.levelManager = g_levelManager;
       resize();
 
-      var server;
-      if (globals.haveServer) {
-        var server = new GameServer({
-          allowMultipleGames: true,
-          id: globals.id,
-          master: globals.levelName && globals.levelName == "level0-0",
-        });
-        g_services.server = server;
-        server.addEventListener('playerconnect', g_playerManager.startPlayer.bind(g_playerManager));
-      }
-      GameSupport.init(server, globals);
-
       new CollectableManager(g_services);
 
       // create portals
@@ -450,6 +438,17 @@ window.g = globals;
 
       startLocalPlayers();
 
+      var server;
+      if (globals.haveServer) {
+        var server = new GameServer({
+          allowMultipleGames: true,
+          id: globals.id,
+          master: globals.levelName && globals.levelName == "level0-0",
+        });
+        g_services.server = server;
+        server.addEventListener('playerconnect', g_playerManager.startPlayer.bind(g_playerManager));
+      }
+      GameSupport.init(server, globals);
       GameSupport.run(globals, mainloop);
     };
 
@@ -517,7 +516,14 @@ window.g = globals;
       }
     }
     g_services.drawSystem.processEntities();
+
+
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+    gl.blendEquation(gl.FUNC_ADD);
     g_services.spriteManager.draw();
+    gl.disable(gl.BLEND);
+
     if (globals.playLevel) {
       // Draw the remaining layers
       for(; layerNdx < numLayers; ++layerNdx) {

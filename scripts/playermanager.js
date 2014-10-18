@@ -66,7 +66,10 @@ define([
       if (dest) {
         dest = dest[misc.randInt(dest.length)];
         startPosition = { x: dest.tx, y: dest.ty };
-      } else {
+      } else if (!isLocalPlayer) {
+        // I don't remember what this is for. I think it's if there is no sub dest just put the player
+        // on the left or right. It's left over from the first impl of teleporting and can probably
+        // be deleted.
         if (destId == 1) {
           startPosition = { x: level.width - 3, y: 2};
         } else {

@@ -6,6 +6,9 @@ To Do
 *   add player to high score at end
 *   show player his score on phone
 *   add input timeout, test with android
+*   test on tablet
+*   consider using a domain name to connect controllers. maybe if --dns
+    then use `game.happyfuntimes.net`
 
 *   need backgrounds
 *   make levels
