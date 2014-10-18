@@ -54,6 +54,7 @@ requirejs(
     './collectable-manager',
     './door',
     './ball',
+    './coingen',
     './debug-renderer',
     './image-cutter',
     './levelloader',
@@ -81,6 +82,7 @@ requirejs(
     CollectableManager,
     Door,
     Ball,
+	CoinGen,
     DebugRenderer,
     ImageCutter,
     LevelLoader,
@@ -416,7 +418,8 @@ window.g = globals;
         {type: "end",      portalType: 1, constructor: Portal},
         {type: "door",                    constructor: Door},
         {type: "ball",                    constructor: Ball},
-      ].forEach(function(type) {
+        {type: "coingen",                    constructor: CoinGen},
+     ].forEach(function(type) {
         var teleports = level.getThings(type.type);
         if (teleports) {
           Object.keys(teleports).forEach(function(key) {
