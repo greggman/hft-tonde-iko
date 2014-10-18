@@ -35,6 +35,32 @@ define([
   ], function(ImageUtils) {
 
   var avatars = [
+    { name: "spider",
+      baseColor: [0xC9,0xA0,0x00],
+      range: [0.00, 1.0],
+      scale: 0.6,
+      idleAnimSpeed: 4,
+      moveAnimSpeed: 0.1,
+      filter: false,
+      anims: {
+        move: {
+          urls: [
+            "assets/avatars/spider/spider_walk1.png",
+            "assets/avatars/spider/spider_walk2.png",
+          ],
+        },
+        idle: {
+          urls: [
+            "assets/avatars/spider/spider.png",
+          ],
+        },
+        jump: {
+          urls: [
+            "assets/avatars/spider/spider.png",
+          ],
+        },
+      },
+    },
     { name: "alienYellow",
       baseColor: [0xFF,0xD6,0x33],
       range: [0.00, -0.02],
@@ -396,7 +422,7 @@ define([
       //   if slices is NOT specifed the entire file is just one frame.
 
       anims: {
-        move: { url: "assets/avatars/blocky/blocky_walkright.png", scale: 2, slices: 17, },
+        move: { url: "assets/avatars/blocky/blocky_walkright.png", scale: 2, slices: 16, },
         idle: { url: "assets/avatars/blocky/blocky_right.png",     scale: 2, slices: 16, },
         jump: { url: "assets/avatars/blocky/blocky_walkright.png", scale: 2, slices: 16, },
       },
