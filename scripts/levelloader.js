@@ -52,6 +52,7 @@ define([
   };
 
   var createTexture = function(img) {
+    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
     var tex = Textures.loadTexture(img);
     tex.setParameter(gl.TEXTURE_MIN_FILTER, gl.NEAREST);
     tex.setParameter(gl.TEXTURE_MAG_FILTER, gl.NEAREST);

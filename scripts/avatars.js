@@ -35,6 +35,136 @@ define([
   ], function(ImageUtils) {
 
   var avatars = [
+    { name: "alienYellow",
+      baseColor: [0xFF,0xD6,0x33],
+      range: [0.00, -0.02],
+      scale: 0.4,
+      idleAnimSpeed: 4,
+      moveAnimSpeed: 0.1,
+      filter: false,
+      anims: {
+        move: {
+          urls: [
+            "assets/avatars/alien_sprites/alienYellow_walk1.png",
+            "assets/avatars/alien_sprites/alienYellow_walk2.png",
+          ],
+        },
+        idle: {
+          urls: [
+            "assets/avatars/alien_sprites/alienYellow_stand.png",
+          ],
+        },
+        jump: {
+          urls: [
+            "assets/avatars/alien_sprites/alienYellow_jump.png",
+          ],
+        },
+      },
+    },
+    { name: "alienPink",
+      baseColor: [0xF3,0xAF,0xC5],
+      range: [0.00, -0.02],
+      scale: 0.4,
+      idleAnimSpeed: 4,
+      moveAnimSpeed: 0.1,
+      filter: false,
+      anims: {
+        move: {
+          urls: [
+            "assets/avatars/alien_sprites/alienPink_walk1.png",
+            "assets/avatars/alien_sprites/alienPink_walk2.png",
+          ],
+        },
+        idle: {
+          urls: [
+            "assets/avatars/alien_sprites/alienPink_stand.png",
+          ],
+        },
+        jump: {
+          urls: [
+            "assets/avatars/alien_sprites/alienPink_jump.png",
+          ],
+        },
+      },
+    },
+    { name: "alienGreen",
+      baseColor: [0x8B,0xCF,0xBA],
+      range: [0.00, -0.02],
+      scale: 0.4,
+      idleAnimSpeed: 4,
+      moveAnimSpeed: 0.1,
+      filter: false,
+      anims: {
+        move: {
+          urls: [
+            "assets/avatars/alien_sprites/alienGreen_walk1.png",
+            "assets/avatars/alien_sprites/alienGreen_walk2.png",
+          ],
+        },
+        idle: {
+          urls: [
+            "assets/avatars/alien_sprites/alienGreen_stand.png",
+          ],
+        },
+        jump: {
+          urls: [
+            "assets/avatars/alien_sprites/alienGreen_jump.png",
+          ],
+        },
+      },
+    },
+    { name: "alienBlue",
+      baseColor: [0xA3,0xC3,0xEB],
+      range: [0.00, -0.02],
+      scale: 0.4,
+      idleAnimSpeed: 4,
+      moveAnimSpeed: 0.1,
+      filter: false,
+      anims: {
+        move: {
+          urls: [
+            "assets/avatars/alien_sprites/alienBlue_walk1.png",
+            "assets/avatars/alien_sprites/alienBlue_walk2.png",
+          ],
+        },
+        idle: {
+          urls: [
+            "assets/avatars/alien_sprites/alienBlue_stand.png",
+          ],
+        },
+        jump: {
+          urls: [
+            "assets/avatars/alien_sprites/alienBlue_jump.png",
+          ],
+        },
+      },
+    },
+    { name: "alienBeige",
+      baseColor: [0xE6,0xDA,0xBF],
+      range: [0.00, -0.02],
+      scale: 0.4,
+      idleAnimSpeed: 4,
+      moveAnimSpeed: 0.1,
+      filter: false,
+      anims: {
+        move: {
+          urls: [
+            "assets/avatars/alien_sprites/alienBeige_walk1.png",
+            "assets/avatars/alien_sprites/alienBeige_walk2.png",
+          ],
+        },
+        idle: {
+          urls: [
+            "assets/avatars/alien_sprites/alienBeige_stand.png",
+          ],
+        },
+        jump: {
+          urls: [
+            "assets/avatars/alien_sprites/alienBeige_jump.png",
+          ],
+        },
+      },
+    },
     { name: "wasler",
       baseColor: [0xFF,0x00,0x00],
       range: [0.00, 0.02],
