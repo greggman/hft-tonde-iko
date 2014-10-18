@@ -41,6 +41,7 @@ define([
       scale: 0.5,
       idleAnimSpeed: 4,
       moveAnimSpeed: 0.2,
+      filter: false,
       anims: {
         move: {
           urls: [
@@ -71,6 +72,7 @@ define([
       scale: 0.5,
       idleAnimSpeed: 4,
       moveAnimSpeed: 0.2,
+      filter: false,
       anims: {
         move: {
           urls: [
@@ -101,6 +103,7 @@ define([
       scale: 0.5,
       idleAnimSpeed: 4,
       moveAnimSpeed: 0.2,
+      filter: false,
       anims: {
         move: {
           urls: [
@@ -131,6 +134,7 @@ define([
       scale: 0.5,
       idleAnimSpeed: 4,
       moveAnimSpeed: 0.2,
+      filter: false,
       anims: {
         move: {
           urls: [
@@ -161,6 +165,7 @@ define([
       scale: 0.5,
       idleAnimSpeed: 4,
       moveAnimSpeed: 0.2,
+      filter: false,
       anims: {
         move: {
           urls: [
@@ -191,6 +196,7 @@ define([
       scale: 0.5,
       idleAnimSpeed: 4,
       moveAnimSpeed: 0.2,
+      filter: false,
       anims: {
         move: {
           urls: [
@@ -221,6 +227,7 @@ define([
       scale: 0.5,
       idleAnimSpeed: 4,
       moveAnimSpeed: 0.2,
+      filter: false,
       anims: {
         move: {
           urls: [

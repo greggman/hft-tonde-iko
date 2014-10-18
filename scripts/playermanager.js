@@ -49,9 +49,9 @@ define([
     var destId = 1;
     var subDestId = 0;
     if (data) {
-      name = data.name;
+      name = data.name || name;
     }
-    if (data && data.dest === undefined) {
+    if (data && data.dest === undefined && data.position) {
       // We teleported by hitting the edge of the level
       startPosition = {
         x: data.position[0] < level.levelWidth / 2 ? level.levelWidth + level.tileWidth / 4 : -level.tileWidth / 4,

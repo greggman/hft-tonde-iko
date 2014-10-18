@@ -407,7 +407,7 @@ define([
         var tile = levelManager.getTileInfoByPixel(xCheck, this.position[1] - this.height / 4 - this.height / 2 * ii);
         if (tile.collisions && (!tile.sideBits || (tile.sideBits & 0x3))) {
           this.velocity[0] = 0;
-          var distInTile = xCheck % level.tileWidth;
+          var distInTile = gmath.emod(xCheck, level.tileWidth);
           var xoff = off ? -distInTile : level.tileWidth - distInTile;
           this.position[0] += xoff;
         }
@@ -459,7 +459,7 @@ define([
       if (tile.collisions && (!tile.sideBits || (tile.sideBits & 0x4))) {
         var level = levelManager.getLevel();
         this.velocity[1] = 0;
-        this.position[1] = (Math.floor(this.position[1] / level.tileHeight) + 1) * level.tileHeight;
+        this.position[1] = (gmath.unitdiv(this.position[1], level.tileHeight) + 1) * level.tileHeight;
         if (!this.bonked) {
           this.bonked = true;
           this.services.audioManager.playSound('bonkhead');

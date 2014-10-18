@@ -61,6 +61,7 @@ requirejs([
      showFPS:          { label: "show fps",     value: true,   on: false, },
      stressTest:       { label: "stress",       value: true,   on: false, },
      mute:             { label: "mute",         value: true,   on: false, },
+     avatarNdx:        { label: "avatar 0",     value: 0,      on: false, },
   };
 
   Object.keys(settingsOptions).forEach(function(name) {

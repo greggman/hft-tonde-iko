@@ -46,13 +46,13 @@ define([
         var width = image.slices.length ? image.slices[jj] : image.slices;
         var frame = ImageUtils.cropImage(image.img, x, 0, width, image.img.height);
         frame = ImageUtils.scaleImage(frame, width * image.scale, frame.height * image.scale);
-        frame = fn(frame);
+        frame = fn(frame, image.filter);
         frames.push(frame);
         x += width;
       }
       image.frames = frames;
     } else {
-      image.frames = [fn(image.img)];
+      image.frames = [fn(image.img, image.filter)];
     }
   };
 
