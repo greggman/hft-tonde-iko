@@ -151,7 +151,8 @@ window.g = globals;
 
     var addLocalPlayer = function() {
       var netPlayer = new LocalNetPlayer();
-      var player = g_playerManager.startPlayer(netPlayer, Strings.padLeft(localPlayers.length + 1, 2, "0"), undefined, true);
+      var data = { avatarNdx: globals.avatarNdx };
+      var player = g_playerManager.startPlayer(netPlayer, Strings.padLeft(localPlayers.length + 1, 2, "0"), data, true);
       localPlayers.push({
         player: player,
         netPlayer: netPlayer,
