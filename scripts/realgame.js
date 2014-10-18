@@ -143,7 +143,6 @@ window.g = globals;
 
   function startLocalPlayers() {
     var localPlayers = [];
-    var count = 0;
 
     if (globals.stressTest) {
       globals.numLocalPlayers = Math.max(globals.numLocalPlayers, globals.stressPlayerCount)
@@ -151,7 +150,11 @@ window.g = globals;
 
     var addLocalPlayer = function() {
       var netPlayer = new LocalNetPlayer();
-      var data = { avatarNdx: globals.avatarNdx };
+      var data = {
+        avatarNdx: globals.avatarNdx,
+        dest: localPlayers.length == 0 ? 1 : undefined,
+        subDest: localPlayers.length == 0 ? 0 : undefined,
+      };
       var player = g_playerManager.startPlayer(netPlayer, Strings.padLeft(localPlayers.length + 1, 2, "0"), data, true);
       localPlayers.push({
         player: player,
@@ -160,11 +163,6 @@ window.g = globals;
         oldLeftRight: 0,
         jump: false,
       });
-      var levelManager = g_services.levelManager;
-      var level = levelManager.getLevel();
-      var p = levelManager.getRandomOpenPosition();
-      player.position[0] = p.x;
-      player.position[1] = p.y;
     };
 
     var removeLocalPlayer = function(playerId) {
@@ -409,18 +407,6 @@ window.g = globals;
       g_services.levelManager = g_levelManager;
       resize();
 
-      var server;
-      if (globals.haveServer) {
-        var server = new GameServer({
-          allowMultipleGames: true,
-          id: globals.id,
-          master: globals.levelName && globals.levelName == "level0-0",
-        });
-        g_services.server = server;
-        server.addEventListener('playerconnect', g_playerManager.startPlayer.bind(g_playerManager));
-      }
-      GameSupport.init(server, globals);
-
       new CollectableManager(g_services);
 
       // create portals
@@ -452,6 +438,17 @@ window.g = globals;
 
       startLocalPlayers();
 
+      var server;
+      if (globals.haveServer) {
+        var server = new GameServer({
+          allowMultipleGames: true,
+          id: globals.id,
+          master: globals.levelName && globals.levelName == "level0-0",
+        });
+        g_services.server = server;
+        server.addEventListener('playerconnect', g_playerManager.startPlayer.bind(g_playerManager));
+      }
+      GameSupport.init(server, globals);
       GameSupport.run(globals, mainloop);
     };
 
