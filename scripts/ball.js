@@ -418,8 +418,8 @@ return ; ///////////////////////////////////////////////////////////////////////
     this.checkBall();
     this.updatePhysics();
 
-    this.checkWall();
     this.checkLand()
+    this.checkWall();
 
     this.lastDirection = this.direction;
   };
