@@ -160,6 +160,8 @@ define([
         var h = (this.avatar.baseHSV[0] + this.color.h) % 1;
         var s = gmath.clamp(this.avatar.baseHSV[1] + this.color.s, 0, 1);
         var v = gmath.clamp(this.avatar.baseHSV[2] + this.color.v, 0, 1);
+        var brightness = (0.2126 * this.avatar.baseColor[0] / 255 + 0.7152 * this.avatar.baseColor[1] / 255 + 0.0722 * this.avatar.baseColor[2] / 255);
+        nameFontOptions.fillStyle = brightness > 0.6 ? "black" : "white";
         var rgb = ImageUtils.hsvToRgb(h, s, v);
         ctx.beginPath();
         CanvasUtils.roundedRect(ctx, 0, 0, ctx.canvas.width, ctx.canvas.height, 10);
