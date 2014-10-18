@@ -58,6 +58,7 @@ requirejs(
     './image-cutter',
     './levelloader',
     './levelmanager',
+    './particleeffectmanager',
     './particlesystemmanager',
     './playermanager',
     './portal',
@@ -85,6 +86,7 @@ requirejs(
     ImageCutter,
     LevelLoader,
     LevelManager,
+    ParticleEffectManager,
     ParticleSystemManager,
     PlayerManager,
     Portal,
@@ -253,6 +255,7 @@ window.g = globals;
   g_services.spriteManager = new SpriteManager();
   g_services.debugRenderer = new DebugRenderer(globals.debug);
   g_services.particleSystemManager = new ParticleSystemManager();
+  g_services.particleEffectManager = new ParticleEffectManager(g_services);
   g_services.avatars = avatars;
 
   var resize = function() {
@@ -504,6 +507,10 @@ window.g = globals;
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.disable(gl.SCISSOR_TEST);
     gl.disable(gl.BLEND);
+
+    if (globals.frameCount % 60 == 0) {
+      g_services.particleEffectManager.spawnConfetti(Misc.randInt(1280), Misc.randInt(720));
+    }
 
     var layerNdx = 0;
     var layers    = globals.level.layers;
