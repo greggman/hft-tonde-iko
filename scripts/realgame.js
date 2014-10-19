@@ -419,7 +419,7 @@ window.g = globals;
       // create portals
       var level = g_levelManager.getLevel();
       [
-        {type: "teleport",     portalType: 0, constructor: Portal,  },
+        {type: "teleport",     portalType: 0, constructor: Portal,  },  // level to level telaports are not used
         {type: "end",          portalType: 1, constructor: Portal,  },
         {type: "teleportDest", portalType: 2, constructor: Portal,  },
         {type: "door",                        constructor: Door,    },

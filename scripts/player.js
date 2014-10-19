@@ -460,8 +460,8 @@ define([
             this.position[0] = (dest.tx + 0.5) * level.tileWidth;
             this.position[1] = (dest.ty +   1) * level.tileHeight - 1;
           } else {
-            var dir = (tile.dest == 0 || tile.dest == 2) ? -1 : 1;
-            this.teleportToOtherGame(dir, tile.dest, tile.subDest);
+//            var dir = (tile.dest == 0 || tile.dest == 2) ? -1 : 1;
+//            this.teleportToOtherGame(dir, tile.dest, tile.subDest);
           }
         }
       }

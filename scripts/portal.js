@@ -182,7 +182,9 @@ define(
     this.services = services;
     switch (type) {
       case 2:
-        this.emitter = createPortalExit(services.particleSystemManager, data);
+        if (data.tileInfo.local) {  // non local teleports are not used
+          this.emitter = createPortalExit(services.particleSystemManager, data);
+        }
         break;
       case 1:
         this.emitter = createExit(services.particleSystemManager, data);
@@ -192,10 +194,12 @@ define(
         break;
     };
 
-    var level = services.levelManager.getLevel();
-    var x = (data.tx + 0.5) * level.tileWidth;
-    var y = (data.ty + 0.5) * level.tileHeight;
-    this.emitter.setTranslation(x, y, 0);
+    if (this.emitter) {
+      var level = services.levelManager.getLevel();
+      var x = (data.tx + 0.5) * level.tileWidth;
+      var y = (data.ty + 0.5) * level.tileHeight;
+      this.emitter.setTranslation(x, y, 0);
+    }
   };
 
   return Portal;
