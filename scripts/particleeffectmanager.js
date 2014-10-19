@@ -62,7 +62,7 @@ define(
     emitter.setParameters({
         numParticles: 200,
         lifeTime: 1.0,
-        timeRange: 0.0,
+        //timeRange: 0.0,
         startSize: 7.0,
         endSize: 7.0,
         spinSpeedRange: Math.PI * 4},
@@ -82,15 +82,53 @@ define(
     return tdl.particles.createOneShotManager(emitter, maxConfetti);
   };
 
+  var createBallConfetti = function(particleSystemManager, hue) {
+    var emitter = particleSystemManager.createParticleEmitter(onePixelTexture.texture);
+    emitter.setState(tdl.particles.ParticleStateIds.BLEND);
+    emitter.setColorRamp(
+        [1, 1, 1, 1]);
+    emitter.setParameters({
+        numParticles: 200,
+        lifeTime: 1.0,
+        //timeRange: 0.0,
+        startSize: 7.0,
+        endSize: 7.0,
+        spinSpeedRange: Math.PI * 4},
+        function(index, parameters) {
+            var speed = Math.random() * 25 + 5;
+            var angle = Math.random() * 2 * Math.PI;
+            var color = ImageUtils.hsvToRgb(hue, Math.random() * 0.5 + 0.5, 1);
+            parameters.startTime = Math.random() * 0.2;
+            parameters.colorMult = [color[0] / 255, color[1] / 255, color[2] / 255, 1];
+            parameters.position = Maths.matrix4.transformPoint(
+                Maths.matrix4.rotationZ(angle), [0, 0, 0])
+            parameters.velocity = Maths.matrix4.transformPoint(
+                Maths.matrix4.rotationZ(angle), [speed * 20, 0, 0]);
+            parameters.acceleration = Maths.addVector(Maths.matrix4.transformPoint(
+                Maths.matrix4.rotationZ(angle), [-speed * 8, 0, 0]), [0, 100, 0]);
+        });
+    return tdl.particles.createOneShotManager(emitter, maxConfetti);
+  };
   var ParticleEffectManager = function(services) {
     setup();
     this.services = services;
     this.confettis = createConfetti(services.particleSystemManager);
+    this.ballRedConfetti = createBallConfetti(services.particleSystemManager, 0);
+    this.ballBlueConfetti = createBallConfetti(services.particleSystemManager, 0.666);
   };
 
   ParticleEffectManager.prototype.spawnConfetti = function(x, y) {
     var _tp_ = tdl.fast.matrix4.translation(new Float32Array(16), [x, y, 0]);
     this.confettis.startOneShot(_tp_);
+  };
+
+  ParticleEffectManager.prototype.spawnBallRedConfetti = function(x, y) {
+    var _tp_ = tdl.fast.matrix4.translation(new Float32Array(16), [x, y, 0]);
+    this.ballRedConfetti.startOneShot(_tp_);
+  };
+  ParticleEffectManager.prototype.spawnBallBlueConfetti = function(x, y) {
+    var _tp_ = tdl.fast.matrix4.translation(new Float32Array(16), [x, y, 0]);
+    this.ballBlueConfetti.startOneShot(_tp_);
   };
 
   return ParticleEffectManager;
