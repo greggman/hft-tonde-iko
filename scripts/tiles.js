@@ -116,6 +116,8 @@ define([
     stopFriction: 0.99,
     walkAcceleration: 200,
     collisions: true,
+    sideBits: 0x8,  // UDLR
+    oneWay: true,
     solidForAI: true,
     udCollision: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
     color: "white",

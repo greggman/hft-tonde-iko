@@ -158,19 +158,19 @@ this.onCount = Math.max(0, this.onCount - 1);
     if (!switches) {
       return this.kill("no switches for doors");
     }
-    var sw = switches[data.tileInfo.id];
-    if (!sw) {
+    var sws = switches[data.tileInfo.id];
+    if (!sws) {
       return this.kill("Missing switch for door id: " + data.tileInfo.id);
-    } else if (sw.length > 1) {
-      return this.kill("Too many switches for door id: " + data.tileInfo.id)
     }
 
-    var doorInfo = sw[0];
-    this.doorSwitch = new DoorSwitch(services, this, doorInfo);
-    // Link back from level to doorSwitch. So, given a tileInfo (level.getTileInfoByPixel)
-    // if it's a thing = "switch" then you can do level.getThings("switch")[tile.id][0].doorSwitch
-    // to get the object that corresponds to that switch
-    doorInfo.doorSwitch = this.doorSwitch;
+    this.doorSwitches = sws.map(function(doorInfo) {
+      var doorSwitch = new DoorSwitch(services, this, doorInfo);
+      // Link back from level to doorSwitch. So, given a tileInfo (level.getTileInfoByPixel)
+      // if it's a thing = "switch" then you can do level.getThings("switch")[tile.id][0].doorSwitch
+      // to get the object that corresponds to that switch
+      doorInfo.doorSwitch = doorSwitch;
+      return doorSwitch;
+    }.bind(this));
 
     var allAreas = level.getThings("area");
     if (!allAreas) {
@@ -215,7 +215,7 @@ this.onCount = Math.max(0, this.onCount - 1);
   Door.prototype.kill = function(msg) {
     this.process = function() {};
     this.draw = function() {};
-    services.gameSupport.log(msg);
+    this.services.gameSupport.log(msg);
   };
 
   // Tell door to open (it might already be open)
