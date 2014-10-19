@@ -41,7 +41,7 @@ define([
 
   function ScoreManager(services, topTodayElement, topHourElement, top10Mins) {
     this.services = services;
-    this.maxScores_ = 7;
+    this.maxScores_ = 4;
     this.orderedPlayers_ = [];
     this.zeros_ = "";
 
@@ -70,7 +70,19 @@ define([
         top.lines.push(line);
         line.setName(ii & 1 ? "WW" : "ii");
         line.setMsg(": " + Strings.padLeft(Math.pow(7,ii + 1), 7, "0"));
-        line.ctx.drawImage(this.services.images.idle.frames[0].img, 0, 0);
+        var avatar = this.services.avatars[0];
+        var ctx = line.ctx;
+        var img = avatar.anims.idle.frames[0].img;
+        var bigger = Math.max(img.width, img.height);
+        var scale = ctx.canvas.width / bigger;
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        var width  = img.width * scale;
+        var height = img.height * scale;
+        ctx.drawImage(
+          img,
+          (ctx.canvas.width  - width ) / 2,
+          (ctx.canvas.height - height) / 2 ,
+          width, height);
       }
     }.bind(this));
   }
