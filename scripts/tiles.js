@@ -69,6 +69,12 @@ define([
     solidForAI: true,
   };
 
+  var tileInfoLadder = {
+    collisions: false,
+    open: true,
+    ladder: true,
+  };
+
   var tileInfoWall = {
     collisions: true,
     solidForAI: true,
@@ -275,7 +281,7 @@ define([
     tileInfoSky,             //  0
     tileInfoWall,            //  1 solid
     tileInfoEnd,             //  2 end
-    tileInfoOneWay,          //  3 ladder
+    tileInfoLadder,          //  3 ladder
     tileInfoCoinGen,         //  4
     tileInfoBall,            //  5 ball
     tileInfoOneWay,          //  6 up-through

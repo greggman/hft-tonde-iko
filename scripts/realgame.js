@@ -83,7 +83,7 @@ requirejs(
     CollectableManager,
     Door,
     Ball,
-	CoinGen,
+    CoinGen,
     DebugRenderer,
     ImageCutter,
     LevelLoader,
@@ -123,6 +123,8 @@ window.s = g_services;
     minStopVelocity: 25,      // below this we're idling
     stopFriction: 0.95,       // amount of velocity to keep each frame
     gravity: 1200,
+    ladderGravity: 600,
+    ladderMaxVelocityY: 200,
     frameCount: 0,
     coinAnimSpeed: 10,
     coinAnimSpeedRange: 2,

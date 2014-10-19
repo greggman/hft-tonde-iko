@@ -310,26 +310,25 @@ define([
       this.velocity[0] = Misc.clampPlusMinus(this.velocity[0], globals.maxVelocity[0]);
     }
     if (axis & 2) {
-      this.velocity[1] += (this.acceleration[1] + globals.gravity) * elapsedTime;
-      this.velocity[1] = Misc.clampPlusMinus(this.velocity[1], globals.maxVelocity[1]);
+      this.velocity[1] += (this.acceleration[1] + this.gravity) * elapsedTime;
+      this.velocity[1] = Misc.clampPlusMinus(this.velocity[1], this.maxVelocityY);
     }
   };
 
   Player.prototype.updatePhysics = function(axis) {
-    var kOneTick = 1 / 60;
     var globals = this.services.globals;
+    var levelManager = this.services.levelManager;
+    var tile = levelManager.getTileInfoByPixel(this.position[0], this.position[1]);
+    this.gravity = tile.ladder ? globals.ladderGravity : globals.gravity;
+    this.maxVelocityY = tile.ladder ? globals.ladderMaxVelocityY : globals.maxVelocity[1];
+    var kOneTick = 1 / 60;
     this.timeAccumulator += globals.elapsedTime;
     var ticks = (this.timeAccumulator / kOneTick) | 0;
     this.timeAccumulator -= ticks * kOneTick;
-	var lpx = this.position[0];
-	var lpy = this.position[1];
     for (var ii = 0; ii < ticks; ++ii) {
       this.updateVelocity(axis, kOneTick);
       this.updatePosition(axis, kOneTick);
     }
-    this.lastPosition[0] =lpx;
-    this.lastPosition[1] = lpy;
-
   };
 
   Player.prototype.init_idle = function() {
@@ -354,12 +353,20 @@ define([
   };
 
   Player.prototype.init_fall = function() {
+    var globals = this.services.globals;
     this.animTimer = 1;
     this.anim = this.anims.jump.frames;
   };
 
   Player.prototype.state_fall = function() {
     var globals = this.services.globals;
+    var levelManager = this.services.levelManager;
+    var tile = levelManager.getTileInfoByPixel(this.position[0], this.position[1]);
+    if (tile.ladder) {
+      if (this.checkJump()) {
+        return;
+      }
+    }
     this.acceleration[0] = this.direction * globals.moveAcceleration;
     this.updatePhysics();
     var landed = this.checkLand();
@@ -486,8 +493,7 @@ define([
       var tile = levelManager.getTileInfoByPixel(this.position[0] - this.width / 4 + this.width / 2 * ii, this.position[1]);
       if (tile.collisions && (!tile.sideBits || (tile.sideBits & 0x8))) {
         var ty = gmath.unitdiv(this.position[1], level.tileHeight) * level.tileHeight;
-		console.log(this.lastPosition[1] + "<?" + ty);
-        if (!tile.oneWay || this.lastPosition[1] <= ty) {
+        if (!tile.oneWay || this.lastPosition[1] < ty) {
           this.position[1] = Math.floor(this.position[1] / level.tileHeight) * level.tileHeight;
           this.velocity[1] = 0;
           this.stopFriction = tile.stopFriction || globals.stopFriction;
