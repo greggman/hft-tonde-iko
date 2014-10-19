@@ -406,6 +406,25 @@ define([
     });
   };
 
+  Player.prototype.addPlayerToScoreboard = function() {
+    // make sure we can't get added twice
+    if (this.addedToScoreboard) {
+      return;
+    }
+    this.addedToScoreboard = true;
+    var scoreManager = this.services.scoreManager;
+    if (scoreManager) {
+      scoreManager.addPlayer({
+        score: this.score,
+        name: this.playerName,
+        color: {
+          h: this.color.h,
+        },
+        avatarNdx: this.avatarNdx,
+      });
+    }
+  }
+
   Player.prototype.checkWall = function() {
     var globals = this.services.globals;
     var levelManager = this.services.levelManager;
