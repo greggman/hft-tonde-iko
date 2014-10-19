@@ -64,8 +64,8 @@ define([
         var sprite = this.services.spriteManager.createSprite();
         this.sprites.push(sprite);
       }
-	  this.position = [
-		(data.tx + 0.5) * level.tileWidth,
+      this.position = [
+        (data.tx + 0.5) * level.tileWidth,
         (data.ty + 1) * level.tileHeight
       ];
 
@@ -155,7 +155,7 @@ define([
     this.animTimer += globals.elapsedTime * this.animSpeed;
 
     if (this.checkCollected()) {
-	  this.setState("collected");
+      this.setState("collected");
       return;
     }
   };
