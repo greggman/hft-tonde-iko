@@ -43,6 +43,7 @@ define(
 
   var onePixelTexture;
   var ringTexture;
+  var squareTexture;
 
   var setup = function() {
     if (!onePixelTexture) {
@@ -59,6 +60,9 @@ define(
 //      ctx.fillStyle = "white";
 //      ctx.fillRect(0, 0, c.width, c.height);
       ringTexture = new Textures.Texture2D(c);
+      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      ctx.strokeRect(3, 3, ctx.canvas.width - 6, ctx.canvas.height - 6);
+      squareTexture = new Textures.Texture2D(c);
     }
   };
 
@@ -68,31 +72,35 @@ define(
   };
 
   var createExit = function(particleSystemManager) {
-    var emitter = particleSystemManager.createParticleEmitter(onePixelTexture.texture);
+//  var emitter = particleSystemManager.createParticleEmitter(onePixelTexture.texture);
+    var emitter = particleSystemManager.createParticleEmitter(squareTexture.texture);
     emitter.setState(tdl.particles.ParticleStateIds.BLEND);
     emitter.setColorRamp(
-        [1, 1, 1, 0,
-         1, 1, 1, 1,
-         1, 0, 1, 1,
-         1, 0, 1, 1,
-         1, 0, 1, 0.5,
-         1, 1, 1, 0]);
+        [0.1, 0.85, 1, 0,
+         0.1, 0.85, 1, 0.3,
+         0.1, 1.0, 1, 0.6,
+         0.1, 1.0, 1, 1,
+         0.1, 0.85, 1, 0.6,
+         0.1, 0.85, 1, 1,
+         0.1, 0.85, 1, 0.1,
+      ]);
+    var numParticles = 15;
     emitter.setParameters({
-        numParticles: 200,
+        numParticles: numParticles,
         lifeTime: 0.8,
-        timeRange: 0.7,
-        startSize: 7.0,
-        endSize: 2.0,
-        spinSpeedRange: 0},
+        timeRange: 0.8,
+        startSize: 140.0,
+        endSize: 0.0,
+        spinSpeedRange: 0.1},
         function(index, parameters) {
             var speed = Math.random() * 10 + 20;
-            var angle = Math.random() * 2 * Math.PI;
+            var angle = index / numParticles * Math.PI * 2; //Math.random() * 2 * Math.PI;
             parameters.position = Maths.matrix4.transformPoint(
-                Maths.matrix4.rotationZ(angle), [-speed, 0, 0])
+                Maths.matrix4.rotationZ(angle), [-speed * 0.1, 0, 0])
             parameters.velocity = Maths.matrix4.transformPoint(
                 Maths.matrix4.rotationZ(angle), [speed * 0, 0, 0]);
             parameters.acceleration = Maths.matrix4.transformPoint(
-                Maths.matrix4.rotationZ(angle), [speed * 2, 0, 0]);
+                Maths.matrix4.rotationZ(angle), [speed * 0, 0, 0]);
         });
     return emitter;
   };
@@ -174,7 +182,9 @@ define(
     this.services = services;
     switch (type) {
       case 2:
-        this.emitter = createPortalExit(services.particleSystemManager, data);
+        if (data.tileInfo.local) {  // non local teleports are not used
+          this.emitter = createPortalExit(services.particleSystemManager, data);
+        }
         break;
       case 1:
         this.emitter = createExit(services.particleSystemManager, data);
@@ -184,10 +194,12 @@ define(
         break;
     };
 
-    var level = services.levelManager.getLevel();
-    var x = (data.tx + 0.5) * level.tileWidth;
-    var y = (data.ty + 0.5) * level.tileHeight;
-    this.emitter.setTranslation(x, y, 0);
+    if (this.emitter) {
+      var level = services.levelManager.getLevel();
+      var x = (data.tx + 0.5) * level.tileWidth;
+      var y = (data.ty + 0.5) * level.tileHeight;
+      this.emitter.setTranslation(x, y, 0);
+    }
   };
 
   return Portal;

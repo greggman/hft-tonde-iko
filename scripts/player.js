@@ -290,42 +290,49 @@ define([
     this.netPlayer.sendCmd(cmd, data);
   };
 
-  Player.prototype.updatePosition = function(axis, elapsedTime) {
-    var axis = axis || 3;
-    this.lastPosition[0] = this.position[0];
-    this.lastPosition[1] = this.position[1];
-    if (axis & 1) {
-      this.position[0] += this.velocity[0] * elapsedTime;
-    }
-    if (axis & 3) {
-      this.position[1] += this.velocity[1] * elapsedTime;
-    }
-  };
+  Player.prototype.updatePhysics = (function() {
+    var updatePosition = function(axis, elapsedTime) {
+      var axis = axis || 3;
+      if (axis & 1) {
+        this.position[0] += this.velocity[0] * elapsedTime;
+      }
+      if (axis & 3) {
+        this.position[1] += this.velocity[1] * elapsedTime;
+      }
+    };
 
-  Player.prototype.updateVelocity = function(axis, elapsedTime) {
-    var globals = this.services.globals;
-    var axis = axis || 3;
-    if (axis & 1) {
-      this.velocity[0] += this.acceleration[0] * elapsedTime;
-      this.velocity[0] = Misc.clampPlusMinus(this.velocity[0], globals.maxVelocity[0]);
-    }
-    if (axis & 2) {
-      this.velocity[1] += (this.acceleration[1] + globals.gravity) * elapsedTime;
-      this.velocity[1] = Misc.clampPlusMinus(this.velocity[1], globals.maxVelocity[1]);
-    }
-  };
+    var updateVelocity = function(axis, elapsedTime) {
+      var globals = this.services.globals;
+      var axis = axis || 3;
+      if (axis & 1) {
+        this.velocity[0] += this.acceleration[0] * elapsedTime;
+        this.velocity[0] = Misc.clampPlusMinus(this.velocity[0], globals.maxVelocity[0]);
+      }
+      if (axis & 2) {
+        this.velocity[1] += (this.acceleration[1] + this.gravity) * elapsedTime;
+        this.velocity[1] = Misc.clampPlusMinus(this.velocity[1], this.maxVelocityY);
+      }
+    };
 
-  Player.prototype.updatePhysics = function(axis) {
-    var kOneTick = 1 / 60;
-    var globals = this.services.globals;
-    this.timeAccumulator += globals.elapsedTime;
-    var ticks = (this.timeAccumulator / kOneTick) | 0;
-    this.timeAccumulator -= ticks * kOneTick;
-    for (var ii = 0; ii < ticks; ++ii) {
-      this.updateVelocity(axis, kOneTick);
-      this.updatePosition(axis, kOneTick);
-    }
-  };
+
+    return function(axis) {
+      var globals = this.services.globals;
+      var levelManager = this.services.levelManager;
+      var tile = levelManager.getTileInfoByPixel(this.position[0], this.position[1]);
+      this.gravity = tile.ladder ? globals.ladderGravity : globals.gravity;
+      this.maxVelocityY = tile.ladder ? globals.ladderMaxVelocityY : globals.maxVelocity[1];
+      var kOneTick = 1 / 60;
+      this.timeAccumulator += globals.elapsedTime;
+      var ticks = (this.timeAccumulator / kOneTick) | 0;
+      this.timeAccumulator -= ticks * kOneTick;
+      this.lastPosition[0] = this.position[0];
+      this.lastPosition[1] = this.position[1];
+      for (var ii = 0; ii < ticks; ++ii) {
+        updateVelocity.call(this, axis, kOneTick);
+        updatePosition.call(this, axis, kOneTick);
+      }
+    };
+  }());
 
   Player.prototype.init_idle = function() {
     this.velocity[0] = 0;
@@ -349,12 +356,20 @@ define([
   };
 
   Player.prototype.init_fall = function() {
+    var globals = this.services.globals;
     this.animTimer = 1;
     this.anim = this.anims.jump.frames;
   };
 
   Player.prototype.state_fall = function() {
     var globals = this.services.globals;
+    var levelManager = this.services.levelManager;
+    var tile = levelManager.getTileInfoByPixel(this.position[0], this.position[1]);
+    if (tile.ladder) {
+      if (this.checkJump()) {
+        return;
+      }
+    }
     this.acceleration[0] = this.direction * globals.moveAcceleration;
     this.updatePhysics();
     var landed = this.checkLand();
@@ -391,6 +406,25 @@ define([
     });
   };
 
+  Player.prototype.addPlayerToScoreboard = function() {
+    // make sure we can't get added twice
+    if (this.addedToScoreboard) {
+      return;
+    }
+    this.addedToScoreboard = true;
+    var scoreManager = this.services.scoreManager;
+    if (scoreManager) {
+      scoreManager.addPlayer({
+        score: this.score,
+        name: this.playerName,
+        color: {
+          h: this.color.h,
+        },
+        avatarNdx: this.avatarNdx,
+      });
+    }
+  }
+
   Player.prototype.checkWall = function() {
     var globals = this.services.globals;
     var levelManager = this.services.levelManager;
@@ -426,8 +460,8 @@ define([
             this.position[0] = (dest.tx + 0.5) * level.tileWidth;
             this.position[1] = (dest.ty +   1) * level.tileHeight - 1;
           } else {
-            var dir = (tile.dest == 0 || tile.dest == 2) ? -1 : 1;
-            this.teleportToOtherGame(dir, tile.dest, tile.subDest);
+//            var dir = (tile.dest == 0 || tile.dest == 2) ? -1 : 1;
+//            this.teleportToOtherGame(dir, tile.dest, tile.subDest);
           }
         }
       }

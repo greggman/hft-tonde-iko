@@ -83,7 +83,7 @@ requirejs(
     CollectableManager,
     Door,
     Ball,
-	CoinGen,
+    CoinGen,
     DebugRenderer,
     ImageCutter,
     LevelLoader,
@@ -123,6 +123,8 @@ window.s = g_services;
     minStopVelocity: 25,      // below this we're idling
     stopFriction: 0.95,       // amount of velocity to keep each frame
     gravity: 1200,
+    ladderGravity: 600,
+    ladderMaxVelocityY: 200,
     frameCount: 0,
     coinAnimSpeed: 10,
     coinAnimSpeedRange: 2,
@@ -417,7 +419,7 @@ window.g = globals;
       // create portals
       var level = g_levelManager.getLevel();
       [
-        {type: "teleport",     portalType: 0, constructor: Portal,  },
+        {type: "teleport",     portalType: 0, constructor: Portal,  },  // level to level telaports are not used
         {type: "end",          portalType: 1, constructor: Portal,  },
         {type: "teleportDest", portalType: 2, constructor: Portal,  },
         {type: "door",                        constructor: Door,    },
@@ -515,6 +517,16 @@ window.g = globals;
     // test particles
     if (globals.frameCount % 60 == 0) {
       //g_services.particleEffectManager.spawnConfetti(Misc.randInt(1280), Misc.randInt(720));
+      if (g_services.scoreManager) {
+        g_services.scoreManager.addPlayer({
+          score: 5 + Misc.randInt(5000),
+          name: String.fromCharCode(Misc.randInt(26) + 0x41, Misc.randInt(26) + 0x41),
+          color: {
+            h: Math.random(),
+          },
+          avatarNdx: Misc.randInt(g_services.avatars.length),
+        });
+      }
     }
 
     var layerNdx = 0;
