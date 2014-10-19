@@ -216,7 +216,7 @@ define([
   var tileInfoTeleport2d = { thing: "teleport", teleport: true, dest: 2, subDest: 3, };
   var tileInfoTeleport3d = { thing: "teleport", teleport: true, dest: 3, subDest: 3, };
 
-  var tileInfoLocalTeleport0 = { thing: "teleport", teleport: true, dest: 0, local: true, };
+  var tileInfoLocalTeleport0 = { thing: "teleport", teleport: true, dest: 0, local: true, open: true}; // to allow coins from balls to go through it.
   var tileInfoLocalTeleport1 = { thing: "teleport", teleport: true, dest: 1, local: true, };
   var tileInfoLocalTeleport2 = { thing: "teleport", teleport: true, dest: 2, local: true, };
   var tileInfoLocalTeleport3 = { thing: "teleport", teleport: true, dest: 3, local: true, };
