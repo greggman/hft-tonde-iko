@@ -196,8 +196,6 @@ return ; ///////////////////////////////////////////////////////////////////////
 
   Ball.prototype.updatePosition = function(axis, elapsedTime) {
     var axis = axis || 3;
-    this.lastPosition[0] = this.position[0];
-    this.lastPosition[1] = this.position[1];
     if (axis & 1) {
       this.position[0] += this.velocity[0] * elapsedTime;
     }
@@ -225,10 +223,14 @@ return ; ///////////////////////////////////////////////////////////////////////
     this.timeAccumulator += globals.elapsedTime;
     var ticks = (this.timeAccumulator / kOneTick) | 0;
     this.timeAccumulator -= ticks * kOneTick;
+	var lpx = this.position[0];
+	var lpy = this.position[1];
     for (var ii = 0; ii < ticks; ++ii) {
       this.updateVelocity(axis, kOneTick);
       this.updatePosition(axis, kOneTick);
     }
+    this.lastPosition[0] = lpx;
+    this.lastPosition[1] = lpy;
   };
 
   Ball.prototype.teleportToOtherGame = function(dir, dest, subDest) {
@@ -355,7 +357,7 @@ return ; ///////////////////////////////////////////////////////////////////////
         this.velocity[0] *= this.stopFriction;
         if (!this.bonked) {
           this.bonked = true;
-          this.services.audioManager.playSound('bonkhead');
+          //this.services.audioManager.playSound('bonkhead');
         }
         return true;
       }
@@ -381,7 +383,7 @@ return ; ///////////////////////////////////////////////////////////////////////
           this.velocity[0] *= this.stopFriction;
           if (!this.landed) {
             this.landed = true;
-            this.services.audioManager.playSound('land');
+            //this.services.audioManager.playSound('land');
           }
         }
         return true;
@@ -448,7 +450,7 @@ return ; ///////////////////////////////////////////////////////////////////////
     var nameSprite = this.nameSprite;
     nameSprite.uniforms.u_texture = this.nameImage;
     nameSprite.x = off.x + ((              this.position[0])      | 0) * globals.scale;
-    nameSprite.y = off.y + ((height / -2 + this.position[1] - 0) | 0) * globals.scale;
+    nameSprite.y = off.y + ((height / -2 + this.position[1] - 2) | 0) * globals.scale;
     nameSprite.width  = this.nameImage.img.width  * globals.scale;
     nameSprite.height = this.nameImage.img.height * globals.scale;
   };
