@@ -79,6 +79,7 @@ define([
       this.acceleration = [0, 0];
       this.stopFriction = globals.stopFriction;
       this.walkAcceleration = globals.moveAcceleration;
+      this.isLocalPlayer = isLocalPlayer;
 
       this.sprite = this.services.spriteManager.createSprite();
       this.nameSprite = this.services.spriteManager.createSprite();
@@ -397,11 +398,11 @@ define([
     var off = this.velocity[0] < 0 ? 0 : 1;
     for (var ii = 0; ii < 2; ++ii) {
       var xCheck = this.position[0] + this.checkWallOffset[off];
-      if (xCheck < 0) {
+      if (!this.isLocalPlayer && xCheck < 0) {
         if (xCheck < -level.tileWidth / 2) {
           this.teleportToOtherGame(-1);
         }
-      } else if (xCheck >= level.levelWidth) {
+      } else if (!this.isLocalPlayer && xCheck >= level.levelWidth) {
         if (xCheck >= level.levelWidth + level.tileWidth / 2) {
           this.teleportToOtherGame(1);
         }
@@ -480,7 +481,7 @@ define([
       var tile = levelManager.getTileInfoByPixel(this.position[0] - this.width / 4 + this.width / 2 * ii, this.position[1]);
       if (tile.collisions && (!tile.sideBits || (tile.sideBits & 0x8))) {
         var ty = gmath.unitdiv(this.position[1], level.tileHeight) * level.tileHeight;
-        if (!this.oneWay || this.lastPosition[1] <= ty) {
+        if (!tile.oneWay || this.lastPosition[1] < ty) {
           this.position[1] = Math.floor(this.position[1] / level.tileHeight) * level.tileHeight;
           this.velocity[1] = 0;
           this.stopFriction = tile.stopFriction || globals.stopFriction;
