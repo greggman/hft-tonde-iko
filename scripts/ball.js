@@ -78,6 +78,7 @@ define([
       this.points = 0;
       
       var h = (++nextColor) % 2 ? 0 : 0.4;
+      this.colorIndex = nextColor;
       this.color = {
         id: 0,
         h: h,
@@ -257,13 +258,15 @@ return ; ///////////////////////////////////////////////////////////////////////
       console.error("missing local dest for dest: " + tile.dest);
       return;
     }
-    dest = dest[Misc.randInt(dest.length)];
-    this.position[0] = (dest.tx + 0.5) * level.tileWidth;
-    this.position[1] = (dest.ty +   1) * level.tileHeight - 1;
     this.points += numPoints;
     if (this.points >= this.services.globals.ballWinGamePoints)
     {
       // Do confetti of this ballsc color here:
+      if ((this.colorIndex % 2)== 0) {
+        this.services.particleEffectManager.spawnBallRedConfetti(this.position[0], this.position[1]);
+      } else {
+        this.services.particleEffectManager.spawnBallBlueConfetti(this.position[0], this.position[1]);
+      }
 
       // Reset all ball points to 0. (new game)
         this.points = 0;
@@ -276,6 +279,10 @@ return ; ///////////////////////////////////////////////////////////////////////
           }
         }  
     }
+
+    dest = dest[Misc.randInt(dest.length)];
+    this.position[0] = (dest.tx + 0.5) * level.tileWidth;
+    this.position[1] = (dest.ty +   1) * level.tileHeight - 1;
     this.setName();
   };
 
