@@ -42,10 +42,23 @@ define(
     Textures) {
 
   var onePixelTexture;
+  var ringTexture;
 
   var setup = function() {
     if (!onePixelTexture) {
       onePixelTexture = new Textures.SolidTexture([255,255,255,255]);
+      var c = document.createElement("canvas");
+      var ctx = c.getContext("2d");
+      c.width = 32;
+      c.height = 32;
+      ctx.beginPath();
+      ctx.arc(c.width / 2, c.height / 2, 14, 0, Math.PI * 2, true);
+      ctx.strokeStyle = "white";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+//      ctx.fillStyle = "white";
+//      ctx.fillRect(0, 0, c.width, c.height);
+      ringTexture = new Textures.Texture2D(c);
     }
   };
 
@@ -85,43 +98,44 @@ define(
   };
 
   var createPortal = function(particleSystemManager, data) {
-    var emitter = particleSystemManager.createParticleEmitter(onePixelTexture.texture);
+//    var emitter = particleSystemManager.createParticleEmitter(onePixelTexture.texture);
 //   var emitter = particleSystemManager.createParticleEmitter();
+   var emitter = particleSystemManager.createParticleEmitter(ringTexture.texture);
     emitter.setState(tdl.particles.ParticleStateIds.BLEND);
     var ramp = [];
     var h = (1 + data.tileInfo.dest / 12 - 0.1) % 1;
     addColorToRamp(ramp, h, 0.5,   1, 0.0);
     addColorToRamp(ramp, h, 0.6,   1, 0.3);
-    addColorToRamp(ramp, h, 0.9,   1, 0.4);
-    addColorToRamp(ramp, h, 0.9,   1, 0.4);
-    addColorToRamp(ramp, h, 0.6,   1, 0.3);
-    addColorToRamp(ramp, h, 0.3,   1, 0.1);
-    addColorToRamp(ramp, h, 0.3,   1, 0.0);
+    addColorToRamp(ramp, h, 0.9,   1, 0.6);
+    addColorToRamp(ramp, h, 0.9,   1, 0.9);
+    addColorToRamp(ramp, h, 0.6,   1, 0.6);
+    addColorToRamp(ramp, h, 0.3,   1, 0.5);
+    addColorToRamp(ramp, h, 0.3,   1, 0.3);
     emitter.setColorRamp(ramp);
-    var numRings = 3;
-    var numParticlesPerRing = 12;
+    var numRings = 12;
+    var numParticlesPerRing = 1;
     var lifeTime = 1.0;
     emitter.setParameters({
         numParticles: numRings * numParticlesPerRing,
         lifeTime:  lifeTime,
         timeRange: lifeTime,
-        startSize: 15.0,
-        endSize: 10.0,
+        startSize: 70.0,
+        endSize: 1.0,
         spinSpeedRange: 0},
         function(index, parameters) {
           var ring = index / numParticlesPerRing | 0;
           var ndx  = index % numParticlesPerRing;
           var ringOffset = ring / numRings;
-          var angle = (1 / numParticlesPerRing * ringOffset + ndx / numParticlesPerRing) * Math.PI * 2;
+          var angle = Math.random() * Math.PI * 2; //(1 / numParticlesPerRing * ringOffset + ndx / numParticlesPerRing) * Math.PI * 2;
           var speed = Math.random() * 10 + 20;
           parameters.spinStart = angle;
           //parameters.startTime = ring / numRings * lifeTime;
           parameters.position = Maths.matrix4.transformPoint(
-              Maths.matrix4.rotationZ(angle), [-speed, 0, 0])
+              Maths.matrix4.rotationZ(angle), [0.05 * -speed, 0, 0])
           parameters.velocity = Maths.matrix4.transformPoint(
               Maths.matrix4.rotationZ(angle), [speed * 0, 0, 0]);
           parameters.acceleration = Maths.matrix4.transformPoint(
-              Maths.matrix4.rotationZ(angle), [speed * 1.0, 0, 0]);
+              Maths.matrix4.rotationZ(angle), [speed * 0.0, 0, 0]);
         });
     return emitter;
   };
