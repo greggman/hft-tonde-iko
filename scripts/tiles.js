@@ -89,6 +89,7 @@ define([
 
   var tileInfoOneWay = {
     collisions: true,
+    solidForAI: true,
     sideBits: 0x8,  // UDLR
     oneWay: true,
     udCollision: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
