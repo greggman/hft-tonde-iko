@@ -223,14 +223,12 @@ return ; ///////////////////////////////////////////////////////////////////////
     this.timeAccumulator += globals.elapsedTime;
     var ticks = (this.timeAccumulator / kOneTick) | 0;
     this.timeAccumulator -= ticks * kOneTick;
-	var lpx = this.position[0];
-	var lpy = this.position[1];
+    this.lastPosition[0] = this.position[0];
+    this.lastPosition[1] = this.position[1];
     for (var ii = 0; ii < ticks; ++ii) {
       this.updateVelocity(axis, kOneTick);
       this.updatePosition(axis, kOneTick);
     }
-    this.lastPosition[0] = lpx;
-    this.lastPosition[1] = lpy;
   };
 
   Ball.prototype.teleportToOtherGame = function(dir, dest, subDest) {
