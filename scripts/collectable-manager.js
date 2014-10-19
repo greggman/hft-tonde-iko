@@ -91,6 +91,22 @@ define([
     }
   };
 
+  CollectableManager.prototype.spawn = function(pos, vel, num) {
+    var globals = this.services.globals;
+    //console.log("Spawning a coin.")
+    var posSpread = [pos[0], pos[1]];
+    var velSpread = [vel[0], vel[1]];
+    while (num && this.collectables.length > 0) {
+      var collectable = this.collectables.pop();
+      //console.log(pos);
+      //console.log(vel);
+      collectable.spawnAtPosition(posSpread, velSpread);
+      --num;
+      posSpread[0] += vel[0] * 0.1666; // * 1/60 second * 10
+      velSpread[1] *= 1.2;
+      //console.log(collectable)
+   }
+  }
   return CollectableManager;
 });
 

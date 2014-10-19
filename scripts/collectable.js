@@ -197,6 +197,12 @@ define([
     this.falling = true;
     this.setState("fall");
   };
+  Collectable.prototype.spawnAtPosition = function(pos, vel) {
+    this.position = [pos[0], pos[1]];
+    this.velocity = [vel[0], vel[1]];
+    this.falling = true;
+    this.setState("fall");
+  };
 
   Collectable.prototype.defaultDraw = function(ctx) {
     var globals = this.services.globals;

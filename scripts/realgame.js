@@ -141,7 +141,8 @@ window.s = g_services;
     maxVelocityBall: [200, 500],
     ballElasticity: 0.75,
     ballStopVelocity: 10,
-    ballGravity:300,
+    ballGravity: 300,
+    ballWinGamePoints: 3,
 
     drawOffset: {},
   };
@@ -414,7 +415,7 @@ window.g = globals;
       g_services.levelManager = g_levelManager;
       resize();
 
-      new CollectableManager(g_services);
+      g_services.collectableManager = new CollectableManager(g_services);
 
       // create portals
       var level = g_levelManager.getLevel();

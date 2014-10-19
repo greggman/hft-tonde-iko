@@ -44,6 +44,7 @@ define([
     gmath) {
 
   var nextColor = 0;
+  var balls = [];
   var nameFontOptions = {
     font: "16px sans-serif",
     yOffset: 18,
@@ -111,7 +112,7 @@ define([
       this.nameSprite = this.services.spriteManager.createSprite();
 
 
-      this.setName(name);
+      this.setName();
       this.direction = data.direction || 0;         // direction player is pushing (-1, 0, 1)
       this.facing = 1; //data.facing || direction;    // direction player is facing (-1, 1)
       this.score = 0;
@@ -123,11 +124,12 @@ define([
 
 
       this.checkBounds();
+      balls.push(this);
     };
   }());
 
-  Ball.prototype.setName = function(name) {
-   	name = this.points.toString();
+  Ball.prototype.setName = function() {
+   	var name = this.points.toString();
     if (name != this.playerName) {
       this.playerName = name;
       this.nameImage = this.services.createTexture(
@@ -149,16 +151,6 @@ define([
   Ball.prototype.updateMoveVector = function() {
     this.moveVector.x = this.position[0] - this.lastPosition[0];
     this.moveVector.y = this.position[1] - this.lastPosition[1];
-  };
-
-  Ball.prototype.checkCollisions = function() {
-    var levelManager = this.services.levelManager;
-    var level = levelManager.getLevel();
-
-    var xp = this.lastPosition[0];
-    var yp = this.lastPosition[1];
-
-    var tile = 0;
   };
 
   Ball.prototype.addPoints = function(points) {
@@ -231,29 +223,6 @@ return ; ///////////////////////////////////////////////////////////////////////
     }
   };
 
-  Ball.prototype.teleportToOtherGame = function(dir, dest, subDest) {
-return ; ////////////////////////////////////////////////////////////////////////////////////////////// fix this todo jma  
-  
-    // HACK!
-    var globals = this.services.globals;
-    var parts = /s(\d+)-(\d+)/.exec(globals.id);
-    var id = parseInt(parts[1]) + parseInt(parts[2]) * globals.columns;
-    var numScreens = globals.columns * globals.rows;
-    id = gmath.emod(id + dir, numScreens);
-    var id = "s" + (id % globals.columns) + "-" + (Math.floor(id / globals.columns));
-    this.netPlayer.switchGame(id, {
-      name: this.playerName,    // Send the name because otherwise we'll make a new one up
-      dest: dest,               // Send the dest so we know where to start
-      subDest: subDest,         // Send the subDest so we know which subDest to start
-      color: this.color,        // Send the color so we don't pick a new one
-      direction: this.direction,// Send the direction so if we're moving we're still moving.
-      facing: this.facing,      // Send the facing so we're facing the sme way
-      velocity: this.velocity,  // Send the velocity so where going the right speed
-      score: this.score,        // Send the score
-      position: this.position,  // Send the position incase there's no dest.
-    });
-  };
-
   Ball.prototype.checkWall = function() {
     var globals = this.services.globals;
     var levelManager = this.services.levelManager;
@@ -262,17 +231,6 @@ return ; ///////////////////////////////////////////////////////////////////////
     var didBounce = false;
     for (var ii = 0; ii < 2; ++ii) {
       var xCheck = this.position[0] + this.checkWallOffset[off];
-      /*
-      if (xCheck < 0) {
-        if (xCheck < -level.tileWidth / 2) {
-          this.teleportToOtherGame(-1);
-        }
-      } else if (xCheck >= level.levelWidth) {
-        if (xCheck >= level.levelWidth + level.tileWidth / 2) {
-          this.teleportToOtherGame(1);
-        }
-      } else {
-      */
         var tile = levelManager.getTileInfoByPixel(xCheck, this.position[1] - this.height / 4 - this.height / 2 * ii);
         if (tile.solidForAI) {
           if (!didBounce) {
@@ -286,29 +244,41 @@ return ; ///////////////////////////////////////////////////////////////////////
           var xoff = off ? -distInTile : level.tileWidth - distInTile;
           this.position[0] += xoff;
         }
-        if (tile.teleport) {
-          if (tile.local) {
-            var dest = level.getLocalDest(tile.dest);
-            if (!dest) {
-              console.error("missing local dest for dest: " + tile.dest);
-              return;
-            }
-
-            dest = dest[Misc.randInt(dest.length)];
-            this.position[0] = (dest.tx + 0.5) * level.tileWidth;
-            this.position[1] = (dest.ty +   1) * level.tileHeight - 1;
-            this.points += 1;
-            this.setName(this.playerName);
-          } else {
-            var dir = (tile.dest == 0 || tile.dest == 2) ? -1 : 1;
-            this.teleportToOtherGame(dir, tile.dest, tile.subDest);
-          }
+        if (tile.teleport && tile.local) {
+          this.doTeleport(level, tile, 1);
         }
-      /*
-      }
-      */
     }
   };
+
+  Ball.prototype.doTeleport = function(level, tile, numPoints){
+   this.services.collectableManager.spawn(this.position, this.velocity, 3);
+    var dest = level.getLocalDest(tile.dest);
+    if (!dest) {
+      console.error("missing local dest for dest: " + tile.dest);
+      return;
+    }
+    dest = dest[Misc.randInt(dest.length)];
+    this.position[0] = (dest.tx + 0.5) * level.tileWidth;
+    this.position[1] = (dest.ty +   1) * level.tileHeight - 1;
+    this.points += numPoints;
+    if (this.points >= this.services.globals.ballWinGamePoints)
+    {
+      // Do confetti of this ballsc color here:
+
+      // Reset all ball points to 0. (new game)
+        this.points = 0;
+        for (var i=0; i < balls.length; ++i)
+        {
+          if (balls[i] != this)
+          {
+            balls[i].points = 0;
+            balls[i].setName();
+          }
+        }  
+    }
+    this.setName();
+  };
+
 
   Ball.prototype.checkBall = function(){
     if (!this.checkBallPlayer) {
@@ -343,11 +313,11 @@ return ; ///////////////////////////////////////////////////////////////////////
   
   Ball.prototype.checkUp = function() {
     var levelManager = this.services.levelManager;
+    var level = levelManager.getLevel();
     for (var ii = 0; ii < 2; ++ii) {
       var tile = levelManager.getTileInfoByPixel(this.position[0] - this.width / 4 + this.width / 2 * ii, this.position[1] - this.height);
-      if (tile.solidForAI) {
-        var level = levelManager.getLevel();
-        this.velocity[1] = -this.velocity[1] * this.ballElasticity; // 0;
+       if (tile.solidForAI) {
+       this.velocity[1] = -this.velocity[1] * this.ballElasticity; // 0;
         if (Math.abs(this.velocity[1]) < this.ballStopVelocity) {
           this.velocity[1] = 0;
         }
@@ -358,6 +328,9 @@ return ; ///////////////////////////////////////////////////////////////////////
           //this.services.audioManager.playSound('bonkhead');
         }
         return true;
+      }
+      if (tile.teleport && tile.local) {
+        this.doTeleport(level, tile, 1);
       }
     }
     return false;
@@ -385,6 +358,9 @@ return ; ///////////////////////////////////////////////////////////////////////
           }
         }
         return true;
+      }
+      if (tile.teleport && tile.local) {
+        this.doTeleport(level, tile, 1);
       }
     }
     return false;
