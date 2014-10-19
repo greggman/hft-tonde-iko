@@ -255,7 +255,7 @@ define([
     },
     { name: "gnu",
       baseColor: [0xB6, 0x7A, 0x3D],
-      range: [0, 0.05],
+      range: [0, 0.1],
       scale: 0.5,
       idleAnimSpeed: 4,
       moveAnimSpeed: 0.2,
