@@ -31,58 +31,74 @@
 "use strict";
 
 define([
+    'hft/misc/misc',
     'hft/misc/strings',
+    '../bower_components/hft-utils/dist/imageutils',
   ], function(
-    Strings
+    Misc,
+    Strings,
+    ImageUtils
   ) {
+
+  var numHuesPerAvatar = 50;
+
   /**
    * Manages the high score list.
    */
 
   function ScoreManager(services, topTodayElement, topHourElement, top10Mins) {
     this.services = services;
+    this.services.entitySystem.addEntity(this);
     this.maxScores_ = 4;
-    this.orderedPlayers_ = [];
-    this.zeros_ = "";
+    this.update = false;  // no players have been added
+    this.busy = false;    // we're updating the display
+
+    // premake all the different avatar colors (this is why we should probably
+    // use WebGL to draw the avatars :(
+    this.avatars = this.services.avatars.map(function(avatar) {
+      var hues = [];
+      var img = avatar.anims.idle.frames[0].img
+      for (var ii = 0; ii < numHuesPerAvatar; ++ii) {
+        var hue = ii / numHuesPerAvatar - 1;
+        hues.push(ImageUtils.adjustHSV(img, hue, 0, 0, avatar.range));
+      }
+      return hues;
+    });
 
     this.tops = [
       { element: topTodayElement,
         timeLimit: 60 * 60 * 24,
-        players: [],
         lines: [],
+        players: [],
       },
       { element: topHourElement,
         timeLimit: 60 * 60,
-        players: [],
         lines: [],
+        players: [],
       },
       { element: top10Mins,
         timeLimit: 60 * 10,
-        players: [],
         lines: [],
+        players: [],
       },
     ];
+
+    // this.tops[0].timeLimit = 60;
+    // this.tops[1].timeLimit = 20;
+    // this.tops[2].timeLimit = 10;
 
     this.tops.forEach(function(top) {
       for (var ii = 0; ii < this.maxScores_; ++ii) {
         var line = this.createScoreLine();
         top.element.appendChild(line.line);
         top.lines.push(line);
-        line.setName(ii & 1 ? "WW" : "ii");
-        line.setMsg(": " + Strings.padLeft(Math.pow(7,ii + 1), 7, "0"));
-        var avatar = this.services.avatars[0];
-        var ctx = line.ctx;
-        var img = avatar.anims.idle.frames[0].img;
-        var bigger = Math.max(img.width, img.height);
-        var scale = ctx.canvas.width / bigger;
-        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-        var width  = img.width * scale;
-        var height = img.height * scale;
-        ctx.drawImage(
-          img,
-          (ctx.canvas.width  - width ) / 2,
-          (ctx.canvas.height - height) / 2 ,
-          width, height);
+        // add content
+//        line.setName(ii & 1 ? "WW" : "ii");
+//        line.setMsg(": " + Strings.padLeft(Math.pow(7,ii + 1), 7, "0"));
+//        this.drawAvatar(line.ctx, {
+//          avatarNdx: Misc.randInt(this.services.avatars.length),
+//          hueNdx: Misc.randInt(numHuesPerAvatar),
+//        });
       }
     }.bind(this));
   }
@@ -91,61 +107,120 @@ define([
     return this.createElement(player, color);
   };
 
-  ScoreManager.prototype.deleteScoreLine = function(scoreLine) {
-    this.deleteElement(scoreLine);
+  ScoreManager.prototype.drawAvatar = function(ctx, player) {
+    var img = this.avatars[player.avatarNdx][player.hueNdx];
+    var bigger = Math.max(img.width, img.height);
+    var scale = ctx.canvas.width / bigger;
+    var width  = img.width * scale;
+    var height = img.height * scale;
+    ctx.drawImage(
+      img,
+      (ctx.canvas.width  - width ) / 2,
+      (ctx.canvas.height - height) / 2 ,
+      width, height);
   };
 
-  ScoreManager.prototype.calculateScores = function() {
-    var orderedPlayers = [];
-    var maxScore = 0;
-    this.services.playerManager.forEachPlayer(function(player) {
-      orderedPlayers.push(player);
-      maxScore = Math.max(maxScore, player.score);
-    });
-
-    orderedPlayers.sort(function(a, b) {
-      if (a.score > b.score)
-        return -1;
-      else if (a.score < b.score)
-        return 1;
-      else if (a.playerName < b.playerName)
-        return -1;
-      else
-        return 1;
-    });
-
-    if (orderedPlayers.length > this.maxScores_) {
-      orderedPlayers.length = this.maxScores_;
-    }
-
-    var numDigits = maxScore.toString().length;
-    if (numDigits < this.zeros_.length) {
-      this.zeros_ = this.zeros_.substr(0, numDigits);
-    } else {
-      while (this.zeros_.length < numDigits) {
-        this.zeros_ += "0";
-      }
-    }
-
-    this.orderedPlayers_ = orderedPlayers;
-  };
-
-  ScoreManager.prototype.drawScores = function() {
-    // remove all the elements.
-    while (this.element_.firstChild) {
-      this.element_.removeChild(this.element_.firstChild);
-    }
-
-    // Add back all the elements in the current order
-    for (var ii = 0; ii < this.orderedPlayers_.length; ++ii) {
-      var player = this.orderedPlayers_[ii];
-      this.element_.appendChild(player.scoreLine.line);
+  ScoreManager.prototype.advanceToNextTop = function() {
+    this.tops[this.topNdx].update = false;
+    this.state = 0;
+    this.lineNdx = 0;
+    this.topNdx++;
+    if (this.topNdx == this.tops.length) {
+      this.busy = false;
     }
   };
 
-  ScoreManager.prototype.update = function() {
-    this.calculateScores();
-    this.drawScores();
+  ScoreManager.prototype.advanceToNextLine = function() {
+    this.state = 0;
+    this.lineNdx++;
+    if (this.lineNdx == this.maxScores_) {
+      this.advanceToNextTop();
+    }
+  };
+
+  ScoreManager.prototype.doNextThing = function() {
+    var top = this.tops[this.topNdx];
+    var line = top.lines[this.lineNdx];
+    var player = top.players[this.lineNdx];
+    switch (this.state++) {
+      case 0: //
+        if (!top.update) {
+          this.advanceToNextTop();
+        } else if (line.player === player) {
+          this.advanceToNextLine();
+        }
+        break;
+      case 1: // erase score
+        line.setMsg("");
+        break;
+      case 2: // erase name
+        line.setName("");
+        break;
+      case 3: // draw erase avatar
+      case 4: // draw erase avatar
+      case 5: // draw erase avatar
+      case 6: // draw erase avatar
+        var ctx = line.ctx;
+        var dur = 4;
+        var lerp = (this.state - 3) / 4;
+        var height = ctx.canvas.height * lerp;
+        ctx.fillStyle = "red";
+        ctx.fillRect(0, ctx.canvas.height / 2 - height / 2, ctx.canvas.width, height);
+        break;
+      case 7: // wait
+        line.player = player;
+        if (!player) {
+          this.advanceToNextLine();
+        }
+        break;
+      case 8: // wait
+        break;
+      case  9: // draw avatar
+      case 10: // draw avatar
+      case 11: // draw avatar
+      case 12: // draw avatar
+        var ctx = line.ctx;
+        var dur = 4;
+        var lerp = 1 - (this.state - 9) / 4;
+        var height = ctx.canvas.height * lerp;
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        this.drawAvatar(ctx, player);
+        ctx.fillStyle = "red";
+        ctx.fillRect(0, ctx.canvas.height / 2 - height / 2, ctx.canvas.width, height);
+        break;
+      case 13: // draw avatar
+        var ctx = line.ctx;
+        this.drawAvatar(ctx, player);
+        break;
+      case 14: // draw name
+        line.setName(player.name);
+        break;
+      case 15: // draw score
+        line.setMsg(player.score);
+        break;
+      case 16:
+        this.advanceToNextLine();
+        break;
+    }
+  };
+
+  ScoreManager.prototype.process = function() {
+    if (!this.update && !this.busy) {
+      return;
+    }
+
+    if (this.busy) {
+      this.doNextThing();
+      return;
+    }
+
+    if (this.update) {
+      this.busy = true;
+      this.topNdx = 0;
+      this.lineNdx = 0;
+      this.state = 0;
+      this.lineState = 0;
+    }
   };
 
   ScoreManager.prototype.createElement = function() {
@@ -198,6 +273,54 @@ define([
     if (element.line.parentNode) {
       element.line.parentNode.removeChild(element.line);
     }
+  };
+
+  // data:
+  //   score: the score
+  //   name: the name
+  //   color: h,s,v
+  //   avatarNdx: the avatar index
+  //
+  // // added after
+  //   time: time it was added
+  //   lineNdx: line this player is on?
+
+  ScoreManager.prototype.addPlayer = function(data) {
+    var globals = this.services.globals;
+    var newPlayer = {
+      score: Strings.padLeft(data.score, 7, "0"),
+      name: data.name,
+      hueNdx: (data.color.h * 50 | 0) % 50,  // we quantize this so we don't get too many? (or does it matter?)
+      avatarNdx: data.avatarNdx,
+      time: globals.gameTime,
+    };
+
+    // add it to each list and update each list
+    this.tops.forEach(function(top) {
+      var players = top.players;
+
+      // insert it at the correct place.
+      for (var ii = 0; ii < players.length; ++ii) {
+        var player = players[ii];
+        if (newPlayer.score >= player.score) {
+          break;
+        }
+      }
+      players.splice(ii, 0, newPlayer);
+
+      // remove old ones.
+      for (var ii = players.length - 1; ii >= 0; --ii) {
+        var player = players[ii];
+        var age = globals.gameTime - player.time;
+        if (age > top.timeLimit) {
+          players.splice(ii, 1);
+        }
+      }
+
+      top.update = true;
+    }.bind(this));
+
+    this.update = true;
   };
 
   return ScoreManager;

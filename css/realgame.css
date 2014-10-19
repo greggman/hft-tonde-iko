@@ -88,7 +88,7 @@ html, body {
 }
 
 #score .name {
-  width: 3em;
+  width: 2em;
   display: inline-block;
 }
 /* the entire line */
@@ -117,6 +117,7 @@ html, body {
 
 /* holds the msg and name */
 #score .info {
+  font-size: 22px;
   font-weight: bold;
   color: white;
   position: absolute:

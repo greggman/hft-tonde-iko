@@ -517,6 +517,16 @@ window.g = globals;
     // test particles
     if (globals.frameCount % 60 == 0) {
       //g_services.particleEffectManager.spawnConfetti(Misc.randInt(1280), Misc.randInt(720));
+      if (g_services.scoreManager) {
+        g_services.scoreManager.addPlayer({
+          score: 5 + Misc.randInt(5000),
+          name: String.fromCharCode(Misc.randInt(26) + 0x41, Misc.randInt(26) + 0x41),
+          color: {
+            h: Math.random(),
+          },
+          avatarNdx: Misc.randInt(g_services.avatars.length),
+        });
+      }
     }
 
     var layerNdx = 0;
