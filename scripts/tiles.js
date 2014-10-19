@@ -213,27 +213,27 @@ define([
   var tileInfoLocalTeleport2 = { thing: "teleport", teleport: true, dest: 2, local: true, };
   var tileInfoLocalTeleport3 = { thing: "teleport", teleport: true, dest: 3, local: true, };
 
-  var tileInfoLocalTeleportDest0 = { teleportDest: 0, local: true, };
-  var tileInfoLocalTeleportDest1 = { teleportDest: 1, local: true, };
-  var tileInfoLocalTeleportDest2 = { teleportDest: 2, local: true, };
-  var tileInfoLocalTeleportDest3 = { teleportDest: 3, local: true, };
+  var tileInfoLocalTeleportDest0 = { thing: "teleportDest", teleportDest: 0, local: true, };
+  var tileInfoLocalTeleportDest1 = { thing: "teleportDest", teleportDest: 1, local: true, };
+  var tileInfoLocalTeleportDest2 = { thing: "teleportDest", teleportDest: 2, local: true, };
+  var tileInfoLocalTeleportDest3 = { thing: "teleportDest", teleportDest: 3, local: true, };
 
-  var tileInfoTeleportDest0  = { teleportDest: 0, subDest: 0, };
-  var tileInfoTeleportDest1  = { teleportDest: 1, subDest: 0, };
-  var tileInfoTeleportDest2  = { teleportDest: 2, subDest: 0, };
-  var tileInfoTeleportDest3  = { teleportDest: 3, subDest: 0, };
-  var tileInfoTeleportDest0b = { teleportDest: 0, subDest: 1, };
-  var tileInfoTeleportDest1b = { teleportDest: 1, subDest: 1, };
-  var tileInfoTeleportDest2b = { teleportDest: 2, subDest: 1, };
-  var tileInfoTeleportDest3b = { teleportDest: 3, subDest: 1, };
-  var tileInfoTeleportDest0c = { teleportDest: 0, subDest: 2, };
-  var tileInfoTeleportDest1c = { teleportDest: 1, subDest: 2, };
-  var tileInfoTeleportDest2c = { teleportDest: 2, subDest: 2, };
-  var tileInfoTeleportDest3c = { teleportDest: 3, subDest: 2, };
-  var tileInfoTeleportDest0d = { teleportDest: 0, subDest: 3, };
-  var tileInfoTeleportDest1d = { teleportDest: 1, subDest: 3, };
-  var tileInfoTeleportDest2d = { teleportDest: 2, subDest: 3, };
-  var tileInfoTeleportDest3d = { teleportDest: 3, subDest: 3, };
+  var tileInfoTeleportDest0  = { thing: "teleportDest", teleportDest: 0, subDest: 0, };
+  var tileInfoTeleportDest1  = { thing: "teleportDest", teleportDest: 1, subDest: 0, };
+  var tileInfoTeleportDest2  = { thing: "teleportDest", teleportDest: 2, subDest: 0, };
+  var tileInfoTeleportDest3  = { thing: "teleportDest", teleportDest: 3, subDest: 0, };
+  var tileInfoTeleportDest0b = { thing: "teleportDest", teleportDest: 0, subDest: 1, };
+  var tileInfoTeleportDest1b = { thing: "teleportDest", teleportDest: 1, subDest: 1, };
+  var tileInfoTeleportDest2b = { thing: "teleportDest", teleportDest: 2, subDest: 1, };
+  var tileInfoTeleportDest3b = { thing: "teleportDest", teleportDest: 3, subDest: 1, };
+  var tileInfoTeleportDest0c = { thing: "teleportDest", teleportDest: 0, subDest: 2, };
+  var tileInfoTeleportDest1c = { thing: "teleportDest", teleportDest: 1, subDest: 2, };
+  var tileInfoTeleportDest2c = { thing: "teleportDest", teleportDest: 2, subDest: 2, };
+  var tileInfoTeleportDest3c = { thing: "teleportDest", teleportDest: 3, subDest: 2, };
+  var tileInfoTeleportDest0d = { thing: "teleportDest", teleportDest: 0, subDest: 3, };
+  var tileInfoTeleportDest1d = { thing: "teleportDest", teleportDest: 1, subDest: 3, };
+  var tileInfoTeleportDest2d = { thing: "teleportDest", teleportDest: 2, subDest: 3, };
+  var tileInfoTeleportDest3d = { thing: "teleportDest", teleportDest: 3, subDest: 3, };
 
   var tileSlope45L = {
     collisions: true,

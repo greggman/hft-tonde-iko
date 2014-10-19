@@ -417,11 +417,12 @@ window.g = globals;
       // create portals
       var level = g_levelManager.getLevel();
       [
-        {type: "teleport", portalType: 0, constructor: Portal},
-        {type: "end",      portalType: 1, constructor: Portal},
-        {type: "door",                    constructor: Door},
-        {type: "ball",                    constructor: Ball},
-        {type: "coingen",                    constructor: CoinGen},
+        {type: "teleport",     portalType: 0, constructor: Portal,  },
+        {type: "end",          portalType: 1, constructor: Portal,  },
+        {type: "teleportDest", portalType: 2, constructor: Portal,  },
+        {type: "door",                        constructor: Door,    },
+        {type: "ball",                        constructor: Ball,    },
+        {type: "coingen",                     constructor: CoinGen, },
      ].forEach(function(type) {
         var teleports = level.getThings(type.type);
         if (teleports) {
