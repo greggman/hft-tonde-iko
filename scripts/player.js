@@ -290,46 +290,49 @@ define([
     this.netPlayer.sendCmd(cmd, data);
   };
 
-  Player.prototype.updatePosition = function(axis, elapsedTime) {
-    var axis = axis || 3;
-    this.lastPosition[0] = this.position[0];
-    this.lastPosition[1] = this.position[1];
-    if (axis & 1) {
-      this.position[0] += this.velocity[0] * elapsedTime;
-    }
-    if (axis & 3) {
-      this.position[1] += this.velocity[1] * elapsedTime;
-    }
-  };
+  Player.prototype.updatePhysics = (function() {
+    var updatePosition = function(axis, elapsedTime) {
+      var axis = axis || 3;
+      if (axis & 1) {
+        this.position[0] += this.velocity[0] * elapsedTime;
+      }
+      if (axis & 3) {
+        this.position[1] += this.velocity[1] * elapsedTime;
+      }
+    };
 
-  Player.prototype.updateVelocity = function(axis, elapsedTime) {
-    var globals = this.services.globals;
-    var axis = axis || 3;
-    if (axis & 1) {
-      this.velocity[0] += this.acceleration[0] * elapsedTime;
-      this.velocity[0] = Misc.clampPlusMinus(this.velocity[0], globals.maxVelocity[0]);
-    }
-    if (axis & 2) {
-      this.velocity[1] += (this.acceleration[1] + this.gravity) * elapsedTime;
-      this.velocity[1] = Misc.clampPlusMinus(this.velocity[1], this.maxVelocityY);
-    }
-  };
+    var updateVelocity = function(axis, elapsedTime) {
+      var globals = this.services.globals;
+      var axis = axis || 3;
+      if (axis & 1) {
+        this.velocity[0] += this.acceleration[0] * elapsedTime;
+        this.velocity[0] = Misc.clampPlusMinus(this.velocity[0], globals.maxVelocity[0]);
+      }
+      if (axis & 2) {
+        this.velocity[1] += (this.acceleration[1] + this.gravity) * elapsedTime;
+        this.velocity[1] = Misc.clampPlusMinus(this.velocity[1], this.maxVelocityY);
+      }
+    };
 
-  Player.prototype.updatePhysics = function(axis) {
-    var globals = this.services.globals;
-    var levelManager = this.services.levelManager;
-    var tile = levelManager.getTileInfoByPixel(this.position[0], this.position[1]);
-    this.gravity = tile.ladder ? globals.ladderGravity : globals.gravity;
-    this.maxVelocityY = tile.ladder ? globals.ladderMaxVelocityY : globals.maxVelocity[1];
-    var kOneTick = 1 / 60;
-    this.timeAccumulator += globals.elapsedTime;
-    var ticks = (this.timeAccumulator / kOneTick) | 0;
-    this.timeAccumulator -= ticks * kOneTick;
-    for (var ii = 0; ii < ticks; ++ii) {
-      this.updateVelocity(axis, kOneTick);
-      this.updatePosition(axis, kOneTick);
-    }
-  };
+
+    return function(axis) {
+      var globals = this.services.globals;
+      var levelManager = this.services.levelManager;
+      var tile = levelManager.getTileInfoByPixel(this.position[0], this.position[1]);
+      this.gravity = tile.ladder ? globals.ladderGravity : globals.gravity;
+      this.maxVelocityY = tile.ladder ? globals.ladderMaxVelocityY : globals.maxVelocity[1];
+      var kOneTick = 1 / 60;
+      this.timeAccumulator += globals.elapsedTime;
+      var ticks = (this.timeAccumulator / kOneTick) | 0;
+      this.timeAccumulator -= ticks * kOneTick;
+      this.lastPosition[0] = this.position[0];
+      this.lastPosition[1] = this.position[1];
+      for (var ii = 0; ii < ticks; ++ii) {
+        updateVelocity.call(this, axis, kOneTick);
+        updatePosition.call(this, axis, kOneTick);
+      }
+    };
+  }());
 
   Player.prototype.init_idle = function() {
     this.velocity[0] = 0;
