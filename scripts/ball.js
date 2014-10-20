@@ -141,7 +141,7 @@ define([
   Ball.prototype.reset = function(startPosition) {
     var levelManager = this.services.levelManager;
     var level = levelManager.getLevel();
-    console.log (levelManager.getRandomOpenPosition());
+    //console.log (levelManager.getRandomOpenPosition());
     var position = startPosition || levelManager.getRandomOpenPosition();
     this.position = [position.x, position.y];
     this.lastPosition = [this.position[0], this.position[1]];
