@@ -584,7 +584,7 @@ window.p = pointers;
 
             // Draw points
             for (var ii = 0; ii < g_points.length; ++ii) {
-              var pnt = g_points[0];
+              var pnt = g_points[ii];
               pnt.time += g_elapsedTime;
               var lerp = pnt.time / g_pointDuration;
               ctx.font = "bold 40px sans-serif";

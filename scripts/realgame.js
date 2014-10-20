@@ -130,6 +130,7 @@ window.s = g_services;
     frameCount: 0,
     coinAnimSpeed: 10,
     coinAnimSpeedRange: 2,
+
     jumpFirstFrameTime: 0.1,
     fallTopAnimVelocity: 100,
     scale: 1,
@@ -377,7 +378,7 @@ window.g = globals;
     doormeterframe: { url: "assets/door-meter-frame.png", },
     ball:           { url: "assets/ball.png",       },
     hat:            { url: "assets/partyhat.png",   },
-    gem:            { url: "assets/gem.png",        },
+    gem:            { url: "assets/gem.png",        scale: 1, slices: 16, },
     gift:           { url: "assets/gift.png",       },
     ghosts:         { url: "assets/ghosts.png",     filter: false, },
     "switch":       { url: "assets/switch.png",     },
