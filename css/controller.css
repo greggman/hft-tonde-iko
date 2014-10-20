@@ -40,7 +40,7 @@ html, body {
     -o-user-select: none;
     user-select: none;
 }
-.button {
+.button, .button2 {
     background-color: #8AF;
     color: #FFF;
     border: 3px solid #444;
@@ -49,6 +49,13 @@ html, body {
     text-align: center;
     font-weight: bold;
 }
+#next1 {
+    margin-top: 0.5em;
+}
+.button2 {
+    background-color: gray;
+}
+
 #android {
   position: absolute;
   top: 0px;

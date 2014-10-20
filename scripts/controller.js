@@ -196,6 +196,9 @@ requirejs(
     var handleDone2 = function() {
       $("end0").style.display = "none";
       $("end1").style.display = "block";
+      $("next1").addEventListener('click', function() {
+        window.location.reload();
+      }, false);
     };
 
     var handleDone = function(data) {
@@ -583,11 +586,15 @@ window.p = pointers;
             ctx.drawImage(g_avatarImage, -avatarWidth / 2, 0);
             ctx.restore();
 
+            g_points = g_points.filter(function(pnt) {
+              return pnt.time < g_pointDuration;
+            });
+
             // Draw points
             for (var ii = 0; ii < g_points.length; ++ii) {
               var pnt = g_points[ii];
               pnt.time += g_elapsedTime;
-              var lerp = pnt.time / g_pointDuration;
+              var lerp = Math.min(1, pnt.time / g_pointDuration);
               ctx.font = "bold 40px sans-serif";
               ctx.textAlign = "center";
               ctx.textBaseline = "middle";
@@ -596,10 +603,6 @@ window.p = pointers;
                 pnt.x + pnt.xv * pnt.time,
                 pnt.y + pnt.yv * pnt.time)
             }
-
-            g_points = g_points.filter(function(pnt) {
-              return pnt.time < g_pointDuration;
-            });
 
             if (g_points.length) {
               g_update = true;
