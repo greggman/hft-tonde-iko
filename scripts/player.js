@@ -771,8 +771,7 @@ define([
     sprite.xScale = this.facing > 0 ? 1 : -1;
 
     var dyName = 0;
-    if (this.hasGift)
-    {
+    if (this.hasGift) {
       img = this.animGift[0];
       //this.nameSprite.visible = false;
       var sprite = this.giftSprite;
@@ -799,10 +798,7 @@ define([
       sprite.width  = img.img.width;//  * globals.scale;
       sprite.height = img.img.height;// * globals.scale;
  
-    }
-    else
-    {
-
+    } else {
       var nameSprite = this.nameSprite;
       nameSprite.uniforms.u_texture = this.nameImage;
       nameSprite.x = off.x + ((              this.position[0])      | 0) * globals.scale;
