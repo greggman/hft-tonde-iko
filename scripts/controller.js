@@ -114,6 +114,18 @@ requirejs(
     assert(v >= 0 && v <= 1);
   };
 
+  var preventStuff = function(e) {
+      e.preventDefault();
+  };
+
+  var disableTouch = function() {
+    document.addEventListener('touchstart', preventStuff, false);
+  };
+  var enableTouch = function() {
+    document.removeEventListener('touchstart', preventStuff, false);
+  };
+  disableTouch();
+
   var readCookie = function() {
     var s = g_playerCookie.get();
     try {
@@ -164,8 +176,34 @@ requirejs(
 //    $("foo").innerHTML = navigator.appVersion;
 
     var handleScore = function() {
+      g_audioManager.playSound('coin');
     };
 
+    var handleDone2 = function() {
+      $("end0").style.display = "none";
+      $("end1").style.display = "block";
+    };
+
+    var handleDone = function(data) {
+      enableTouch();
+      $("end0").style.display = "block";
+      $("next0").addEventListener('click', handleDone2, false);
+      data.places.forEach(function(place, ndx) {
+        $("rank" + ndx).appendChild(document.createTextNode(place + 1));
+      });
+      var ctx = $("avatar").getContext("2d");
+      ctx.save();
+      ctx.translate(ctx.canvas.width / 2, ctx.canvas.height / 2);
+      drawAvatar(ctx);
+      ctx.restore();
+    };
+
+    var drawAvatar = function(ctx) {
+      ctx.scale(0.6, 0.6);
+      ctx.scale(g_avatar.scale, g_avatar.scale);
+      ctx.translate(-g_avatarImage.width / 2, -g_avatarImage.height / 2);
+      ctx.drawImage(g_avatarImage, 0, 0);
+    };
 
     var makeAvatar = function() {
       var img = ImageUtils.adjustHSV(g_avatar.anims.idle.frames[0], globals.save.color.h, globals.save.color.s, globals.save.color.v, g_avatar.range);
@@ -173,9 +211,15 @@ requirejs(
     };
 
     g_client.addEventListener('score', handleScore);
+    g_client.addEventListener('done', handleDone);
     makeAvatar();
 
-    var sounds = {};
+    // test done
+    //handleDone({places: [4343, 3, 5455]});
+
+    var sounds = {
+      coin:              { jsfx: ["square",0.0000,0.4000,0.0000,0.0240,0.4080,0.3480,20.0000,909.0000,2400.0000,0.0000,0.0000,0.0000,0.0100,0.0003,0.0000,0.2540,0.1090,0.0000,0.0000,0.0000,0.0000,0.0000,1.0000,0.0000,0.0000,0.0000,0.0000], },
+    };
     g_audioManager = new AudioManager(sounds);
 
     CommonUI.setupStandardControllerUI(g_client, globals);
@@ -237,9 +281,6 @@ requirejs(
 //      ],
 //    });
 
-document.addEventListener('touchstart', function(e) {
-  e.preventDefault();
-}, false);
 //window.addEventListener('orientationchange', function(e) {
 //  g_update = true;
 //}, false);
@@ -645,10 +686,7 @@ window.p = pointers;
               if (g_avatarImage) {
                 ctx.save();
                 {
-                  ctx.scale(0.6, 0.6);
-                  ctx.scale(g_avatar.scale, g_avatar.scale);
-                  ctx.translate(-g_avatarImage.width / 2, -g_avatarImage.height / 2);
-                  ctx.drawImage(g_avatarImage, 0, 0);
+                  drawAvatar(ctx);
                 }
                 ctx.restore();
               }

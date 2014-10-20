@@ -117,7 +117,7 @@ define([
       this.direction = data.direction || 0;      // direction player is pushing (-1, 0, 1)
       this.facing = data.facing || direction;    // direction player is facing (-1, 1)
       this.score = 0;
-      this.addPoints(0);
+//      this.addPoints(0);
 
       this.reset(startPosition);
       if (data.velocity) {
@@ -215,6 +215,7 @@ define([
 
   Player.prototype.addPoints = function(points) {
     this.score += points;
+    this.sendCmd('score', {points: points});
   };
 
   Player.prototype.setState = function(state) {
@@ -435,7 +436,7 @@ define([
     this.addedToScoreboard = true;
     var scoreManager = this.services.scoreManager;
     if (scoreManager) {
-      scoreManager.addPlayer({
+      var places = scoreManager.addPlayer({
         score: this.score,
         name: this.playerName,
         color: {
@@ -444,7 +445,8 @@ define([
         avatarNdx: this.avatarNdx,
       });
     }
-  }
+    return places;
+  };
 
   // returns true if we teleported
   Player.prototype.checkWall = function() {
@@ -688,12 +690,30 @@ define([
   Player.prototype.state_end = function() {
     var globals = this.services.globals;
     this.animTimer += globals.elapsedTime;
-    this.animTimer = this.animTimer % globals.endDuration;
-    var lerp = Math.sin(this.animTimer / globals.endDuration * Math.PI / 2);
-    this.position[0] = gmath.clampedLerp(this.lastPosition[0], this.targetX, lerp);
-    this.position[1] = gmath.clampedLerp(this.lastPosition[1], this.targetY, lerp);
+ //   this.animTimer = this.animTimer % globals.endDuration;
+    var lerp = this.animTimer / globals.endDuration;
+    var plerp = Math.sin(lerp * Math.PI / 2);
+    this.position[0] = gmath.clampedLerp(this.lastPosition[0], this.targetX, plerp);
+    this.position[1] = gmath.clampedLerp(this.lastPosition[1], this.targetY, plerp);
     this.sprite.rotation += globals.elapsedTime * globals.endRotationSpeed;
     this.scale     = Math.max(0, 1 - lerp);
+    if (lerp >= 1) {
+      this.setState("done");
+    }
+  };
+
+  Player.prototype.init_done = function() {
+    // move the player off the screen so collisions don't happen
+    this.position[0] = -1000;
+    this.position[1] = -1000;
+    var places = this.addPlayerToScoreboard();
+    this.sendCmd('done', {
+      places: places,
+    });
+  };
+
+  Player.prototype.state_done = function() {
+    // do nothing, we're done
   };
 
   Player.prototype.draw = function() {

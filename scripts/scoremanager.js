@@ -284,6 +284,9 @@ define([
   // // added after
   //   time: time it was added
   //   lineNdx: line this player is on?
+  //
+  // returns [dayPlace, hourPlace, 10MinPlace]
+
 
   ScoreManager.prototype.addPlayer = function(data) {
     var globals = this.services.globals;
@@ -296,17 +299,9 @@ define([
     };
 
     // add it to each list and update each list
-    this.tops.forEach(function(top) {
+    this.update = true;
+    var places = this.tops.map(function(top) {
       var players = top.players;
-
-      // insert it at the correct place.
-      for (var ii = 0; ii < players.length; ++ii) {
-        var player = players[ii];
-        if (newPlayer.score >= player.score) {
-          break;
-        }
-      }
-      players.splice(ii, 0, newPlayer);
 
       // remove old ones.
       for (var ii = players.length - 1; ii >= 0; --ii) {
@@ -317,10 +312,22 @@ define([
         }
       }
 
+      // insert it at the correct place.
+      for (var ii = 0; ii < players.length; ++ii) {
+        var player = players[ii];
+        if (newPlayer.score >= player.score) {
+          break;
+        }
+      }
+      var place = ii;
+      players.splice(ii, 0, newPlayer);
+
       top.update = true;
+
+      return place;
     }.bind(this));
 
-    this.update = true;
+    return places
   };
 
   return ScoreManager;
