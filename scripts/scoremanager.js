@@ -291,7 +291,7 @@ define([
   ScoreManager.prototype.addPlayer = function(data) {
     var globals = this.services.globals;
     var newPlayer = {
-      score: Strings.padLeft(data.score, 7, "0"),
+      score: Strings.padLeft(data.score, 7, " "),
       name: data.name,
       hueNdx: (data.color.h * 50 | 0) % 50,  // we quantize this so we don't get too many? (or does it matter?)
       avatarNdx: data.avatarNdx,
@@ -326,6 +326,13 @@ define([
 
       return place;
     }.bind(this));
+
+    // Remove day players past max because otherwise they'll
+    // never be removed and we'll have thousands of players
+    var dayPlayers = this.tops[0].players;
+    if (dayPlayers.length > this.maxScores_) {
+      dayPlayers.splice(this.maxScores_, dayPlayers.length - this.maxScores_);
+    }
 
     return places
   };
