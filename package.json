@@ -11,7 +11,8 @@
     "gameType": "html",
     "minPlayers": 1,
     "templateUrls": [
-      "realgame.html"
+      "realgame.html",
+      "stress.html"
     ]
   }
 }
