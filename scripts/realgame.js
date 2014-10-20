@@ -128,7 +128,7 @@ window.s = g_services;
     ladderGravity: 600,
     ladderMaxVelocityY: 200,
     frameCount: 0,
-    coinAnimSpeed: 5,
+    coinAnimSpeed: 10,
     coinAnimSpeedRange: 2,
     jumpFirstFrameTime: 0.1,
     fallTopAnimVelocity: 100,
