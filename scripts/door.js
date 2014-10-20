@@ -201,6 +201,17 @@ this.onCount = Math.max(0, this.onCount - 1);
     this.sprite = this.services.spriteManager.createSprite();
     this.hsva = [data.tileInfo.id / 3, 0, 0, 0];
     this.sprite.uniforms.u_hsvaAdjust = this.hsva;
+
+    this.meterHsva = this.hsva.slice();
+    this.meterSprite = this.services.spriteManager.createSprite();
+    this.meterSprite.uniforms.u_hsvaAdjust = this.meterHsva;
+    this.frameSprite = this.services.spriteManager.createSprite();
+    this.frameSprite.uniforms.u_hsvaAdjust = this.meterHsva;
+    this.meterImg = this.services.images.doormeter.frames[0];
+    this.frameImg = this.services.images.doormeterframe.frames[0];
+    this.meterSprite.uniforms.u_texture = this.meterImg;
+    this.frameSprite.uniforms.u_texture = this.frameImg;
+
     this.setState("closed");
     this.countFn = Door.prototype.addPlayerIfInArea.bind(this);
   };
@@ -251,7 +262,14 @@ this.onCount = Math.max(0, this.onCount - 1);
 this.services.status.addMsg("a# " + this.id + " : inArea = " + this.numPlayersInArea + " : @door = " + this.numPlayersInDoorArea);
   };
 
+  Door.prototype.resetDoor = function() {
+    this.doorTimer = 0;
+    this.meterSprite.visible = false;
+    this.frameSprite.visible = false;
+  };
+
   Door.prototype.init_closed = function() {
+    this.resetDoor();
     this.setTiles(this.doorTile);
   };
 
@@ -260,18 +278,22 @@ this.services.status.addMsg("a# " + this.id + " : inArea = " + this.numPlayersIn
     this.countPlayersInArea();
     // There's > 1 player in area
     if (this.numPlayersInArea > 1) {
-      this.doorTimer = 0;
+      this.resetDoor();
     } else if (this.numPlayersInDoorArea > 0) {
       this.doorTimer += globals.elapsedTime;
+      this.meterSprite.visible = true;
+      this.frameSprite.visible = true;
       if (this.doorTimer > globals.doorWaitTime) {
         this.open();
       }
     } else {
-      this.doorTimer = 0;
+      this.resetDoor();
     }
   };
 
   Door.prototype.init_opening = function() {
+    this.meterSprite.visible = false;
+    this.frameSprite.visible = false;
     this.animTimer = 0;
     this.setTiles(0);
   };
@@ -338,6 +360,17 @@ this.services.status.addMsg("a# " + this.id + " : inArea = " + this.numPlayersIn
     sprite.y = globals.drawOffset.y + (this.position[1] - this.height / 2) * globals.scale;
     sprite.width  = this.width  * globals.scale;
     sprite.height = this.height * globals.scale;
+
+    var lerp = 1 - this.doorTimer / globals.doorWaitTime;
+    this.meterSprite.x      = sprite.x + 28;
+    this.meterSprite.y      = sprite.y + this.meterImg.img.height * (1 - lerp) * 0.5;
+    this.meterSprite.width  = this.meterImg.img.width  * globals.scale;
+    this.meterSprite.height = this.meterImg.img.height * globals.scale * lerp;
+    this.frameSprite.x      = this.meterSprite.x;
+    this.frameSprite.y      = sprite.y;
+    this.frameSprite.width  = this.frameImg.img.width  * globals.scale;
+    this.frameSprite.height = this.frameImg.img.height * globals.scale;
+
 
 this.services.debugRenderer.addX(
   this.position[0], this.position[1], 10, 0xFFFFFFFF);
