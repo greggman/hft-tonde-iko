@@ -35,6 +35,7 @@ requirejs(
   [ 'hft/commonui',
     'hft/gameclient',
     'hft/misc/cookies',
+    'hft/misc/gameclock',
     'hft/misc/input',
     'hft/misc/misc',
     'hft/misc/mobilehacks',
@@ -50,6 +51,7 @@ requirejs(
     CommonUI,
     GameClient,
     Cookie,
+    GameClock,
     Input,
     Misc,
     MobileHacks,
@@ -64,11 +66,13 @@ requirejs(
   var g_state = "select";
   var g_client;
   var g_audioManager;
-  var g_clock;
+  var g_clock = new GameClock();
+  var g_elapsedTime;
   var g_grid;
   var g_instrument;
   var g_leftRight = 0;
   var g_oldLeftRight = 0;
+  var g_pointDuration = 1;
   var g_jump = false;
   var g_avatarImage;
   var g_avatar;
@@ -78,6 +82,7 @@ requirejs(
   var g_oldOrientation;
   var g_spinner;
   var g_playerCookie = new Cookie("hft-tondeiko-player");
+  var g_points = [];
   var g_oldLetter = [
     {},
     {},
@@ -175,7 +180,16 @@ requirejs(
     g_client = new GameClient();
 //    $("foo").innerHTML = navigator.appVersion;
 
-    var handleScore = function() {
+    var handleScore = function(data) {
+      g_points.push({
+        time: 0,
+        points: data.points,
+        x: Math.random() * 64 - 32,
+        y: Math.random() * 10,
+        xv: Math.random() * 40 - 20,
+        yv: Math.random() * 30 - 60,
+      });
+      g_update = true;
       g_audioManager.playSound('coin');
     };
 
@@ -540,6 +554,7 @@ window.p = pointers;
 
       if (g_update) {
         g_update = false;
+        g_elapsedTime = g_clock.getElapsedTime();
 
         var drawController = function() {
           var depth = 5;
@@ -562,8 +577,33 @@ window.p = pointers;
           if (g_avatarImage) {
             ctx.save();
             ctx.translate(avatarX, avatarY);
+            ctx.save();
             ctx.scale(g_avatar.scale, g_avatar.scale);
             ctx.drawImage(g_avatarImage, -avatarWidth / 2, 0);
+            ctx.restore();
+
+            // Draw points
+            for (var ii = 0; ii < g_points.length; ++ii) {
+              var pnt = g_points[0];
+              pnt.time += g_elapsedTime;
+              var lerp = pnt.time / g_pointDuration;
+              ctx.font = "bold 40px sans-serif";
+              ctx.textAlign = "center";
+              ctx.textBaseline = "middle";
+              ctx.fillStyle = "rgba(255,255,255," + (1 - lerp) + ")";
+              ctx.fillText(pnt.points,
+                pnt.x + pnt.xv * pnt.time,
+                pnt.y + pnt.yv * pnt.time)
+            }
+
+            g_points = g_points.filter(function(pnt) {
+              return pnt.time < g_pointDuration;
+            });
+
+            if (g_points.length) {
+              g_update = true;
+            }
+
             ctx.restore();
           }
 
