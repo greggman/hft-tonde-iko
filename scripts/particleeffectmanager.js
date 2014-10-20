@@ -140,13 +140,13 @@ define(
 
   var createSnow = function(particleSystemManager) {
     var emitter = particleSystemManager.createParticleEmitterBehindLevel(snowFlakeTexture.texture);
-    emitter.setState(tdl.particles.ParticleStateIds.BLEND);
+    emitter.setState(tdl.particles.ParticleStateIds.ADD);
     emitter.setColorRamp(
         [0.8, 0.9, 1, 0.0,
-         0.8, 0.9, 1, 0.3,
-         0.8, 0.9, 1, 0.9,
-         0.8, 0.9, 1, 0.9,
-         0.8, 0.9, 1, 0.3,
+         0.8, 0.9, 1, 0.2,
+         0.8, 0.9, 1, 0.4,
+         0.8, 0.9, 1, 0.4,
+         0.8, 0.9, 1, 0.2,
          0.8, 0.9, 1, 0.0]);
     emitter.setParameters({
         numParticles: 200,
