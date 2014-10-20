@@ -217,9 +217,9 @@ define([
     var sprite = this.sprites[0];
     sprite.uniforms.u_texture = img;
     sprite.x = off.x + (this.position[0]                  ) * globals.scale;
-    sprite.y = off.y + (this.position[1] - this.height / 2) * globals.scale;
-    sprite.width  = this.width  * globals.scale;
-    sprite.height = this.height * globals.scale;
+    sprite.y = off.y + (this.position[1] - (this.height * globals.smallCoinScale)/ 2) * globals.scale;
+    sprite.width  = this.width * globals.smallCoinScale * globals.scale;
+    sprite.height = this.height * globals.smallCoinScale * globals.scale;
   };
 
   Collectable.prototype.draw = function(ctx) {

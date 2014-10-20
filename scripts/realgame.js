@@ -128,7 +128,7 @@ window.s = g_services;
     ladderGravity: 600,
     ladderMaxVelocityY: 200,
     frameCount: 0,
-    coinAnimSpeed: 10,
+    coinAnimSpeed: 5,
     coinAnimSpeedRange: 2,
     jumpFirstFrameTime: 0.1,
     fallTopAnimVelocity: 100,
@@ -153,6 +153,7 @@ window.s = g_services;
     giftStopVelocity: 10,
     giftGravity: 1000,
     giftMaxAllowed: 10,
+    smallCoinScale: 0.75,
 
     drawOffset: {},
   };

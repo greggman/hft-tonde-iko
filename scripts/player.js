@@ -83,7 +83,7 @@ define([
       this.walkAcceleration = globals.moveAcceleration;
       this.isLocalPlayer = isLocalPlayer;
       this.hasHat = false;
-      this.hasGift = false;
+      this.hasGift = data.hasGift || false;
 
       this.giftSprite = this.services.spriteManager.createSprite();
       this.sprite = this.services.spriteManager.createSprite();
@@ -116,7 +116,7 @@ define([
       this.setName(name);
       this.direction = data.direction || 0;      // direction player is pushing (-1, 0, 1)
       this.facing = data.facing || direction;    // direction player is facing (-1, 1)
-      this.score = 0;
+      this.score = data.score || 0;
 //      this.addPoints(0);
 
       this.reset(startPosition);
@@ -430,6 +430,7 @@ define([
       velocity: this.velocity,  // Send the velocity so where going the right speed
       score: this.score,        // Send the score
       position: this.position,  // Send the position incase there's no dest.
+      hasGift: this.hasGift,	// Send the carrying-gift flag.
     });
   };
 
@@ -529,7 +530,6 @@ define([
           return true; // we teleported. Stop checking
         } else if (tile.gift) {
           this.hasGift = true;
-          this.giftScale = gmath.clamp(this.score / 200, 0.5, 2.0);
         }
       }
     }
@@ -773,6 +773,7 @@ define([
     var dyName = 0;
     if (this.hasGift) {
       img = this.animGift[0];
+      this.giftScale = gmath.clamp(this.score / 300, 0.5, 2.0);
       //this.nameSprite.visible = false;
       var sprite = this.giftSprite;
       sprite.uniforms.u_texture = img;
