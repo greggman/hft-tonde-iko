@@ -358,6 +358,8 @@ window.g = globals;
     coin:  { url: "assets/coin_anim.png",   scale: 4, slices: 8, },
     door:  { url: "assets/door.png",        },
     ball:  { url: "assets/ball.png",        },    
+    hat:   { url: "assets/partyhat.png",    },
+    gift:  { url: "assets/gift.png",        },
     "switch":  { url: "assets/switch.png",  },
   };
 

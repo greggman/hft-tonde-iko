@@ -80,9 +80,13 @@ define([
       this.stopFriction = globals.stopFriction;
       this.walkAcceleration = globals.moveAcceleration;
       this.isLocalPlayer = isLocalPlayer;
+      this.hasHat = false;
+      this.hasGift = false;
 
       this.sprite = this.services.spriteManager.createSprite();
       this.nameSprite = this.services.spriteManager.createSprite();
+      this.hatSprite = this.services.spriteManager.createSprite();
+      this.giftSprite = this.services.spriteManager.createSprite();
 
       this.setAvatar(data.avatarNdx !== undefined ? data.avatarNdx : Misc.randInt(this.services.avatars.length));
       this.setColor(data.color || { h: Math.random(), s: 0, v: 0 });
@@ -151,6 +155,9 @@ define([
     this.anims  = this.avatar.anims;
     this.idleAnimSpeed = (0.8 + Math.random() * 0.4) * this.avatar.idleAnimSpeed;
     this.sprite.uniforms.u_adjustRange = this.avatar.range.slice();
+
+    this.animHat = this.services.images.hat.frames;
+    this.animGift = this.services.images.gift.frames;
   };
 
   Player.prototype.setName = function(name) {
@@ -243,6 +250,8 @@ define([
   Player.prototype.removeFromGame = function() {
     this.services.spriteManager.deleteSprite(this.sprite);
     this.services.spriteManager.deleteSprite(this.nameSprite);
+    this.services.spriteManager.deleteSprite(this.hatSprite);
+    this.services.spriteManager.deleteSprite(this.giftSprite);
     this.services.entitySystem.removeEntity(this);
     this.services.drawSystem.removeEntity(this);
     this.services.playerManager.removePlayer(this);
@@ -459,6 +468,11 @@ define([
             dest = dest[Misc.randInt(dest.length)];
             this.position[0] = (dest.tx + 0.5) * level.tileWidth;
             this.position[1] = (dest.ty +   1) * level.tileHeight - 1;
+
+            if (globals.levelName == "level5-0") {
+              this.hasHat = true;
+            }
+ 
           } else {
 //            var dir = (tile.dest == 0 || tile.dest == 2) ? -1 : 1;
 //            this.teleportToOtherGame(dir, tile.dest, tile.subDest);
@@ -651,12 +665,26 @@ define([
     sprite.height = height * globals.scale;
     sprite.xScale = this.facing > 0 ? 1 : -1;
 
-    var nameSprite = this.nameSprite;
-    nameSprite.uniforms.u_texture = this.nameImage;
-    nameSprite.x = off.x + ((              this.position[0])      | 0) * globals.scale;
-    nameSprite.y = off.y + ((height / -2 + this.position[1] - 36) | 0) * globals.scale;
-    nameSprite.width  = this.nameImage.img.width  * globals.scale;
-    nameSprite.height = this.nameImage.img.height * globals.scale;
+    if (this.hasHat) {
+      this.nameSprite.visible = false;
+      var sprite = this.hatSprite;
+      sprite.uniforms.u_texture = this.animHat[0];
+      sprite.x = off.x + ((              this.position[0]) | 0) * globals.scale;
+      sprite.y = off.y + (( (height / -2) * 2.5 + this.position[1]) | 0) * globals.scale;
+      sprite.width  = width  * globals.scale;
+      sprite.height = height * globals.scale;
+      sprite.xScale = this.facing > 0 ? 1 : -1;
+
+    }
+    else
+    {
+      var nameSprite = this.nameSprite;
+      nameSprite.uniforms.u_texture = this.nameImage;
+      nameSprite.x = off.x + ((              this.position[0])      | 0) * globals.scale;
+      nameSprite.y = off.y + ((height / -2 + this.position[1] - 36) | 0) * globals.scale;
+      nameSprite.width  = this.nameImage.img.width  * globals.scale;
+      nameSprite.height = this.nameImage.img.height * globals.scale;
+    }
   };
 
   return Player;
