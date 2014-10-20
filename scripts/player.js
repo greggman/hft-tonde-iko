@@ -477,6 +477,9 @@ define([
 //            var dir = (tile.dest == 0 || tile.dest == 2) ? -1 : 1;
 //            this.teleportToOtherGame(dir, tile.dest, tile.subDest);
           }
+        } else if (tile.gift)
+        {
+          this.hasGift = true;
         }
       }
     }
@@ -665,6 +668,19 @@ define([
     sprite.height = height * globals.scale;
     sprite.xScale = this.facing > 0 ? 1 : -1;
 
+    var dyName = 0;
+    if (this.hasGift)
+    {
+      this.nameSprite.visible = false;
+      var sprite = this.hatSprite;
+      sprite.uniforms.u_texture = this.animGift[0];
+      sprite.xScale = this.facing > 0 ? 1 : -1;     
+      sprite.x = off.x + ((  (width / 2) * sprite.xScale +            this.position[0]) | 0) * globals.scale;
+      sprite.y = off.y + (( (height / -2) * 2 + this.position[1]) | 0) * globals.scale;
+      sprite.width  = width  * globals.scale;
+      sprite.height = height * globals.scale;
+      dyName = -27; 
+    }
     if (this.hasHat) {
       this.nameSprite.visible = false;
       var sprite = this.hatSprite;
@@ -678,10 +694,11 @@ define([
     }
     else
     {
+
       var nameSprite = this.nameSprite;
       nameSprite.uniforms.u_texture = this.nameImage;
       nameSprite.x = off.x + ((              this.position[0])      | 0) * globals.scale;
-      nameSprite.y = off.y + ((height / -2 + this.position[1] - 36) | 0) * globals.scale;
+      nameSprite.y = off.y + ((height / -2 + this.position[1] - 36 + dyName) | 0) * globals.scale;
       nameSprite.width  = this.nameImage.img.width  * globals.scale;
       nameSprite.height = this.nameImage.img.height * globals.scale;
     }
