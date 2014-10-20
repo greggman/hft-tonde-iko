@@ -490,7 +490,7 @@ define([
           this.position[0] += xoff;
         }
         if (tile.teleport) {
-          if (tile.end) {
+          if (tile.end && !globals.noExit) {
             // it's the end
             this.targetX = (gmath.unitdiv(xCheck, level.tileWidth ) + 0.5) * level.tileWidth;
             this.targetY = (gmath.unitdiv(yCheck, level.tileHeight) +   1) * level.tileHeight;

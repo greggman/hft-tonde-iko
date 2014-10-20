@@ -431,7 +431,11 @@ window.g = globals;
         tilesDown: images.brick.img.height / 32,   // tiles down set
         texture: images.brick.frames[0],
       };
-      var g_levelManager = new LevelManager(g_services, tileset);
+      var g_levelManager = new LevelManager(
+        g_services,
+        tileset, {
+          offEdgeTileId: globals.noExit ? 1 : undefined,
+        });
       g_services.levelManager = g_levelManager;
       resize();
 

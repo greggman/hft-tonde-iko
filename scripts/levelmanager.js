@@ -178,9 +178,12 @@ define([
       ].join("")}));
   };
 
-  var LevelManager = function(services, tileset) {
+  var LevelManager = function(services, tileset, options) {
+    options = options || {};
     this.services = services;
     this.tileset = tileset;
+    this.offEdgeTileId = options.offEdgeTileId !== undefined ? options.offEdgeTileId : 13;
+    this.offTopBottomTileID = options.offTopBottomTileId !== undefined ? options.offTopBottomTileId : 1;
     initLevels(tileset);
   };
 
@@ -220,9 +223,9 @@ define([
 
   LevelManager.prototype.getTileInfoByPixel = function(x, y) {
     if (y < 0 || y >= this.level.levelHeight) {
-      return Tiles.getInfo(1);
+      return Tiles.getInfo(this.offTopBottomTileID);
     } else if (x < 0 || x >= this.level.levelWidth) {
-      return Tiles.getInfo(13);
+      return Tiles.getInfo(this.offEdgeTileId);
     }
     var tileId = this.level.getTileByPixel(x, y);
     return this.getTileInfo(tileId);
