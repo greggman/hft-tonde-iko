@@ -50,7 +50,7 @@ define([
       services.drawSystem.addEntity(this);
 
       this.animTimer = 0;
-      this.anim = this.services.images.coin.frames;
+      this.anim = this.services.images.gem.frames;
       this.animSpeed = globals.coinAnimSpeed + Math.random() * globals.coinAnimSpeedRange;
 
       var levelManager = this.services.levelManager;
@@ -59,9 +59,11 @@ define([
       this.width = level.tileWidth;
       this.height = level.tileHeight;
 
+      this.hsva = [Math.random(), 0, 0, 0];
       this.sprites = [];
       for (var ii = 0; ii < 3; ++ii) {
         var sprite = this.services.spriteManager.createSprite();
+        sprite.uniforms.u_hsvaAdjust = this.hsva;
         this.sprites.push(sprite);
       }
       this.position = [
@@ -194,7 +196,8 @@ define([
 
     var sprite = this.sprites[0];
     sprite.uniforms.u_texture = img;
-    sprite.x = off.x + (this.position[0]                  ) * globals.scale;
+    this.hsva[0] += globals.elapsedTime * (0.8 + 0.2 * Math.random());
+    sprite.x = off.x + (this.position[0]                  ) * globals.scale + Math.random() * 2 - 1;
     sprite.y = off.y + (this.position[1] - this.height / 2) * globals.scale;
     sprite.width  = this.width  * globals.scale;
     sprite.height = this.height * globals.scale;

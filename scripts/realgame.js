@@ -377,6 +377,7 @@ window.g = globals;
     doormeterframe: { url: "assets/door-meter-frame.png", },
     ball:           { url: "assets/ball.png",       },
     hat:            { url: "assets/partyhat.png",   },
+    gem:            { url: "assets/gem.png",        },
     gift:           { url: "assets/gift.png",       },
     ghosts:         { url: "assets/ghosts.png",     filter: false, },
     "switch":       { url: "assets/switch.png",     },
