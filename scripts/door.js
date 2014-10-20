@@ -70,7 +70,7 @@ define([
     // use a count so this lasts 2 frames.
     // otherwise if the DoorSwitch is processed
     // before one of the player it won't get scene.
-    this.onCount = 2;
+    this.onCount = 5;
   };
 
   DoorSwitch.prototype.setState = function(state) {
