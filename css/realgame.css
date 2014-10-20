@@ -91,6 +91,13 @@ html, body {
   width: 2em;
   display: inline-block;
 }
+
+#score .msg {
+  text-align: right;
+  width: 4em;
+  display: inline-block;
+}
+
 /* the entire line */
 #score .scoreline {
   position: relative;
