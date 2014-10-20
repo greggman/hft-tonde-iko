@@ -470,12 +470,12 @@ define([
     var off = this.velocity[0] < 0 ? 0 : 1;
     for (var ii = 0; ii < 2; ++ii) {
       var xCheck = this.position[0] + this.checkWallOffset[off];
-      if (!this.isLocalPlayer && xCheck < 0) {
+      if (!globals.noExit && !this.isLocalPlayer && xCheck < 0) {
         if (xCheck < -level.tileWidth / 2) {
           this.teleportToOtherGame(-1);
           return true;
         }
-      } else if (!this.isLocalPlayer && xCheck >= level.levelWidth) {
+      } else if (!globals.noExit && !this.isLocalPlayer && xCheck >= level.levelWidth) {
         if (xCheck >= level.levelWidth + level.tileWidth / 2) {
           this.teleportToOtherGame(1);
           return true;
