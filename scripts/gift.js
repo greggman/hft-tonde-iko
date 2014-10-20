@@ -74,7 +74,8 @@ define([
       this.giftStopVelocity = globals.giftStopVelocity;
       this.walkAcceleration = globals.moveAcceleration;
       this.idleAnimSpeed = (0.8 + Math.random() * 0.4) * globals.idleAnimSpeed;
-      
+      this.giftScale = player.giftScale; 
+       
       var h = (++nextColor) % 2 ? 0 : 0.4;
       this.colorIndex = nextColor;
       this.color = {
