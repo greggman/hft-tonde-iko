@@ -72,8 +72,7 @@ define(
   };
 
   var createExit = function(particleSystemManager) {
-//  var emitter = particleSystemManager.createParticleEmitter(onePixelTexture.texture);
-    var emitter = particleSystemManager.createParticleEmitter(squareTexture.texture);
+    var emitter = particleSystemManager.createParticleEmitterBehindPlayer(squareTexture.texture);
     emitter.setState(tdl.particles.ParticleStateIds.BLEND);
     emitter.setColorRamp(
         [0.1, 0.85, 1, 0,
@@ -87,8 +86,8 @@ define(
     var numParticles = 15;
     emitter.setParameters({
         numParticles: numParticles,
-        lifeTime: 0.8,
-        timeRange: 0.8,
+        lifeTime: 1.8,
+        timeRange: 1.8,
         startSize: 140.0,
         endSize: 0.0,
         spinSpeedRange: 0.1},
@@ -106,9 +105,7 @@ define(
   };
 
   var createPortal = function(particleSystemManager, data) {
-//    var emitter = particleSystemManager.createParticleEmitter(onePixelTexture.texture);
-//   var emitter = particleSystemManager.createParticleEmitter();
-   var emitter = particleSystemManager.createParticleEmitter(ringTexture.texture);
+   var emitter = particleSystemManager.createParticleEmitterInFrontOfPlayer(ringTexture.texture);
     emitter.setState(tdl.particles.ParticleStateIds.BLEND);
     var ramp = [];
     var h = (1 + data.tileInfo.dest / 12 - 0.1) % 1;
@@ -149,7 +146,7 @@ define(
   };
 
   var createPortalExit = function(particleSystemManager, data) {
-    var emitter = particleSystemManager.createParticleEmitter(onePixelTexture.texture);
+    var emitter = particleSystemManager.createParticleEmitterInFrontOfPlayer(onePixelTexture.texture);
     emitter.setState(tdl.particles.ParticleStateIds.BLEND);
     var ramp = [];
     var h = (1 + data.tileInfo.teleportDest / 12 - 0.1) % 1;

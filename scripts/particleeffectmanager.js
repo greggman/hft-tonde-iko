@@ -55,7 +55,7 @@ define(
   };
 
   var createConfetti = function(particleSystemManager) {
-    var emitter = particleSystemManager.createParticleEmitter(onePixelTexture.texture);
+    var emitter = particleSystemManager.createParticleEmitterInFrontOfPlayer(onePixelTexture.texture);
     emitter.setState(tdl.particles.ParticleStateIds.BLEND);
     emitter.setColorRamp(
         [1, 1, 1, 1]);
@@ -83,7 +83,7 @@ define(
   };
 
   var createBallConfetti = function(particleSystemManager, hue) {
-    var emitter = particleSystemManager.createParticleEmitter(onePixelTexture.texture);
+    var emitter = particleSystemManager.createParticleEmitterInFrontOfPlayer(onePixelTexture.texture);
     emitter.setState(tdl.particles.ParticleStateIds.BLEND);
     emitter.setColorRamp(
         [1, 1, 1, 1]);

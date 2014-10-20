@@ -134,7 +134,7 @@ define([
     ],
   };
 
-  var tileInfoEnd = { thing: "end", id: 0, end: true, };
+  var tileInfoEnd = { teleport: true, thing: "end", id: 0, end: true, };
 
   var tileInfoDoor1 = {
     thing: "door", id: 0, collisions: true,
