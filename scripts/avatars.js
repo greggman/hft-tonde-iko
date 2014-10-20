@@ -198,8 +198,10 @@ define([
       idleAnimSpeed: 4,
       moveAnimSpeed: 0.2,
       filter: false,
+      dyHat: 8,
       anims: {
         move: {
+          dxHat: [2, 2, 2],
           urls: [
             "assets/avatars/wasler/walk/r/1.png",
             "assets/avatars/wasler/walk/r/2.png",
@@ -214,6 +216,8 @@ define([
           ],
         },
         jump: {
+          dxHat: [-3, -3, 1],
+          dyHat: [8, 6, 4],
           urls: [
             "assets/avatars/wasler/jump/r/1.png",
             "assets/avatars/wasler/jump/r/2.png",
@@ -229,8 +233,11 @@ define([
       idleAnimSpeed: 4,
       moveAnimSpeed: 0.2,
       filter: false,
+      dxHat: 1, 
+      dyHat: 8,
       anims: {
         move: {
+          dxHat: [3, 3, 3],
           urls: [
             "assets/avatars/sara/walk/r/1.png",
             "assets/avatars/sara/walk/r/2.png",
@@ -245,6 +252,8 @@ define([
           ],
         },
         jump: {
+          dxHat: [1, 1, 2],
+          dyHat: [7, 6, 7],
           urls: [
             "assets/avatars/sara/jump/r/1.png",
             "assets/avatars/sara/jump/r/2.png",
@@ -260,8 +269,10 @@ define([
       idleAnimSpeed: 4,
       moveAnimSpeed: 0.2,
       filter: false,
+      dyHat: 8,
       anims: {
         move: {
+          dxHat: [2, 2, 2],
           urls: [
             "assets/avatars/gnu/walk/r/1.png",
             "assets/avatars/gnu/walk/r/2.png",
@@ -276,6 +287,8 @@ define([
           ],
         },
         jump: {
+          dxHat: [-1, -1, 1],
+          dyHat: [8, 6, 7],
           urls: [
             "assets/avatars/gnu/jump/r/1.png",
             "assets/avatars/gnu/jump/r/2.png",
@@ -291,8 +304,10 @@ define([
       idleAnimSpeed: 4,
       moveAnimSpeed: 0.2,
       filter: false,
+      dyHat: 8,
       anims: {
         move: {
+          dxHat: [2, 2, 2],
           urls: [
             "assets/avatars/wilber/walk/r/1.png",
             "assets/avatars/wilber/walk/r/2.png",
@@ -307,6 +322,8 @@ define([
           ],
         },
         jump: {
+          dxHat: [-1, -1, 1],
+          dyHat: [7, 4, 5],
           urls: [
             "assets/avatars/wilber/jump/r/1.png",
             "assets/avatars/wilber/jump/r/2.png",
@@ -322,8 +339,11 @@ define([
       idleAnimSpeed: 4,
       moveAnimSpeed: 0.2,
       filter: false,
+      dyHat: 8,
       anims: {
         move: {
+          dxHat: [3, 3, 3],
+          dyHat: [9, 9, 9],
           urls: [
             "assets/avatars/kisi/walk/r/1.png",
             "assets/avatars/kisi/walk/r/2.png",
@@ -338,7 +358,9 @@ define([
           ],
         },
         jump: {
-          urls: [
+           dxHat: [-2, -2, 1],
+          dyHat: [6, 4, 5],
+         urls: [
             "assets/avatars/kisi/jump/r/1.png",
             "assets/avatars/kisi/jump/r/2.png",
             "assets/avatars/kisi/jump/r/3.png",
@@ -353,8 +375,10 @@ define([
       idleAnimSpeed: 4,
       moveAnimSpeed: 0.2,
       filter: false,
+      dyHat: 10,
       anims: {
         move: {
+          dxHat: [3, 3, 3],
           urls: [
             "assets/avatars/tux/walk/r/1.png",
             "assets/avatars/tux/walk/r/2.png",
@@ -369,6 +393,8 @@ define([
           ],
         },
         jump: {
+          dxHat: [-5, -5, 4],
+          dyHat: [8, 6, 7],
           urls: [
             "assets/avatars/tux/jump/r/1.png",
             "assets/avatars/tux/jump/r/2.png",
@@ -384,8 +410,10 @@ define([
       idleAnimSpeed: 4,
       moveAnimSpeed: 0.2,
       filter: false,
+      dyHat: 10,
       anims: {
         move: {
+          dxHat: [4, 4, 4],
           urls: [
             "assets/avatars/kit/walk/r/1.png",
             "assets/avatars/kit/walk/r/2.png",
@@ -400,6 +428,8 @@ define([
           ],
         },
         jump: {
+          dxHat: [-4, -4, 4],
+          dyHat: [8, 6, 7],
           urls: [
             "assets/avatars/kit/jump/r/1.png",
             "assets/avatars/kit/jump/r/2.png",
@@ -433,6 +463,7 @@ define([
       scale: 32/27,
       idleAnimSpeed: 4,
       moveAnimSpeed: 0.2,
+      dyHat: -2,
       anims: {
         move: { url: "assets/avatars/miyamoto/run.png", scale: 1, slices: 20, },
         idle: { url: "assets/avatars/miyamoto/idle.png", },

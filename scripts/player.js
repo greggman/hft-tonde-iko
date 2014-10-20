@@ -363,6 +363,7 @@ define([
     this.acceleration[0] = 0;
     this.acceleration[1] = 0;
     this.animTimer = 0;
+    this.animSet = this.anims.idle;
     this.anim = this.anims.idle.frames;
   };
 
@@ -381,6 +382,7 @@ define([
   Player.prototype.init_fall = function() {
     var globals = this.services.globals;
     this.animTimer = 1;
+    this.animSet = this.anims.jump;
     this.anim = this.anims.jump.frames;
   };
 
@@ -587,6 +589,7 @@ define([
 
   Player.prototype.init_move = function() {
     this.animTimer = 0;
+    this.animSet = this.anims.move;
     this.anim = this.anims.move.frames;
     this.lastDirection = this.direction;
   };
@@ -649,6 +652,7 @@ define([
     this.jumpTimer = 0;
     this.animTimer = 0;
     this.bonked = false;
+    this.animSet = this.anims.jump;
     this.anim = this.anims.jump.frames;
     this.services.audioManager.playSound('jump');
   };
@@ -674,6 +678,7 @@ define([
   Player.prototype.init_waitForGo = function() {
     this.lastPosition[0] = this.position[0];
     this.lastPosition[1] = this.position[1];
+    this.animSet = this.anims.idle;
     this.anim = this.anims.idle.frames;
 
     // move us off the screen so no collisions happen
@@ -764,15 +769,20 @@ define([
       dyName = -27; 
     }
     if (this.hasHat) {
+        var dxHat = (this.animSet.dxHat) ? this.animSet.dxHat[frameNumber] : (this.avatar.dxHat || 0);
+        var dyHat = (this.animSet.dyHat) ? this.animSet.dyHat[frameNumber] : (this.avatar.dyHat || 0);
+//        if (this.animSet.dxhat != 0 && this.avatar.dxHatMove ) {
+//          dxHat = this.avatar.dxHatMove;
+//        }
       img = this.animHat[0];
       var sprite = this.hatSprite;
       sprite.uniforms.u_texture = img;
-      sprite.x = off.x + ((              this.position[0]) | 0) * globals.scale;
-      sprite.y = off.y + (( (height / -2) * 2.5 + this.position[1]) | 0) * globals.scale;
+      sprite.xScale = this.facing > 0 ? 1 : -1;
+      sprite.x = off.x + ((    (dxHat * sprite.xScale)  +        this.position[0]) | 0) * globals.scale;
+      sprite.y = off.y + (( (height / -2) * 2.5 + this.position[1]) + dyHat | 0) * globals.scale;
       sprite.width  = img.img.width;//  * globals.scale;
       sprite.height = img.img.height;// * globals.scale;
-      sprite.xScale = this.facing > 0 ? 1 : -1;
-
+ 
     }
     else
     {
