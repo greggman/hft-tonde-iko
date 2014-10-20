@@ -486,8 +486,10 @@ define([
             this.position[0] = (dest.tx + 0.5) * level.tileWidth;
             this.position[1] = (dest.ty +   1) * level.tileHeight - 1;
 
-            if (globals.levelName == "level5-0") {
+            if (globals.levelName == "level5-0" && this.hasGift) {
               this.hasHat = true;
+              this.hasGift = false;
+              this.giftSprite.visible = false;
             }
  
           } else {
