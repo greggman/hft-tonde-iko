@@ -47,10 +47,38 @@ define(
 
   var maxConfetti = 10;
   var onePixelTexture;
+  var snowFlakeTexture;
+  var ghostsTexture;
+  var rainTexture;
 
-  var setup = function() {
+  var setup = function(services) {
     if (!onePixelTexture) {
       onePixelTexture = new Textures.SolidTexture([255,255,255,255]);
+      var c = document.createElement("canvas");
+      var ctx = c.getContext("2d");
+      c.width = 32;
+      c.height = 32;
+      for (var ii = 0; ii < 6; ++ii) {
+        ctx.save();
+        ctx.translate(c.width / 2, c.height / 2);
+        ctx.rotate(ii / 6 * Math.PI * 2);
+        ctx.translate(c.width / 4, 0);
+        ctx.beginPath();
+        ctx.arc(0, 0, c.width / 6, 0, Math.PI * 2, true);
+        ctx.strokeStyle = "white";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.restore();
+      }
+      snowFlakeTexture = new Textures.Texture2D(c);
+      ctx.clearRect(0, 0, c.width, c.height);
+      ctx.beginPath();
+      ctx.moveTo(c.width / 2, 4);
+      ctx.lineTo(c.width / 2, c.height - 1);
+      ctx.strokeStyle = "white";
+      ctx.stroke();
+      rainTexture = new Textures.Texture2D(c);
+      ghostsTexture = services.images.ghosts.frames[0];
     }
   };
 
@@ -109,8 +137,98 @@ define(
         });
     return tdl.particles.createOneShotManager(emitter, maxConfetti);
   };
+
+  var createSnow = function(particleSystemManager) {
+    var emitter = particleSystemManager.createParticleEmitterBehindLevel(snowFlakeTexture.texture);
+    emitter.setState(tdl.particles.ParticleStateIds.BLEND);
+    emitter.setColorRamp(
+        [0.8, 0.9, 1, 0.0,
+         0.8, 0.9, 1, 0.3,
+         0.8, 0.9, 1, 0.9,
+         0.8, 0.9, 1, 0.9,
+         0.8, 0.9, 1, 0.3,
+         0.8, 0.9, 1, 0.0]);
+    emitter.setParameters({
+        numParticles: 200,
+        lifeTime: 2.0,
+        timeRange: 2.0,
+        startSize: 17.0,
+        endSize: 17.0,
+        spinSpeedRange: Math.PI},
+        function(index, parameters) {
+            var speed = Math.random() * 1 + 3;
+            var angle = (Math.random() * 0.2 + 0.4) * Math.PI;
+            //var color = ImageUtils.hsvToRgb(hue, Math.random() * 0.5 + 0.5, 1);
+            //parameters.colorMult = [color[0] / 255, color[1] / 255, color[2] / 255, 1];
+            parameters.position =  [Misc.randInt(1280), Misc.randInt(720) - 32, 0];
+            parameters.velocity = Maths.matrix4.transformPoint(
+                Maths.matrix4.rotationZ(angle), [speed * 20, 0, 0]);
+//            parameters.acceleration = Maths.matrix4.transformPoint(
+//                Maths.matrix4.rotationZ(angle), [-speed * 8, 0, 0]));
+        });
+    return emitter;
+  };
+
+  var createGhosts = function(particleSystemManager, services) {
+    var emitter = particleSystemManager.createParticleEmitterInFrontOfPlayer(ghostsTexture.texture);
+    emitter.setState(tdl.particles.ParticleStateIds.SUBTRACT);
+    emitter.setColorRamp(
+        [0.8, 0.9, 1, 0.0,
+         0.8, 0.9, 1, 0.2,
+         0.8, 0.9, 1, 0.4,
+         0.8, 0.9, 1, 0.6,
+         0.8, 0.9, 1, 0.9,
+         0.8, 0.9, 1, 0.9,
+         0.8, 0.9, 1, 0.3,
+         0.8, 0.9, 1, 0.0]);
+    var timeRange = 50;
+    emitter.setParameters({
+        numFrames: 4,
+        numParticles: 20,
+        frameDuration: timeRange,
+        lifeTime: 2.0,
+        timeRange: timeRange,
+        startSize: 32.0,
+        endSize: 256.0,
+        spinSpeedRange:  Math.PI * 0},
+        function(index, parameters) {
+            parameters.startTime  = Math.random() * timeRange;
+            parameters.frameStart = Misc.randInt(4);
+            var speed = Math.random() * 1 + 3;
+            var angle = Math.random() * 0.4 + -0.2;
+            parameters.spinStart = angle;
+            angle += Math.PI / 2 + (Math.random() > 0.5 ? 0 : Math.PI);
+            parameters.position =  [Misc.randInt(1280), Misc.randInt(720) - 32, 0];
+            parameters.velocity = Maths.matrix4.transformPoint(
+                Maths.matrix4.rotationZ(angle), [speed * 20, 0, 0]);
+        });
+    return emitter;
+  };
+
+  var createRain = function(particleSystemManager) {
+    var emitter = particleSystemManager.createParticleEmitterBehindLevel(rainTexture.texture);
+    emitter.setState(tdl.particles.ParticleStateIds.BLEND);
+    var timeRange = 1;
+    var angle = Math.PI * 0.6;
+    emitter.setParameters({
+        numParticles: 100,
+        lifeTime: 1.0,
+        timeRange: 1.0,
+        startSize: 32.0,
+        endSize: 32.0,
+      },
+      function(index, parameters) {
+        parameters.spinStart = angle + Math.PI / 16 * 5.0;
+        var speed = Math.random() * 10 + 50;
+        parameters.position =  [Misc.randInt(1280) + 100, -32, 0];
+        parameters.velocity = Maths.matrix4.transformPoint(
+            Maths.matrix4.rotationZ(angle), [speed * 20, 0, 0]);
+        });
+    return emitter;
+  };
+
   var ParticleEffectManager = function(services) {
-    setup();
+    setup(services);
     this.services = services;
     this.confettis = createConfetti(services.particleSystemManager);
     this.ballRedConfetti = createBallConfetti(services.particleSystemManager, 0);
@@ -126,9 +244,22 @@ define(
     var _tp_ = tdl.fast.matrix4.translation(new Float32Array(16), [x, y, 0]);
     this.ballRedConfetti.startOneShot(_tp_);
   };
+
   ParticleEffectManager.prototype.spawnBallBlueConfetti = function(x, y) {
     var _tp_ = tdl.fast.matrix4.translation(new Float32Array(16), [x, y, 0]);
     this.ballBlueConfetti.startOneShot(_tp_);
+  };
+
+  ParticleEffectManager.prototype.createSnow = function() {
+    createSnow(this.services.particleSystemManager);
+  };
+
+  ParticleEffectManager.prototype.createGhosts = function() {
+    createGhosts(this.services.particleSystemManager);
+  };
+
+  ParticleEffectManager.prototype.createRain = function() {
+    createRain(this.services.particleSystemManager);
   };
 
   return ParticleEffectManager;

@@ -262,7 +262,6 @@ window.g = globals;
   g_services.spriteManager = new SpriteManager();
   g_services.debugRenderer = new DebugRenderer(globals.debug);
   g_services.particleSystemManager = new ParticleSystemManager(2);
-  g_services.particleEffectManager = new ParticleEffectManager(g_services);
   g_services.avatars = avatars;
 
   var resize = function() {
@@ -356,11 +355,12 @@ window.g = globals;
   // colorize: number of colors to make
   // slizes: number = width of all slices, array = width of each consecutive slice
   var images = {
-    brick: { url: "assets/bricks.png",      preMult: false, },
-    coin:  { url: "assets/coin_anim.png",   scale: 4, slices: 8, },
-    door:  { url: "assets/door.png",        },
-    ball:  { url: "assets/ball.png",        },    
-    "switch":  { url: "assets/switch.png",  },
+    brick:    { url: "assets/bricks.png",    preMult: false, },
+    coin:     { url: "assets/coin_anim.png", scale: 4, slices: 8, },
+    door:     { url: "assets/door.png",      },
+    ball:     { url: "assets/ball.png",      },
+    ghosts:   { url: "assets/ghosts.png",    filter: false, },
+    "switch": { url: "assets/switch.png",    },
   };
 
   // Add all the avatar files to the list of images to load.
@@ -417,6 +417,7 @@ window.g = globals;
       g_services.levelManager = g_levelManager;
       resize();
 
+      g_services.particleEffectManager = new ParticleEffectManager(g_services);
       g_services.collectableManager = new CollectableManager(g_services);
 
       // create portals
@@ -442,10 +443,19 @@ window.g = globals;
         }
       });
 
-      if (globals.levelName == "level5-0") {
+      switch (globals.levelName) {
+      case "level3-0":
+        g_services.particleEffectManager.createGhosts();
+        g_services.particleEffectManager.createRain();
+        break;
+      case "level4-0":
+        g_services.particleEffectManager.createSnow();
+        break;
+      case "level5-0":
         $("score").style.display = "block";
         g_services.scoreManager = new ScoreManager(
           g_services, $("top-today"), $("top-hour"), $("top-10mins"));
+        break;
       }
 
       startLocalPlayers();
@@ -541,12 +551,14 @@ window.g = globals;
         var layer = layers[layerNdx];
         if (layer === globals.playLevel) {
           g_services.particleSystemManager.drawParticleSystemBehindLevel(globals.drawOffset);
+          gl.disable(gl.BLEND);
         }
         layer.draw(g_services.levelManager, globals);
       }
     }
 
     g_services.particleSystemManager.drawParticleSystemBehindPlayer(globals.drawOffset);
+    gl.disable(gl.BLEND);
 
     g_services.drawSystem.processEntities();
 
