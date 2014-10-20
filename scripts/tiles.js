@@ -195,6 +195,7 @@ define([
   var tileInfoSuperCoin = { thing: "supercoin", id: 0, };
   var tileInfoBall = { thing: "ball", id: 0, };
   var tileInfoCoinGen = { thing: "coingen", id: 0, };
+  var tileInfoGift = {thing: "gift", gift:true, };
 
   var tileInfoArea1 = { open: true, thing: "area", id: 0, };
   var tileInfoArea2 = { open: true, thing: "area", id: 1, };
@@ -354,7 +355,7 @@ define([
     tileInfoArea1,            // 0x44
     tileInfoArea2,            // 0x45
     tileInfoArea3,            // 0x46
-    nullTile,            // 0x47
+    tileInfoGift,            // 0x47
     nullTile,            // 0x48
     nullTile,            // 0x49
     nullTile,            // 0x4A
