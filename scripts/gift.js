@@ -113,6 +113,7 @@ define([
       this.score = 0;
 
       //console.log(startPosition);
+      this.color = player.color;
       this.reset(startPosition);
       this.setState('move');
 
@@ -137,7 +138,7 @@ define([
     this.position = [position.x, position.y];
     this.lastPosition = [this.position[0], this.position[1]];
     this.sprite.uniforms.u_hsvaAdjust = this.color.hsv.slice();
-    this.sprite.uniforms.u_adjustRange = this.color.range.slice();
+    //this.sprite.uniforms.u_adjustRange = this.color.range.slice();
   };
 
   Gift.prototype.updateMoveVector = function() {

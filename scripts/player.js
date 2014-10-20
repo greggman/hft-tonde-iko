@@ -85,10 +85,10 @@ define([
       this.hasHat = false;
       this.hasGift = false;
 
+      this.giftSprite = this.services.spriteManager.createSprite();
       this.sprite = this.services.spriteManager.createSprite();
       this.nameSprite = this.services.spriteManager.createSprite();
       this.hatSprite = this.services.spriteManager.createSprite();
-      this.giftSprite = this.services.spriteManager.createSprite();
 
       this.setAvatar(data.avatarNdx !== undefined ? data.avatarNdx : Misc.randInt(this.services.avatars.length));
       this.setColor(data.color || { h: Math.random(), s: 0, v: 0 });
@@ -154,6 +154,8 @@ define([
        hsv: [color.h, color.s, color.v, 0],
     };
     this.sprite.uniforms.u_hsvaAdjust = this.color.hsv.slice();
+    this.hatSprite.uniforms.u_hsvaAdjust = this.color.hsv.slice();
+    this.giftSprite.uniforms.u_hsvaAdjust = this.color.hsv.slice();
   };
 
   Player.prototype.setAvatar = function(avatarNdx) {
@@ -257,7 +259,8 @@ define([
 
   Player.prototype.removeFromGame = function() {
     if (this.gift) {
-      gift.removeFromGame();
+      this.gift.removeFromGame();
+      this.gift = null;
     }
     this.services.spriteManager.deleteSprite(this.sprite);
     this.services.spriteManager.deleteSprite(this.nameSprite);
@@ -497,6 +500,7 @@ define([
               this.hasHat = true;
               this.hasGift = false;
               this.giftSprite.visible = false;
+              this.nameSprite.visible = false;
               this.gift = new Gift(this.services, this); //this.position, this.velocity);
             }
  
@@ -685,6 +689,14 @@ define([
     this.animTimer = 0;
     this.lastPosition[0] = this.position[0];
     this.lastPosition[1] = this.position[1];
+    if (this.gift) {
+      this.gift.removeFromGame();
+      this.gift = null;
+    }
+    if (this.hasHat) {
+      this.hatSprite.visible = false;
+      this.hasHat = false;
+    }
   };
 
   Player.prototype.state_end = function() {
@@ -740,24 +752,25 @@ define([
     var dyName = 0;
     if (this.hasGift)
     {
-      this.nameSprite.visible = false;
-      var sprite = this.hatSprite;
-      sprite.uniforms.u_texture = this.animGift[0];
+      img = this.animGift[0];
+      //this.nameSprite.visible = false;
+      var sprite = this.giftSprite;
+      sprite.uniforms.u_texture = img;
       sprite.xScale = this.facing > 0 ? 1 : -1;     
-      sprite.x = off.x + ((  (width / 2) * sprite.xScale +            this.position[0]) | 0) * globals.scale;
+      sprite.x = off.x + ((  (width / 2) * sprite.xScale +     this.position[0]) | 0) * globals.scale;
       sprite.y = off.y + (( (height / -2) * 2 + this.position[1]) | 0) * globals.scale;
-      sprite.width  = width  * globals.scale;
-      sprite.height = height * globals.scale;
+      sprite.width  = img.img.width; // * globals.scale;
+      sprite.height = img.img.height;// * globals.scale;
       dyName = -27; 
     }
     if (this.hasHat) {
-      this.nameSprite.visible = false;
+      img = this.animHat[0];
       var sprite = this.hatSprite;
-      sprite.uniforms.u_texture = this.animHat[0];
+      sprite.uniforms.u_texture = img;
       sprite.x = off.x + ((              this.position[0]) | 0) * globals.scale;
       sprite.y = off.y + (( (height / -2) * 2.5 + this.position[1]) | 0) * globals.scale;
-      sprite.width  = width  * globals.scale;
-      sprite.height = height * globals.scale;
+      sprite.width  = img.img.width;//  * globals.scale;
+      sprite.height = img.img.height;// * globals.scale;
       sprite.xScale = this.facing > 0 ? 1 : -1;
 
     }
