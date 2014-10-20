@@ -157,7 +157,7 @@ requirejs(
   };
 
   var saveCookie = function() {
-    g_playerCookie.set(JSON.stringify(globals.save));
+    g_playerCookie.set(JSON.stringify(globals.save), 1000);
   };
 
   readCookie();
@@ -208,6 +208,7 @@ requirejs(
     var makeAvatar = function() {
       var img = ImageUtils.adjustHSV(g_avatar.anims.idle.frames[0], globals.save.color.h, globals.save.color.s, globals.save.color.v, g_avatar.range);
       g_avatarImage = ImageUtils.scaleImage(img, img.width * 4, img.height * 4);
+      saveCookie();
     };
 
     g_client.addEventListener('score', handleScore);
