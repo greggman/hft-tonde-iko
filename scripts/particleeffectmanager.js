@@ -158,13 +158,9 @@ define(
         function(index, parameters) {
             var speed = Math.random() * 1 + 3;
             var angle = (Math.random() * 0.2 + 0.4) * Math.PI;
-            //var color = ImageUtils.hsvToRgb(hue, Math.random() * 0.5 + 0.5, 1);
-            //parameters.colorMult = [color[0] / 255, color[1] / 255, color[2] / 255, 1];
             parameters.position =  [Misc.randInt(1280), Misc.randInt(720) - 32, 0];
             parameters.velocity = Maths.matrix4.transformPoint(
                 Maths.matrix4.rotationZ(angle), [speed * 20, 0, 0]);
-//            parameters.acceleration = Maths.matrix4.transformPoint(
-//                Maths.matrix4.rotationZ(angle), [-speed * 8, 0, 0]));
         });
     return emitter;
   };
