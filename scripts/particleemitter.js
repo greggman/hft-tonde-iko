@@ -43,6 +43,7 @@ define(
 
   var onePixelTexture;
   var ringTexture;
+  var circleTexture;
   var squareTexture;
 
   var setup = function() {
@@ -57,9 +58,11 @@ define(
       ctx.strokeStyle = "white";
       ctx.lineWidth = 2;
       ctx.stroke();
-//      ctx.fillStyle = "white";
-//      ctx.fillRect(0, 0, c.width, c.height);
       ringTexture = new Textures.Texture2D(c);
+      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      ctx.fillStyle = "white";
+      ctx.fill();
+      circleTexture = new Textures.Texture2D(c);
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
       ctx.strokeRect(3, 3, ctx.canvas.width - 6, ctx.canvas.height - 6);
       squareTexture = new Textures.Texture2D(c);
@@ -73,7 +76,7 @@ define(
 
   var createExit = function(particleSystemManager) {
     var emitter = particleSystemManager.createParticleEmitterBehindPlayer(squareTexture.texture);
-    emitter.setState(tdl.particles.ParticleStateIds.BLEND);
+    emitter.setState(Particles.ParticleStateIds.BLEND);
     emitter.setColorRamp(
         [0.1, 0.85, 1, 0,
          0.1, 0.85, 1, 0.3,
@@ -106,7 +109,7 @@ define(
 
   var createPortal = function(particleSystemManager, data) {
    var emitter = particleSystemManager.createParticleEmitterInFrontOfPlayer(ringTexture.texture);
-    emitter.setState(tdl.particles.ParticleStateIds.BLEND);
+    emitter.setState(Particles.ParticleStateIds.BLEND);
     var ramp = [];
     var h = (1 + data.tileInfo.dest / 12 - 0.1) % 1;
     addColorToRamp(ramp, h, 0.5,   1, 0.0);
@@ -147,7 +150,7 @@ define(
 
   var createPortalExit = function(particleSystemManager, data) {
     var emitter = particleSystemManager.createParticleEmitterInFrontOfPlayer(onePixelTexture.texture);
-    emitter.setState(tdl.particles.ParticleStateIds.BLEND);
+    emitter.setState(Particles.ParticleStateIds.BLEND);
     var ramp = [];
     var h = (1 + data.tileInfo.teleportDest / 12 - 0.1) % 1;
     addColorToRamp(ramp, h, 0.5,   1, 0.7);
@@ -174,32 +177,83 @@ define(
     return emitter;
   };
 
-  var Portal = function(services, data, type) {
+  var createFlame = function(particleSystemManager, data) {
+    var emitter = particleSystemManager.createParticleEmitterBehindPlayer(circleTexture.texture);
+    emitter.setState(Particles.ParticleStateIds.ADD);
+    emitter.setColorRamp(
+      [1, 0.5, 0, 1,
+       1, 0, 0, 1,
+       0, 0, 0, 1,
+       0, 0, 0, 0.5,
+       0, 0, 0, 0]);
+    emitter.setParameters({
+      numParticles: 40,
+      lifeTime: 2,
+      timeRange: 2,
+      startSize: 7,
+      endSize: 12,
+      velocity:[0, -30, 0], velocityRange: [5, 5, 5],
+      worldAcceleration: [0, 10, 0],
+      spinSpeedRange: 4});
+    return emitter;
+  };
+
+  var createSmoke = function(particleSystemManager, data) {
+    var emitter = particleSystemManager.createParticleEmitterBehindPlayer(circleTexture.texture);
+    emitter.setState(Particles.ParticleStateIds.SUBTRACT);
+    emitter.setColorRamp(
+      [1, 1, 0, 0.3,
+       1, 0, 0, 0.3,
+       0, 0, 0, 0.3,
+       0, 0, 0, 0.1,
+       0, 0, 0, 0]);
+    emitter.setParameters({
+      numParticles: 40,
+      lifeTime: 2.5,
+      timeRange: 2.5,
+      startSize: 7,
+      endSize: 24,
+      velocity:[0, -30, 0], velocityRange: [5, 5, 5],
+      worldAcceleration: [0, 5, 0],
+      spinSpeedRange: 4});
+    return emitter;
+  };
+
+  var ParticleEmitter = function(services, data, type) {
     setup();
     this.services = services;
-    switch (type) {
+    this.emitters = [];
+    var xOff = 0;
+    var yOff = 0;
+    switch (type.particleType) {
+      case 3:
+        this.emitters.push(createSmoke(services.particleSystemManager, data));
+        this.emitters.push(createFlame(services.particleSystemManager, data));
+        xOff = -1;
+        yOff = -8;
+        break;
       case 2:
         if (data.tileInfo.local) {  // non local teleports are not used
-          this.emitter = createPortalExit(services.particleSystemManager, data);
+          this.emitters.push(createPortalExit(services.particleSystemManager, data));
         }
         break;
       case 1:
-        this.emitter = createExit(services.particleSystemManager, data);
+        this.emitters.push(createExit(services.particleSystemManager, data));
         break;
       default:
-        this.emitter = createPortal(services.particleSystemManager, data);
+        this.emitters.push(createPortal(services.particleSystemManager, data));
         break;
     };
 
-    if (this.emitter) {
+    this.emitters.forEach(function(emitter) {
       var level = services.levelManager.getLevel();
-      var x = (data.tx + 0.5) * level.tileWidth;
-      var y = (data.ty + 0.5) * level.tileHeight;
-      this.emitter.setTranslation(x, y, 0);
-    }
+      var x = xOff + (data.tx + 0.5) * level.tileWidth;
+      var y = yOff + (data.ty + 0.5) * level.tileHeight;
+      emitter.setTranslation(x, y, 0);
+    });
   };
 
-  return Portal;
+  return ParticleEmitter;
 });
 
 

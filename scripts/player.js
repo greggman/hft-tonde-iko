@@ -433,6 +433,15 @@ define([
     });
   };
 
+  Player.prototype.addConfettiNearPlayer = function(delay) {
+    var x = this.position[0] - 150 + Misc.randInt(300);
+    var y = this.position[1] - 100 + Misc.randInt(200);
+    var pm = this.services.particleEffectManager;
+    setTimeout(function() {
+      pm.spawnConfetti(x, y);
+    }, delay);
+  };
+
   Player.prototype.addPlayerToScoreboard = function() {
     // make sure we can't get added twice
     if (this.addedToScoreboard) {
@@ -498,14 +507,20 @@ define([
             this.position[0] = (dest.tx + 0.5) * level.tileWidth;
             this.position[1] = (dest.ty +   1) * level.tileHeight - 1;
 
-            if (globals.levelName == "level5-0" && this.hasGift) {
-              this.hasHat = true;
-              this.hasGift = false;
-              this.giftSprite.visible = false;
-              this.nameSprite.visible = false;
-              this.gift = new Gift(this.services, this); //this.position, this.velocity);
+            if (globals.levelName == "level5-0") {
+
+              this.addConfettiNearPlayer(1000 * 0);
+              this.addConfettiNearPlayer(1000 * 0.5);
+              this.addConfettiNearPlayer(1000 * 1.0);
+
+              if (this.hasGift) {
+                this.hasHat = true;
+                this.hasGift = false;
+                this.giftSprite.visible = false;
+                this.nameSprite.visible = false;
+                this.gift = new Gift(this.services, this); //this.position, this.velocity);
+              }
             }
- 
           } else {
             // comment this in to allow level to level teleports
 //            var dir = (tile.dest == 0 || tile.dest == 2) ? -1 : 1;

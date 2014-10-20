@@ -61,9 +61,9 @@ requirejs(
     './levelloader',
     './levelmanager',
     './particleeffectmanager',
+    './particleemitter',
     './particlesystemmanager',
     './playermanager',
-    './portal',
     './scoremanager',
   ], function(
     GameServer,
@@ -91,9 +91,9 @@ requirejs(
     LevelLoader,
     LevelManager,
     ParticleEffectManager,
+    ParticleEmitter,
     ParticleSystemManager,
     PlayerManager,
-    Portal,
     ScoreManager) {
 
   var g_debug = false;
@@ -272,6 +272,12 @@ window.g = globals;
   g_services.particleSystemManager = new ParticleSystemManager(2);
   g_services.avatars = avatars;
 
+  if (globals.fullScreen) {
+    document.body.addEventListener('click', function() {
+      Fullscreen.requestFullScreen(document.body);
+    }, false);
+  }
+
   var resize = function() {
     if (!globals.resizeOnce || (globals.resize !== false && Misc.resize(canvas))) {
       if (!globals.resizeOnce && globals.resize !== false) {
@@ -432,15 +438,16 @@ window.g = globals;
       g_services.particleEffectManager = new ParticleEffectManager(g_services);
       g_services.collectableManager = new CollectableManager(g_services);
 
-      // create portals
+      // create stuff
       var level = g_levelManager.getLevel();
       [
-        {type: "teleport",     portalType: 0, constructor: Portal,  },  // level to level telaports are not used
-        {type: "end",          portalType: 1, constructor: Portal,  },
-        {type: "teleportDest", portalType: 2, constructor: Portal,  },
-        {type: "door",                        constructor: Door,    },
-        {type: "ball",                        constructor: Ball,    },
-        {type: "coingen",                     constructor: CoinGen, },
+        {type: "teleport",     particleType: 0, constructor: ParticleEmitter,  },  // level to level telaports are not used
+        {type: "end",          particleType: 1, constructor: ParticleEmitter,  },
+        {type: "teleportDest", particleType: 2, constructor: ParticleEmitter,  },
+        {type: "candle",       particleType: 3, constructor: ParticleEmitter,  },
+        {type: "door",                          constructor: Door,    },
+        {type: "ball",                          constructor: Ball,    },
+        {type: "coingen",                       constructor: CoinGen, },
      ].forEach(function(type) {
         var teleports = level.getThings(type.type);
         if (teleports) {
@@ -449,7 +456,7 @@ window.g = globals;
               new (type.constructor)(
                 g_services,
                 teleport,
-                type.portalType);
+                type);
             });
           });
         }

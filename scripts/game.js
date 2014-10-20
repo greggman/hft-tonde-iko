@@ -62,6 +62,7 @@ requirejs([
      stressTest:       { label: "stress",       value: true,   on: false, },
      mute:             { label: "mute",         value: true,   on: false, },
      avatarNdx:        { label: "avatar 0",     value: 0,      on: false, },
+     fullScreen:       { label: "fullscreen",   value: true,   on: false, },
   };
 
   Object.keys(settingsOptions).forEach(function(name) {
