@@ -363,14 +363,16 @@ window.g = globals;
   // colorize: number of colors to make
   // slizes: number = width of all slices, array = width of each consecutive slice
   var images = {
-    brick:     { url: "assets/bricks.png",    preMult: false, },
-    coin:      { url: "assets/coin_anim.png", scale: 4, slices: 8, },
-    door:      { url: "assets/door.png",      },
-    ball:      { url: "assets/ball.png",      },
-    hat:       { url: "assets/partyhat.png",  },
-    gift:      { url: "assets/gift.png",      },
-    ghosts:    { url: "assets/ghosts.png",    filter: false, },
-    "switch":  { url: "assets/switch.png",    },
+    brick:          { url: "assets/bricks.png",     preMult: false, },
+    coin:           { url: "assets/coin_anim.png",  scale: 4, slices: 8, },
+    door:           { url: "assets/door.png",       },
+    doormeter:      { url: "assets/door-meter.png", },
+    doormeterframe: { url: "assets/door-meter-frame.png", },
+    ball:           { url: "assets/ball.png",       },
+    hat:            { url: "assets/partyhat.png",   },
+    gift:           { url: "assets/gift.png",       },
+    ghosts:         { url: "assets/ghosts.png",     filter: false, },
+    "switch":       { url: "assets/switch.png",     },
   };
 
   // Add all the avatar files to the list of images to load.
