@@ -201,6 +201,7 @@ requirejs(
     var handleDone = function(data) {
       enableTouch();
       $("end0").style.display = "block";
+      $("score").appendChild(document.createTextNode(data.score));
       $("next0").addEventListener('click', handleDone2, false);
       data.places.forEach(function(place, ndx) {
         $("rank" + ndx).appendChild(document.createTextNode(place + 1));

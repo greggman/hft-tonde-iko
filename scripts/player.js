@@ -742,6 +742,7 @@ define([
     var places = this.addPlayerToScoreboard();
     this.sendCmd('done', {
       places: places,
+      score: this.score,
     });
   };
 
