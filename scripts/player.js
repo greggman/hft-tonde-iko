@@ -94,6 +94,7 @@ define([
       this.animTimer = 0;
       this.width = width;
       this.height = height;
+      this.scale = 1;
       this.canJump = false;
       this.checkWallOffset = [
         -this.width / 2,
@@ -134,6 +135,10 @@ define([
 //this.lastPosition[1] = 466 - 10;
 //this.velocity[0] = -200;
 //this.velocity[1] =  370;
+
+      // force player near end
+//      this.position[0] = 800;
+//      this.position[1] = 32;
 
       this.checkBounds();
     };
@@ -382,7 +387,9 @@ define([
     this.acceleration[0] = this.direction * globals.moveAcceleration;
     this.updatePhysics();
     var landed = this.checkLand();
-    this.checkWall();
+    if (this.checkWall()) {
+      return;
+    }
     if (landed) {
       return;
     }
@@ -434,6 +441,7 @@ define([
     }
   }
 
+  // returns true if we teleported
   Player.prototype.checkWall = function() {
     var globals = this.services.globals;
     var levelManager = this.services.levelManager;
@@ -444,13 +452,16 @@ define([
       if (!this.isLocalPlayer && xCheck < 0) {
         if (xCheck < -level.tileWidth / 2) {
           this.teleportToOtherGame(-1);
+          return true;
         }
       } else if (!this.isLocalPlayer && xCheck >= level.levelWidth) {
         if (xCheck >= level.levelWidth + level.tileWidth / 2) {
           this.teleportToOtherGame(1);
+          return true;
         }
       } else {
-        var tile = levelManager.getTileInfoByPixel(xCheck, this.position[1] - this.height / 4 - this.height / 2 * ii);
+        var yCheck = this.position[1] - this.height / 4 - this.height / 2 * ii;
+        var tile = levelManager.getTileInfoByPixel(xCheck, yCheck);
         if (tile.collisions && (!tile.sideBits || (tile.sideBits & 0x3))) {
           this.velocity[0] = 0;
           var distInTile = gmath.emod(xCheck, level.tileWidth);
@@ -458,11 +469,17 @@ define([
           this.position[0] += xoff;
         }
         if (tile.teleport) {
-          if (tile.local) {
+          if (tile.end) {
+            // it's the end
+            this.targetX = (gmath.unitdiv(xCheck, level.tileWidth ) + 0.5) * level.tileWidth;
+            this.targetY = (gmath.unitdiv(yCheck, level.tileHeight) +   1) * level.tileHeight;
+            this.setState("end");
+          } else if (tile.local) {
+            // it's a local teleport
             var dest = level.getLocalDest(tile.dest);
             if (!dest) {
               console.error("missing local dest for dest: " + tile.dest);
-              return;
+              return true;
             }
 
             dest = dest[Misc.randInt(dest.length)];
@@ -474,11 +491,12 @@ define([
             }
  
           } else {
+            // comment this in to allow level to level teleports
 //            var dir = (tile.dest == 0 || tile.dest == 2) ? -1 : 1;
 //            this.teleportToOtherGame(dir, tile.dest, tile.subDest);
           }
-        } else if (tile.gift)
-        {
+          return true; // we teleported. Stop checking
+        } else if (tile.gift) {
           this.hasGift = true;
         }
       }
@@ -569,7 +587,9 @@ define([
     this.animTimer += this.avatar.moveAnimSpeed * Math.abs(this.velocity[0]) * globals.elapsedTime;
     this.updatePhysics(1);
 
-    this.checkWall();
+    if (this.checkWall()) {
+      return;
+    }
     this.checkFall();
 
     if (!this.direction) {
@@ -604,7 +624,9 @@ define([
 
     this.animTimer += this.avatar.moveAnimSpeed * Math.abs(this.velocity[0]) * globals.elapsedTime;
     this.updatePhysics(1);
-    this.checkWall();
+    if (this.checkWall()) {
+      return;
+    }
     this.checkFall();
   };
 
@@ -624,7 +646,9 @@ define([
     this.jumpTimer += globals.elapsedTime;
     this.updatePhysics();
     this.checkLand();
-    this.checkWall();
+    if (this.checkWall()) {
+      return;
+    }
     if (this.jumpTimer >= globals.jumpFirstFrameTime) {
       this.animTimer = 1;
     }
@@ -647,6 +671,23 @@ define([
     // Do nada.
   };
 
+  Player.prototype.init_end = function() {
+    this.animTimer = 0;
+    this.lastPosition[0] = this.position[0];
+    this.lastPosition[1] = this.position[1];
+  };
+
+  Player.prototype.state_end = function() {
+    var globals = this.services.globals;
+    this.animTimer += globals.elapsedTime;
+    this.animTimer = this.animTimer % globals.endDuration;
+    var lerp = Math.sin(this.animTimer / globals.endDuration * Math.PI / 2);
+    this.position[0] = gmath.clampedLerp(this.lastPosition[0], this.targetX, lerp);
+    this.position[1] = gmath.clampedLerp(this.lastPosition[1], this.targetY, lerp);
+    this.sprite.rotation += globals.elapsedTime * globals.endRotationSpeed;
+    this.scale     = Math.max(0, 1 - lerp);
+  };
+
   Player.prototype.draw = function() {
     var globals = this.services.globals;
     var images = this.services.images;
@@ -664,8 +705,8 @@ define([
     sprite.uniforms.u_texture = img;
     sprite.x = off.x + ((              this.position[0]) | 0) * globals.scale;
     sprite.y = off.y + ((height / -2 + this.position[1]) | 0) * globals.scale;
-    sprite.width  = width  * globals.scale;
-    sprite.height = height * globals.scale;
+    sprite.width  = width  * globals.scale * this.scale;
+    sprite.height = height * globals.scale * this.scale;
     sprite.xScale = this.facing > 0 ? 1 : -1;
 
     var dyName = 0;

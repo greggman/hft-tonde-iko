@@ -134,6 +134,8 @@ window.s = g_services;
     minBonusTime: 60,
     maxBonusTime: 180,
     bonusSpeed: 4,  // every 4 frames (add a coin every N frames)
+    endDuration: 3,
+    endRotationSpeed: Math.PI * 6,
 
     doorOpenDuration: 0.1,
     doorWaitTime: 5,    // time 1 player has to wait for door.
@@ -259,8 +261,7 @@ window.g = globals;
   var gl = WebGL.setupWebGL(canvas, {alpha:false, antialias: false}, function() {});
   g_services.spriteManager = new SpriteManager();
   g_services.debugRenderer = new DebugRenderer(globals.debug);
-  g_services.particleSystemManager = new ParticleSystemManager();
-  g_services.particleEffectManager = new ParticleEffectManager(g_services);
+  g_services.particleSystemManager = new ParticleSystemManager(2);
   g_services.avatars = avatars;
 
   var resize = function() {
@@ -354,13 +355,14 @@ window.g = globals;
   // colorize: number of colors to make
   // slizes: number = width of all slices, array = width of each consecutive slice
   var images = {
-    brick: { url: "assets/bricks.png",      preMult: false, },
-    coin:  { url: "assets/coin_anim.png",   scale: 4, slices: 8, },
-    door:  { url: "assets/door.png",        },
-    ball:  { url: "assets/ball.png",        },    
-    hat:   { url: "assets/partyhat.png",    },
-    gift:  { url: "assets/gift.png",        },
-    "switch":  { url: "assets/switch.png",  },
+    brick:     { url: "assets/bricks.png",    preMult: false, },
+    coin:      { url: "assets/coin_anim.png", scale: 4, slices: 8, },
+    door:      { url: "assets/door.png",      },
+    ball:      { url: "assets/ball.png",      },
+    hat:       { url: "assets/partyhat.png",  },
+    gift:      { url: "assets/gift.png",      },
+    ghosts:    { url: "assets/ghosts.png",    filter: false, },
+    "switch":  { url: "assets/switch.png",    },
   };
 
   // Add all the avatar files to the list of images to load.
@@ -417,6 +419,7 @@ window.g = globals;
       g_services.levelManager = g_levelManager;
       resize();
 
+      g_services.particleEffectManager = new ParticleEffectManager(g_services);
       g_services.collectableManager = new CollectableManager(g_services);
 
       // create portals
@@ -442,10 +445,19 @@ window.g = globals;
         }
       });
 
-      if (globals.levelName == "level5-0") {
+      switch (globals.levelName) {
+      case "level3-0":
+        g_services.particleEffectManager.createGhosts();
+        g_services.particleEffectManager.createRain();
+        break;
+      case "level4-0":
+        g_services.particleEffectManager.createSnow();
+        break;
+      case "level5-0":
         $("score").style.display = "block";
         g_services.scoreManager = new ScoreManager(
           g_services, $("top-today"), $("top-hour"), $("top-10mins"));
+        break;
       }
 
       startLocalPlayers();
@@ -539,9 +551,17 @@ window.g = globals;
       // Draw all layers before and including playLevel
       for (; layerNdx < numLayers && layer !== globals.playLevel; ++layerNdx) {
         var layer = layers[layerNdx];
+        if (layer === globals.playLevel) {
+          g_services.particleSystemManager.drawParticleSystemBehindLevel(globals.drawOffset);
+          gl.disable(gl.BLEND);
+        }
         layer.draw(g_services.levelManager, globals);
       }
     }
+
+    g_services.particleSystemManager.drawParticleSystemBehindPlayer(globals.drawOffset);
+    gl.disable(gl.BLEND);
+
     g_services.drawSystem.processEntities();
 
 
@@ -558,7 +578,7 @@ window.g = globals;
         layer.draw(g_services.levelManager, globals);
       }
     }
-    g_services.particleSystemManager.draw(globals.drawOffset);
+    g_services.particleSystemManager.drawParticleSystemInFrontOfPlayer(globals.drawOffset);
 
     gl.enable(gl.SCISSOR_TEST);
     gl.clearColor(0,0,0,1);

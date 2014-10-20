@@ -39,18 +39,21 @@ define(
     Maths,
     Particles) {
 
+  var numParticleSystems = 3;
+
   var ParticleSystemManager = function(services) {
     var projection  = Fast.matrix4.identity(new Float32Array(16));
     var world       = Fast.matrix4.identity(new Float32Array(16));
     var viewInverse = Fast.matrix4.identity(new Float32Array(16));
-    var particleSystem = new Particles.ParticleSystem(
-        gl, null, Maths.pseudoRandom);
 
-    this.createParticleEmitter = function() {
-      return particleSystem.createParticleEmitter.apply(particleSystem, arguments);
-    };
+    var particleSystems = [];
+    for (var ii = 0; ii < numParticleSystems; ++ii) {
+      particleSystems.push(new Particles.ParticleSystem(
+          gl, null, Maths.pseudoRandom));
+    }
 
-    this.draw = function(offset) {
+    var draw = function(systemNdx, offset) {
+      var particleSystem = particleSystems[systemNdx];
       world[12] = offset.x;
       world[13] = offset.y;
       var width = gl.canvas.width;
@@ -61,6 +64,33 @@ define(
       projection[13] =  1 - 1 / height;
 
       particleSystem.draw(projection, world, viewInverse);
+    };
+
+    this.createParticleEmitterInFrontOfPlayer = function() {
+      var particleSystem = particleSystems[2];
+      return particleSystem.createParticleEmitter.apply(particleSystem, arguments);
+    };
+
+    this.createParticleEmitterBehindPlayer = function() {
+      var particleSystem = particleSystems[1];
+      return particleSystem.createParticleEmitter.apply(particleSystem, arguments);
+    };
+
+    this.createParticleEmitterBehindLevel = function() {
+      var particleSystem = particleSystems[0];
+      return particleSystem.createParticleEmitter.apply(particleSystem, arguments);
+    };
+
+    this.drawParticleSystemInFrontOfPlayer = function(offset) {
+      draw(2, offset);
+    };
+
+    this.drawParticleSystemBehindPlayer = function(offset) {
+      draw(1, offset);
+    };
+
+    this.drawParticleSystemBehindLevel = function(offset) {
+      draw(0, offset);
     };
   };
 
