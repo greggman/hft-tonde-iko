@@ -113,8 +113,8 @@ define([
     map.tilesets.forEach(function(ts) {
       var srcX = 0;
       var srcY = 0;
-      var tilesAcross = ts.image.width  / ts.tilewidth;
-      var tilesDown   = ts.image.height / ts.tileheight;
+      var tilesAcross = ts.image.width  / ts.tilewidth  | 0;
+      var tilesDown   = ts.image.height / ts.tileheight | 0;
       var numTiles    = tilesAcross * tilesDown;
       while (srcY < tilesDown) {
         var dstSize = superAcross - dstX;
