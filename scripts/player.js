@@ -37,13 +37,15 @@ define([
     '../bower_components/hft-utils/dist/imageutils',
     './canvas-utils',
     './math',
+    './gift',
   ], function(
     Misc,
     Strings,
     M2D,
     ImageUtils,
     CanvasUtils,
-    gmath) {
+    gmath,
+    Gift) {
 
   var nameFontOptions = {
     font: "20px sans-serif",
@@ -253,6 +255,9 @@ define([
 //  };
 
   Player.prototype.removeFromGame = function() {
+    if (this.gift) {
+      gift.removeFromGame();
+    }
     this.services.spriteManager.deleteSprite(this.sprite);
     this.services.spriteManager.deleteSprite(this.nameSprite);
     this.services.spriteManager.deleteSprite(this.hatSprite);
@@ -490,6 +495,7 @@ define([
               this.hasHat = true;
               this.hasGift = false;
               this.giftSprite.visible = false;
+              this.gift = new Gift(this.services, this); //this.position, this.velocity);
             }
  
           } else {
