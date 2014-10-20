@@ -54,6 +54,7 @@ requirejs(
     './collectable-manager',
     './door',
     './ball',
+    './gift',
     './coingen',
     './debug-renderer',
     './image-cutter',
@@ -83,6 +84,7 @@ requirejs(
     CollectableManager,
     Door,
     Ball,
+    Gift,
     CoinGen,
     DebugRenderer,
     ImageCutter,
@@ -145,6 +147,12 @@ window.s = g_services;
     ballStopVelocity: 10,
     ballGravity: 300,
     ballWinGamePoints: 3,
+
+    maxVelocityGift: [200, 500],
+    giftElasticity: 0.25,
+    giftStopVelocity: 10,
+    giftGravity: 1000,
+    giftMaxAllowed: 10,
 
     drawOffset: {},
   };
