@@ -192,7 +192,7 @@ define([
   Collectable.prototype.chooseNewPosition = function() {
     var levelManager = this.services.levelManager;
     var position = levelManager.getRandomOpenPosition();
-    this.position = [position.x, position.y];
+    this.position = [position.x + Misc.randInt(9) - 4, position.y];
     this.velocity = [0, 0];
     this.falling = true;
     this.setState("fall");
