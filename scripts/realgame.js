@@ -123,7 +123,7 @@ window.s = g_services;
     jumpDuration: 0.2,        // how long the jump velocity can be applied
     jumpVelocity: -350,
     minStopVelocity: 25,      // below this we're idling
-    stopFriction: 0.95,       // amount of velocity to keep each frame
+    stopFriction: 0.90,       // amount of velocity to keep each frame
     gravity: 1200,
     ladderGravity: 600,
     ladderMaxVelocityY: 200,
