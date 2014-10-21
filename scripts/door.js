@@ -97,7 +97,7 @@ define([
   DoorSwitch.prototype.init_down = function() {
     var levelManager = this.services.levelManager;
     var level = levelManager.getLevel();
-    this.height = level.tileHeight / 2;
+    this.height = level.tileHeight / 4 * 3;
   };
 
   DoorSwitch.prototype.state_down = function() {

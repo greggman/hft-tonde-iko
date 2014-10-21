@@ -63,6 +63,12 @@ define([
     if (options.testBaseline) { ctx.textBaseline = options.textBaselne; }
   };
 
+  var computeDistSq = function(a, b) {
+    var dx = a[0] - b[0];
+    var dy = a[1] - b[1];
+    return dx * dx + dy * dy;
+  };
+
   /**
    * Player represnt a player in the game.
    * @constructor
@@ -112,6 +118,7 @@ define([
       netPlayer.addEventListener('jump', Player.prototype.handleJumpMsg.bind(this));
       netPlayer.addEventListener('busy', Player.prototype.handleBusyMsg.bind(this));
       netPlayer.addEventListener('go', Player.prototype.handleGoMsg.bind(this));
+      netPlayer.addEventListener('setName', function() {});
 
       this.setName(name);
       this.direction = data.direction || 0;      // direction player is pushing (-1, 0, 1)
@@ -547,7 +554,19 @@ define([
         this.stopFriction = tile.stopFriction || globals.stopFriction;
         this.walkAcceleration = tile.walkAcceleration || globals.moveAcceleration;
         if (tile.thing == "switch") {
-          level.getThings("switch")[tile.id][0].doorSwitch.switchOn();
+          var doorSwitches = level.getThings("switch")[tile.id];
+          // find the closest
+          var closestSwitch = doorSwitches[0].doorSwitch;
+          var closestDist = computeDistSq(this.position, closestSwitch.position);
+          for (var ii = 1; ii < doorSwitches.length; ++ii) {
+            var doorSwitch = doorSwitches[ii].doorSwitch;
+            var dist = computeDistSq(this.position, doorSwitch.position);
+            if (dist < closestDist) {
+              closestDist = dist;
+              closestSwitch = doorSwitch;
+            }
+          }
+          closestSwitch.switchOn();
         }
         return false;
       }
@@ -581,9 +600,9 @@ define([
     for (var ii = 0; ii < 2; ++ii) {
       var tile = levelManager.getTileInfoByPixel(this.position[0] - this.width / 4 + this.width / 2 * ii, this.position[1]);
       if (tile.collisions && (!tile.sideBits || (tile.sideBits & 0x8))) {
-        var ty = gmath.unitdiv(this.position[1], level.tileHeight) * level.tileHeight;
+        var ty = gmath.unitdiv(this.position[1], level.tileHeight) * level.tileHeight + (tile.top || 0);
         if (!tile.oneWay || this.lastPosition[1] < ty) {
-          this.position[1] = Math.floor(this.position[1] / level.tileHeight) * level.tileHeight;
+          this.position[1] = ty;
           this.velocity[1] = 0;
           this.stopFriction = tile.stopFriction || globals.stopFriction;
           this.services.audioManager.playSound('land');
