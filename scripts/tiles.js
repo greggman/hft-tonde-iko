@@ -164,8 +164,12 @@ define([
     lines: solidLines,
   };
 
+  var switchTop = 7;
+  var switchFriction = 0.5;
   var tileInfoSwitch1 = {
     thing: "switch", id: 0, collisions: true,
+    top: switchTop,
+    stopFriction: switchFriction,
     solidForAI: true,
     lrCollision: lrLowerHalfSolidCollision,
     rlCollision: rlLowerHalfSolidCollision,
@@ -176,6 +180,8 @@ define([
   var tileInfoSwitch2 = {
     thing: "switch", id: 1, collisions: true,
     solidForAI: true,
+    top: switchTop,
+    stopFriction: switchFriction,
     lrCollision: lrLowerHalfSolidCollision,
     rlCollision: rlLowerHalfSolidCollision,
     udCollision: udLowerHalfSolidCollision,
@@ -185,6 +191,8 @@ define([
   var tileInfoSwitch3 = {
     thing: "switch", id: 2, collisions: true,
     solidForAI: true,
+    top: switchTop,
+    stopFriction: switchFriction,
     lrCollision: lrLowerHalfSolidCollision,
     rlCollision: rlLowerHalfSolidCollision,
     udCollision: udLowerHalfSolidCollision,

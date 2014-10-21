@@ -581,9 +581,9 @@ define([
     for (var ii = 0; ii < 2; ++ii) {
       var tile = levelManager.getTileInfoByPixel(this.position[0] - this.width / 4 + this.width / 2 * ii, this.position[1]);
       if (tile.collisions && (!tile.sideBits || (tile.sideBits & 0x8))) {
-        var ty = gmath.unitdiv(this.position[1], level.tileHeight) * level.tileHeight;
+        var ty = gmath.unitdiv(this.position[1], level.tileHeight) * level.tileHeight + (tile.top || 0);
         if (!tile.oneWay || this.lastPosition[1] < ty) {
-          this.position[1] = Math.floor(this.position[1] / level.tileHeight) * level.tileHeight;
+          this.position[1] = ty;
           this.velocity[1] = 0;
           this.stopFriction = tile.stopFriction || globals.stopFriction;
           this.services.audioManager.playSound('land');
