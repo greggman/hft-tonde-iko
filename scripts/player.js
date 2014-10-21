@@ -779,8 +779,8 @@ define([
       var sprite = this.giftSprite;
       sprite.uniforms.u_texture = img;
       sprite.xScale = this.facing > 0 ? 1 : -1;     
-      sprite.x = off.x + ((  (width / 2) * -sprite.xScale +     this.position[0]) | 0) * globals.scale;
-      sprite.y = off.y + (( (height / -2) * 2 + this.position[1]) | 0) * globals.scale;
+      sprite.x = off.x + ((    this.position[0]) | 0) * globals.scale;
+      sprite.y = off.y + (( (height / -2)  + this.position[1]) -36 - 22 | 0) * globals.scale;
       sprite.width  = img.img.width * this.giftScale; //globals.scale;
       sprite.height = img.img.height * this.giftScale; //globals.scale;
       dyName = -27; 
@@ -804,7 +804,7 @@ define([
       var nameSprite = this.nameSprite;
       nameSprite.uniforms.u_texture = this.nameImage;
       nameSprite.x = off.x + ((              this.position[0])      | 0) * globals.scale;
-      nameSprite.y = off.y + ((height / -2 + this.position[1] - 36 + dyName) | 0) * globals.scale;
+      nameSprite.y = off.y + ((height / -2 + this.position[1] - 36 ) | 0) * globals.scale;
       nameSprite.width  = this.nameImage.img.width  * globals.scale;
       nameSprite.height = this.nameImage.img.height * globals.scale;
     }
