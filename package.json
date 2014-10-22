@@ -12,7 +12,8 @@
     "minPlayers": 1,
     "templateUrls": [
       "realgame.html",
-      "stress.html"
+      "stress.html",
+      "makeimage.html"
     ]
   }
 }
