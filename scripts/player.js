@@ -91,10 +91,10 @@ define([
       this.hasHat = false;
       this.hasGift = data.hasGift || false;
 
-      this.giftSprite = this.services.spriteManager.createSprite();
       this.sprite = this.services.spriteManager.createSprite();
       this.nameSprite = this.services.spriteManager.createSprite();
       this.hatSprite = this.services.spriteManager.createSprite();
+      this.giftSprite = this.services.spriteManager.createSprite();
 
       this.setAvatar(data.avatarNdx !== undefined ? data.avatarNdx : Misc.randInt(this.services.avatars.length));
       this.setColor(data.color || { h: Math.random(), s: 0, v: 0 });
@@ -578,7 +578,8 @@ define([
           return true; // we teleported. Stop checking
         } else if (tile.gift && !this.hasGift) {
           this.hasGift = true;
-          this.services.particleEffectManager.spawnBallRedConfetti(this.position[0], this.position[1] - 32);
+          //this.services.particleEffectManager.spawnBallRedConfetti(this.position[0], this.position[1] - 32);
+          this.elapsedTimeGift = 0;
         }
       }
     }
@@ -834,14 +835,24 @@ define([
 
     var dyName = 0;
     if (this.hasGift) {
+      var dy = 0;
+      var rot = 0;
+      this.elapsedTimeGift += globals.elapsedTime;
+      var timGiftDuration = 1.0;
+      if (this.elapsedTimeGift < timGiftDuration){
+        var lerp = (this.elapsedTimeGift / timGiftDuration);
+        var sinLerp = Math.sin(lerp * Math.PI * 0.80);
+        dy = 58 -96 * sinLerp;
+        rot = (Math.PI *2 * 5) * lerp;
+      }
       img = this.animGift[0];
       this.giftScale = gmath.clamp(this.score / 300, 0.5, 2.0);
-      //this.nameSprite.visible = false;
       var sprite = this.giftSprite;
+      sprite.rotation = rot;
       sprite.uniforms.u_texture = img;
       sprite.xScale = this.facing > 0 ? 1 : -1;     
       sprite.x = off.x + ((    this.position[0]) | 0) * globals.scale;
-      sprite.y = off.y + (( (height / -2)  + this.position[1]) -36 - 22 | 0) * globals.scale;
+      sprite.y = off.y + (( (height / -2)  + this.position[1]) -36 - 22 + dy| 0) * globals.scale;
       sprite.width  = img.img.width * this.giftScale; //globals.scale;
       sprite.height = img.img.height * this.giftScale; //globals.scale;
       dyName = -27; 
