@@ -465,7 +465,7 @@ define([
       var cosTime = Math.cos( lerp * Math.PI);
       this.position[0] = this.posDestTeleport[0] - this.dxHalfTeleport - cosTime * this.dxHalfTeleport;
       this.position[1] = this.posDestTeleport[1] - this.dyHalfTeleport - cosTime * this.dyHalfTeleport;
-      this.sprite.rotation = lerp * this.rotationsTeleport;
+      this.sprite.rotation = (cosTime+1)*0.5 * this.rotationsTeleport;
     }
   };
 
