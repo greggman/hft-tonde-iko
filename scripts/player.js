@@ -350,7 +350,7 @@ define([
       var levelManager = this.services.levelManager;
       var tile = levelManager.getTileInfoByPixel(this.position[0], this.position[1]);
       this.gravity = tile.ladder ? globals.ladderGravity : globals.gravity;
-      this.maxVelocityY = tile.ladder ? globals.ladderMaxVelocityY : globals.maxVelocity[1];
+      this.maxVelocityY = (tile.ladder && this.velocity[1] > 0) ? globals.ladderMaxVelocityY : globals.maxVelocity[1];
       var kOneTick = 1 / 60;
       this.timeAccumulator += globals.elapsedTime;
       var ticks = (this.timeAccumulator / kOneTick) | 0;
