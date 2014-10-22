@@ -94,6 +94,26 @@ define(
     return document.getElementById(id);
   }
 
+  // shit hacks for iOS8 because iOS8 barfs toolbars on the screen and
+  // (a) the user can NOT dismiss them and (b) there is no way for the
+  // webpage to see they exist. This only happens on iPhone 4/4s/5/s.
+
+  var isIOS;
+  var shittyOldIPhoneWithShittyIOS8Plus = function() {
+    var iPhone4 = (window.screen.height == (960 / 2));
+    var iPhone5 = (window.screen.height == (1136 / 2));
+    var iOS8Plus = function() {
+      if (/iP(hone|od|ad)/.test(navigator.platform)) {
+        // supports iOS 2.0 and later: <http://bit.ly/TJjs1V>
+        var v = (navigator.appVersion).match(/OS (\d+)_(\d+)_?(\d+)?/);
+        isIOS = true;
+        return parseInt(v[1], 10) >= 8;
+      }
+    }();
+    return iOS8Plus && (iPhone4 || iPhone5);
+  }();
+
+
   // check for old android
   var rxaosp = window.navigator.userAgent.match(/Android.*AppleWebKit\/([\d.]+)/);
   var isaosp = (rxaosp && rxaosp[1]<537);
@@ -468,20 +488,28 @@ window.p = pointers;
       ctx.fillStyle = "black";
       ctx.strokeStyle = "none";
 
-      var inLeftButton = inRect(ctx, width / 2, height);
+      var inLeftButton = inRect(ctx, width / 2, height * 5, 0, -height * 2);
       ctx.fillStyle = inLeftButton ? "red" : "black";
       ctx.save();
       ctx.translate(20, height / 2);
-      drawTriangle(ctx, height * 0.6, height * 0.7);
+      drawTriangle(ctx, (width - 40) * 0.45, height * 0.7);
+
+      //if (width > 200) {
+      //  ctx.translate(70, 0);
+      //  drawTriangle(ctx, height * 0.6, height * 0.7);
+      //}
       ctx.restore();
 
-      var inRightButton = inRect(ctx, width / 2, height, width / 2);
+      var inRightButton = inRect(ctx, width / 2, height * 5, width / 2, -height * 2);
       ctx.fillStyle = inRightButton ? "red" : "black";
       ctx.save();
       ctx.translate(width - 20, height / 2);
       ctx.rotate(Math.PI);
-
-      drawTriangle(ctx, height * 0.6, height * 0.7);
+      drawTriangle(ctx, (width - 40) * 0.45, height * 0.7);
+      //if (width > 200) {
+      //  ctx.translate(70, 0);
+      //  drawTriangle(ctx, height * 0.6, height * 0.7);
+      //}
       ctx.restore();
 
       return (inLeftButton ? 0x1 : 0x0) | (inRightButton ? 0x2 : 0x0);
@@ -489,7 +517,7 @@ window.p = pointers;
 
     var drawUpButton = function(ctx, width, height, depth) {
       drawDepthRect(ctx, width, height, depth, "black", "gray", metalGrad);
-      var inButton = inRect(ctx, width, height);
+      var inButton = inRect(ctx, width, height * 5, 0, -height * 2);
 
       ctx.fillStyle = inButton ? "red" : "black";
       ctx.strokeStyle = "none";
@@ -497,7 +525,7 @@ window.p = pointers;
       ctx.save();
       ctx.translate(width / 2, 20);
       ctx.rotate(Math.PI / 2);
-      drawTriangle(ctx, height * 0.6, height * 0.7);
+      drawTriangle(ctx, height * 0.6, width * 0.7);
       ctx.restore();
 
       return inButton ? 0x4 : 0x0;
@@ -546,8 +574,10 @@ window.p = pointers;
       return (inTop ? 0x1 : 0) | (inBottom ? 0x2 : 0);
     };
 
+    var foo = 0;
     var render = function() {
-
+//      ++foo;
+//      window.scrollTo(0, foo % 2);
       g_update = hackedResizeBecauseFuckedupIOSSucksDonkeyShit(g_canvas) || g_update;
 
       if (window.orientation !== g_oldOrientation) {
@@ -563,19 +593,51 @@ window.p = pointers;
           var depth = 5;
 
           var xOffset  = 40;
-          var lrWidth  = 250;
+          var innerWidth = Math.min(500, virtualWidth - xOffset * 2);
+          var lrWidth  = innerWidth / 18 * (12 - 0.5);
           var lrHeight = 100;
           var lrX      = xOffset;
           var lrY      = virtualHeight - 40 - lrHeight;
-          var upWidth  = lrHeight;
+          var upWidth  = innerWidth / 18 * (6 - 0.5);
           var upHeight = lrHeight;
           var upX      = virtualWidth - xOffset - upWidth;
           var upY      = lrY;
 
-          var avatarWidth = 128;
-          var avatarHeight = 128;
-          var avatarX = lrX + lrWidth + (upX - (lrX + lrWidth)) / 2;
-          var avatarY = lrY / 2 - avatarHeight / 2;
+          var avatarWidth  = g_avatarImage.width;
+          var avatarHeight = g_avatarImage.height;
+          var avatarX = upX + upWidth / 2; //lrX + lrWidth + (upX - (lrX + lrWidth)) / 2;
+          var avatarY = lrY - avatarHeight + 20;
+
+          ctx.save();
+          {
+            ctx.translate(lrX + lrWidth / 2, avatarY + avatarWidth / 2);
+            ctx.font = "bold 40px sans-serif";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillStyle = "white";
+            ctx.fillText("PTS:" + g_score, 0, 0);
+          }
+          ctx.restore();
+
+
+          var buttonBits = 0;
+
+          ctx.save();
+          {
+            ctx.translate(lrX, lrY);
+            buttonBits |= drawLRButton(ctx, lrWidth, lrHeight, depth);
+          }
+          ctx.restore();
+
+          ctx.save();
+          {
+            ctx.translate(upX, upY);
+            buttonBits |= drawUpButton(ctx, upWidth, upHeight, depth);
+
+            handleLeftRightTouch(buttonBits & 0x3);
+            handleJump(buttonBits & 0x4);
+          }
+          ctx.restore();
 
           if (g_avatarImage) {
             ctx.save();
@@ -610,38 +672,6 @@ window.p = pointers;
 
             ctx.restore();
           }
-
-          ctx.save();
-          {
-            ctx.translate(lrX + lrWidth / 2, avatarY + avatarWidth / 2);
-            ctx.font = "bold 40px sans-serif";
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            ctx.fillStyle = "white";
-            ctx.fillText("PTS:" + g_score, 0, 0);
-          }
-          ctx.restore();
-
-
-          var buttonBits = 0;
-
-          ctx.save();
-          {
-            ctx.translate(lrX, lrY);
-            buttonBits |= drawLRButton(ctx, lrWidth, lrHeight, depth);
-          }
-          ctx.restore();
-
-          ctx.save();
-          {
-            ctx.translate(upX, upY);
-            buttonBits |= drawUpButton(ctx, upWidth, upHeight, depth);
-
-            handleLeftRightTouch(buttonBits & 0x3);
-            handleJump(buttonBits & 0x4);
-          }
-          ctx.restore();
-
 
         };
 
@@ -854,16 +884,11 @@ window.p = pointers;
 
         ctx.fillStyle = "blue";
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+
 //        ctx.fillStyle = "yellow";
 //        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 //        ctx.fillRect(5, 5, ctx.canvas.width - 10, ctx.canvas.height - 10);
-
-//        ctx.fillStyle = "white";
-//        var s = "w:" + window.innerWidth + "," + window.innerHeight + " s:" + window.screenX + "," + window.screenY +
-//          " atl: " +   window.screen.availLeft + "," + window.screen.availTop + " awh: " + window.screen.availWidth + "," + window.screen.availHeight +
-//          " or: " + window.orientation;
-//        ctx.fillText(s, 10, 20);
-//        ctx.fillText(JSON.stringify(pointers), 10, 40);
 
         // orientation:   0 = portrait
         //              -90 = rotate left
@@ -873,6 +898,7 @@ window.p = pointers;
         {
           var virtualWidth;
           var virtualHeight;
+          var extraFuckedIPhoneYOffset = 0;
           switch (window.orientation) {
             case 0:  // portrait
               virtualWidth = ctx.canvas.height;
@@ -883,6 +909,12 @@ window.p = pointers;
             case  90:  // rotate right
               virtualWidth = ctx.canvas.width;
               virtualHeight = ctx.canvas.height;
+
+              if (shittyOldIPhoneWithShittyIOS8Plus && virtualHeight == 320) {
+                virtualHeight -= 90;
+              } else if (isIOS) {
+                virtualHeight -= 45;
+              }
               //ctx.translate(ctx.canvas.width - 1, ctx.canvas.height - 1);
               //ctx.rotate(Math.PI);
               break;
@@ -903,7 +935,12 @@ window.p = pointers;
               }
               break;
             case "control":
-              drawController();
+              ctx.save()
+              {
+                ctx.translate(0, extraFuckedIPhoneYOffset);
+                drawController();
+              }
+              ctx.restore();
               break;
           }
 
@@ -917,6 +954,20 @@ window.p = pointers;
 
         }
         ctx.restore();
+
+//        ctx.fillStyle = "black";
+//        ctx.fillRect(0, 80, ctx.canvas.width, 60);
+//        ctx.fillStyle = "white";
+//        ctx.font = "10px monospace";
+//        var s = "w:" + window.innerWidth + "," + window.innerHeight + " s:" + window.screenX + "," + window.screenY +
+//          " atl: " +   window.screen.availLeft + "," + window.screen.availTop + " awh: " + window.screen.availWidth + "," + window.screen.availHeight +
+//          " or: " + window.orientation + " po:" + window.pageXOffset + "," + window.pageYOffset +
+//          " sc: " + window.scrollX + "," + window.scrollY;
+//        ctx.fillText(s, 10, 100);
+//        var s = "fc:" + document.hasFocus();
+//        ctx.fillText(s, 10, 120);
+//      //        ctx.fillText(JSON.stringify(pointers), 10, 120);
+
 
         ctx.validateTransformStack();
       }
@@ -932,7 +983,6 @@ window.p = pointers;
   };
 
   ImageLoader.loadImages(images, startClient);
-
   return {};
 });
 
