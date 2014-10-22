@@ -89,11 +89,43 @@ html, body {
 }
 
 #end0 {
-   background-color: blue;
+    background-color: blue;
+}
+#end0 .grp0 {
+    clear: both;
+    padding: 0px;
+    margin: 0px;
+}
+
+#end0 .col {
+    display: block;
+    float:left;
+    gmargin: 1% 0 1% 1.6%;
+}
+
+#end0 .grp0:before,
+#end0 .grp0:after {
+    content:"";
+    display:table;
+}
+#end0 .grp0:after {
+    clear:both;
+}
+
+
+#end0 .col1 {
+    gbackground-color: green;
+    width: 60%;
+    border-left: 5px solid black;
+}
+#end0 .col0 {
+    background-color: #red;
+    width: 40%;
 }
 
 #end1 {
    background-color: black;
+   font-size: x-large;
 }
 
 #end1 strong {
@@ -118,3 +150,12 @@ html, body {
     }
 }
 
+@media only screen and (max-width: 420px) {
+    #end0 .col {
+        width: 100%;
+    }
+
+    #end1 .cold {
+        width: 100%;
+    }
+}
