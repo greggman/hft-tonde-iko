@@ -197,6 +197,7 @@ define(
     };
 
     var handleDone = function(data) {
+      MobileHacks.fixHeightHack();
       enableTouch();
       $("end0").style.display = "block";
       $("score").appendChild(document.createTextNode(data.score));
@@ -922,6 +923,7 @@ window.p = pointers;
       requestAnimationFrame(render);
     };
     render();
+//  handleDone({places:[20,34,12], score: 1234});
   };
 
   // You can generate this image with makeimage.html
