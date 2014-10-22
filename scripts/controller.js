@@ -169,16 +169,9 @@ requirejs(
 
   var startClient = function() {
 
-    avatars.forEach(function(avatar) {
-      var name = avatar.name + "-idle";
-      ImageCutter.cutImage(images[name], { numFrames: 1 });
-      avatar.anims.idle.frames = images[name].frames;
-    });
-
     g_canvas = $("buttons");
     ctx = CanvasWrapper.wrap(g_canvas.getContext("2d"));
     g_client = new GameClient();
-//    $("foo").innerHTML = navigator.appVersion;
 
     var handleScore = function(data) {
       g_points.push({
@@ -217,14 +210,17 @@ requirejs(
     };
 
     var drawAvatar = function(ctx) {
-      ctx.scale(0.6, 0.6);
-      ctx.scale(g_avatar.scale, g_avatar.scale);
+      ctx.scale(0.5, 0.5);
       ctx.translate(-g_avatarImage.width / 2, -g_avatarImage.height / 2);
       ctx.drawImage(g_avatarImage, 0, 0);
     };
 
     var makeAvatar = function() {
-      var img = ImageUtils.adjustHSV(g_avatar.anims.idle.frames[0], globals.save.color.h, globals.save.color.s, globals.save.color.v, g_avatar.range);
+      var srcImg = images.avatars.img;
+      var width  = srcImg.width / avatars.length;
+      var height = srcImg.height;
+      var img = ImageUtils.cropImage(srcImg, width * globals.save.avatar, 0, width, height);
+      img = ImageUtils.adjustHSV(img, globals.save.color.h, globals.save.color.s, globals.save.color.v, g_avatar.range);
       g_avatarImage = ImageUtils.scaleImage(img, img.width * 4, img.height * 4);
       saveCookie();
     };
@@ -582,7 +578,8 @@ window.p = pointers;
             ctx.save();
             ctx.translate(avatarX, avatarY);
             ctx.save();
-            ctx.scale(g_avatar.scale, g_avatar.scale);
+//            ctx.scale(g_avatar.scale, g_avatar.scale);
+//            ctx.scale(0.5, 0.5);
             ctx.drawImage(g_avatarImage, -avatarWidth / 2, 0);
             ctx.restore();
 
@@ -912,19 +909,10 @@ window.p = pointers;
     render();
   };
 
-  var images = { };
-
-  avatars.forEach(function(avatar) {
-    var name = avatar.name + "-idle";
-    var idle = avatar.anims.idle;
-    if (idle.urls) {
-      var p = { url: idle.urls[0] };
-      images[name] = p
-      avatar.anims.idle = p;
-    } else {
-      images[name] = idle;
-    }
-  });
+  // You can generate this image with makeimage.html
+  var images = {
+    avatars: { url: "assets/avatars/avatars.png" },
+  };
 
   ImageLoader.loadImages(images, startClient);
 });
