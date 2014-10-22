@@ -1,0 +1,2 @@
+define(['./realcontroller'], function() {});
+
