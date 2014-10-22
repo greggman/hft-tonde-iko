@@ -837,6 +837,7 @@ define([
     if (this.hasGift) {
       var dy = 0;
       var rot = 0;
+      var scale = 1;
       this.elapsedTimeGift += globals.elapsedTime;
       var timGiftDuration = 1.0;
       if (this.elapsedTimeGift < timGiftDuration){
@@ -844,13 +845,15 @@ define([
         var sinLerp = Math.sin(lerp * Math.PI * 0.80);
         dy = 58 -96 * sinLerp;
         rot = (Math.PI *2 * 5) * lerp;
+        scale = 1 + 1 * Math.sin(lerp * Math.PI);
       }
       img = this.animGift[0];
       this.giftScale = gmath.clamp(this.score / 300, 0.5, 2.0);
       var sprite = this.giftSprite;
       sprite.rotation = rot;
       sprite.uniforms.u_texture = img;
-      sprite.xScale = this.facing > 0 ? 1 : -1;     
+      sprite.xScale = scale; //this.facing > 0 ? scale : -scale;     
+      sprite.yScale = scale;
       sprite.x = off.x + ((    this.position[0]) | 0) * globals.scale;
       sprite.y = off.y + (( (height / -2)  + this.position[1]) -36 - 22 + dy| 0) * globals.scale;
       sprite.width  = img.img.width * this.giftScale; //globals.scale;
