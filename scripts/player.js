@@ -126,6 +126,7 @@ define([
       this.score = data.score || 0;
 //      this.addPoints(0);
 
+      this.posDestTeleport = [0,0];
       this.reset(startPosition);
       if (data.velocity) {
         this.velocity[0] = data.velocity[0];
@@ -418,6 +419,56 @@ define([
     }
   };
 
+  Player.prototype.init_teleport = function() {
+    var dx = this.posDestTeleport[0] - this.position[0];
+    var dy = this.posDestTeleport[1] - this.position[1];
+    this.distTeleport = Math.sqrt(dx*dx + dy*dy);
+    this.dxHalfTeleport = dx * 0.5;
+    this.dyHalfTeleport = dy * 0.5;
+    this.timeTeleport = 0.25 + this.distTeleport / 500;
+    this.rotationsTeleport = Math.PI * 2 * (1 + this.distTeleport / 100);
+    this.elapsedTimeTeleport = 0;
+    this.animTimer = 0;
+    this.animSet = this.anims.idle;
+    this.anim = this.anims.idle.frames;
+  };
+
+  Player.prototype.state_teleport = function() {
+
+    var globals = this.services.globals;
+    this.animTimer += globals.elapsedTime * this.idleAnimSpeed;
+    
+    this.elapsedTimeTeleport += globals.elapsedTime;
+    if (this.elapsedTimeTeleport >= this.timeTeleport) {
+      this.position[0] = this.posDestTeleport[0];
+      this.position[1] = this.posDestTeleport[1];
+      this.sprite.rotation = 0;
+
+      if (globals.levelName == "level5-0") {
+
+        this.addConfettiNearPlayer(1000 * 0);
+        this.addConfettiNearPlayer(1000 * 0.5);
+        this.addConfettiNearPlayer(1000 * 1.0);
+
+        if (this.hasGift) {
+          this.hasHat = true;
+          this.hasGift = false;
+          this.giftSprite.visible = false;
+          this.nameSprite.visible = false;
+          this.gift = new Gift(this.services, this); //this.position, this.velocity);
+        }
+      }
+      this.setState(this.statePrevTeleport);
+
+    } else {
+      var lerp = (this.elapsedTimeTeleport/this.timeTeleport)
+      var cosTime = Math.cos( lerp * Math.PI);
+      this.position[0] = this.posDestTeleport[0] - this.dxHalfTeleport - cosTime * this.dxHalfTeleport;
+      this.position[1] = this.posDestTeleport[1] - this.dyHalfTeleport - cosTime * this.dyHalfTeleport;
+      this.sprite.rotation = lerp * this.rotationsTeleport;
+    }
+  };
+
   Player.prototype.teleportToOtherGame = function(dir, dest, subDest) {
     // HACK!
     var globals = this.services.globals;
@@ -512,23 +563,13 @@ define([
             }
 
             dest = dest[Misc.randInt(dest.length)];
-            this.position[0] = (dest.tx + 0.5) * level.tileWidth;
-            this.position[1] = (dest.ty +   1) * level.tileHeight - 1;
+            this.posDestTeleport[0] =  (dest.tx + 0.5) * level.tileWidth;
+            this.posDestTeleport[1] =  (dest.ty +   1) * level.tileHeight - 1;
+            this.statePrevTeleport = this.state;
+            this.setState("teleport");
+            //this.position[0] = (dest.tx + 0.5) * level.tileWidth;
+            //this.position[1] = (dest.ty +   1) * level.tileHeight - 1;
 
-            if (globals.levelName == "level5-0") {
-
-              this.addConfettiNearPlayer(1000 * 0);
-              this.addConfettiNearPlayer(1000 * 0.5);
-              this.addConfettiNearPlayer(1000 * 1.0);
-
-              if (this.hasGift) {
-                this.hasHat = true;
-                this.hasGift = false;
-                this.giftSprite.visible = false;
-                this.nameSprite.visible = false;
-                this.gift = new Gift(this.services, this); //this.position, this.velocity);
-              }
-            }
           } else {
             // comment this in to allow level to level teleports
 //            var dir = (tile.dest == 0 || tile.dest == 2) ? -1 : 1;
