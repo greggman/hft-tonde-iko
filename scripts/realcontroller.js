@@ -81,6 +81,7 @@ define(
   var g_update;
   var g_oldOrientation;
   var g_spinner;
+  var g_score = 0;
   var g_playerCookie = new Cookie("hft-tondeiko-player");
   var g_points = [];
   var g_oldLetter = [
@@ -182,6 +183,7 @@ define(
         xv: Math.random() * 40 - 20,
         yv: Math.random() * 30 - 60,
       });
+      g_score += data.points;
       g_update = true;
       g_audioManager.playSound('coin');
     };
@@ -608,6 +610,18 @@ window.p = pointers;
             ctx.restore();
           }
 
+          ctx.save();
+          {
+            ctx.translate(lrX + lrWidth / 2, avatarY + avatarWidth / 2);
+            ctx.font = "bold 40px sans-serif";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillStyle = "white";
+            ctx.fillText("PTS:" + g_score, 0, 0);
+          }
+          ctx.restore();
+
+
           var buttonBits = 0;
 
           ctx.save();
@@ -626,6 +640,7 @@ window.p = pointers;
             handleJump(buttonBits & 0x4);
           }
           ctx.restore();
+
 
         };
 
