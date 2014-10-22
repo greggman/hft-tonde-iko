@@ -67,6 +67,9 @@ define([
 
   CollectableManager.prototype.process = function() {
     var globals = this.services.globals;
+    if (globals.levelName == "level1-0") {
+    	return; // no coin rain on ball level
+    }
     this.bonusTime -= globals.elapsedTime;
     if (this.bonusTime <= 0) {
       if (this.services.playerManager.getNumPlayers() == 0) {
