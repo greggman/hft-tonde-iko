@@ -576,8 +576,9 @@ define([
 //            this.teleportToOtherGame(dir, tile.dest, tile.subDest);
           }
           return true; // we teleported. Stop checking
-        } else if (tile.gift) {
+        } else if (tile.gift && !this.hasGift) {
           this.hasGift = true;
+          this.services.particleEffectManager.spawnBallRedConfetti(this.position[0], this.position[1] - 32);
         }
       }
     }
