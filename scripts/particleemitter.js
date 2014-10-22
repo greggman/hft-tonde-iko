@@ -107,11 +107,12 @@ define(
     return emitter;
   };
 
+  var portalHueSpreader = 7;
   var createPortal = function(particleSystemManager, data) {
    var emitter = particleSystemManager.createParticleEmitterInFrontOfPlayer(ringTexture.texture);
     emitter.setState(Particles.ParticleStateIds.BLEND);
     var ramp = [];
-    var h = (1 + data.tileInfo.dest / 12 - 0.1) % 1;
+    var h = (1 + data.tileInfo.dest / portalHueSpreader - 0.1) % 1;
     addColorToRamp(ramp, h, 0.5,   1, 0.0);
     addColorToRamp(ramp, h, 0.6,   1, 0.3);
     addColorToRamp(ramp, h, 0.9,   1, 0.6);
@@ -152,7 +153,7 @@ define(
     var emitter = particleSystemManager.createParticleEmitterInFrontOfPlayer(onePixelTexture.texture);
     emitter.setState(Particles.ParticleStateIds.BLEND);
     var ramp = [];
-    var h = (1 + data.tileInfo.teleportDest / 12 - 0.1) % 1;
+    var h = (1 + data.tileInfo.teleportDest / portalHueSpreader - 0.1) % 1;
     addColorToRamp(ramp, h, 0.5,   1, 0.7);
     addColorToRamp(ramp, h,   1,   1, 0.5);
     addColorToRamp(ramp, h, 0.5,   1, 0.0);
