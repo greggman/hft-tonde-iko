@@ -614,6 +614,8 @@ define([
         return false;
       }
     }
+    if (this.checkHeadStand()) return false;
+
     this.setState('fall');
     return true;
   };
@@ -654,6 +656,13 @@ define([
         return true;
       }
     }
+    if (this.checkHeadStand()) {
+          this.velocity[1] = 0;
+          this.stopFriction =  globals.stopFriction;
+          this.services.audioManager.playSound('land');
+          this.setState('move');
+          return true;
+     }
     return false;
   };
 
@@ -664,6 +673,31 @@ define([
       return this.checkUp();
     }
   };
+
+  Player.prototype.checkHeadStand = function(){
+    if (this.jump) return false;
+    if (!this.checkPlayerHead) {
+      this.checkPlayerHead = function(player) {
+        if (player == this) return false;
+//        if (player.velocity[1] < 0) return false; // no pushing me up from under by jumping under me.
+        var halfWidthHim = player.sprite.width * 0.25;
+        if (this.position[0] - this.halfWidthMe > player.position[0] + halfWidthHim) return false;  // to right of player's right side
+        if (this.position[0] + this.halfWidthMe < player.position[0] - halfWidthHim) return false;  // to left of player's left side 
+        var heightHim = 30;
+        if (this.position[1] - this.heightMe > player.position[1]) return false;               // below player's bottom 
+        if (this.position[1]  < player.position[1] - heightHim) return false;            // above player's top
+
+        if (this.position[1] > player.position[1]- heightHim*0.5) return; // no good if half way into guy below me.
+
+        this.position[1] = player.position[1] - heightHim;
+        this.velocity[1] = 0.0001;
+        return true;
+      }.bind(this);
+    }
+    this.halfWidthMe = this.sprite.width * 0.25;
+    this.heightMe = 30;
+    return this.services.playerManager.forEachPlayer(this.checkPlayerHead);
+  }
 
   Player.prototype.init_move = function() {
     this.animTimer = 0;
