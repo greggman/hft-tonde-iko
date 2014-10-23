@@ -691,7 +691,10 @@ define([
         if (this.position[1] > player.position[1]- heightHim*0.5) return; // no good if half way into guy below me.
 
         this.position[1] = player.position[1] - heightHim;
-        this.velocity[1] = 0;
+        if (player.velocity[1] < 0)
+        	this.velocity[1] = player.velocity[1];
+        else
+        	this.velocity[1] = 0;
         if (this.position[1] < this.lastPosition[1]) {
           this.checkUp(); // This will set the bonk flag if he hits a tile, which will make him no longer stand on other players until he jumps again.
         }
