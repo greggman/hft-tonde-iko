@@ -617,6 +617,7 @@ define([
     if (this.checkHeadStand()) return false;
 
     this.setState('fall');
+    this.bonked = false;    // allows player to stand on othe player's head afte jumping and bonking then landing then walking off platform onto player's head.
     return true;
   };
 
