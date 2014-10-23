@@ -155,6 +155,8 @@ window.s = g_services;
     giftGravity: 1000,
     giftMaxAllowed: 10,
     smallCoinScale: 0.75,
+    allowStandOnPlayers: true,
+    allowStoodOnToBumpYou: true,
 
     drawOffset: {},
   };

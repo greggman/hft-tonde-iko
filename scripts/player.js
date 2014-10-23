@@ -675,11 +675,11 @@ define([
   };
 
   Player.prototype.checkHeadStand = function(){
-    if (this.jump) return false;
+    if (!this.services.globals.allowStandOnPlayers || this.jump) return false;
     if (!this.checkPlayerHead) {
       this.checkPlayerHead = function(player) {
         if (player == this) return false;
-//        if (player.velocity[1] < 0) return false; // no pushing me up from under by jumping under me.
+        if (!this.services.allowStoodOnToBumpYou && player.velocity[1] < 0) return false; // no pushing me up from under by jumping under me.
         var halfWidthHim = player.sprite.width * 0.25;
         if (this.position[0] - this.halfWidthMe > player.position[0] + halfWidthHim) return false;  // to right of player's right side
         if (this.position[0] + this.halfWidthMe < player.position[0] - halfWidthHim) return false;  // to left of player's left side 
