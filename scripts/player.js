@@ -675,11 +675,11 @@ define([
   };
 
   Player.prototype.checkHeadStand = function(){
-    if (!this.services.globals.allowStandOnPlayers || this.jump) return false;
+    if (!this.services.globals.allowStandOnPlayers || this.jump || this.bonked) return false;
     if (!this.checkPlayerHead) {
       this.checkPlayerHead = function(player) {
         if (player == this) return false;
-        if (!this.services.allowStoodOnToBumpYou && player.velocity[1] < 0) return false; // no pushing me up from under by jumping under me.
+        if (player.velocity[1] < 0 && !this.services.globals.allowStoodOnToBumpYou) return false; // no pushing me up from under by jumping under me.
         var halfWidthHim = player.sprite.width * 0.25;
         if (this.position[0] - this.halfWidthMe > player.position[0] + halfWidthHim) return false;  // to right of player's right side
         if (this.position[0] + this.halfWidthMe < player.position[0] - halfWidthHim) return false;  // to left of player's left side 
@@ -690,7 +690,10 @@ define([
         if (this.position[1] > player.position[1]- heightHim*0.5) return; // no good if half way into guy below me.
 
         this.position[1] = player.position[1] - heightHim;
-        this.velocity[1] = 0.0001;
+        this.velocity[1] = 0;
+        if (this.position[1] < this.lastPosition[1]) {
+          this.checkUp(); // This will set the bonk flag if he hits a tile, which will make him no longer stand on other players until he jumps again.
+        }
         return true;
       }.bind(this);
     }
