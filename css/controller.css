@@ -30,7 +30,7 @@
  */
 html, body {
     font-family: Helvetica, Arial, sans-serif;
-    background-color: purple;
+    background-color: #222;
 }
 #buttons {
     position: absolute;
@@ -114,12 +114,10 @@ html, body {
 
 
 #end0 .col1 {
-    gbackground-color: green;
     width: 60%;
     border-left: 5px solid black;
 }
 #end0 .col0 {
-    background-color: #red;
     width: 40%;
 }
 
