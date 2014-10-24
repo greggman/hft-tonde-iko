@@ -112,7 +112,7 @@ define(
    var emitter = particleSystemManager.createParticleEmitterInFrontOfPlayer(ringTexture.texture);
     emitter.setState(Particles.ParticleStateIds.BLEND);
     var ramp = [];
-    var h = (1 + data.tileInfo.dest / portalHueSpreader - 0.1) % 1;
+    var h = data.hue || (1 + data.tileInfo.dest / portalHueSpreader - 0.1) % 1;
     addColorToRamp(ramp, h, 0.5,   1, 0.0);
     addColorToRamp(ramp, h, 0.6,   1, 0.3);
     addColorToRamp(ramp, h, 0.9,   1, 0.6);
@@ -153,7 +153,7 @@ define(
     var emitter = particleSystemManager.createParticleEmitterInFrontOfPlayer(onePixelTexture.texture);
     emitter.setState(Particles.ParticleStateIds.BLEND);
     var ramp = [];
-    var h = (1 + data.tileInfo.teleportDest / portalHueSpreader - 0.1) % 1;
+    var h = data.hue || (1 + data.tileInfo.teleportDest / portalHueSpreader - 0.1) % 1;
     addColorToRamp(ramp, h, 0.5,   1, 0.7);
     addColorToRamp(ramp, h,   1,   1, 0.5);
     addColorToRamp(ramp, h, 0.5,   1, 0.0);
@@ -226,6 +226,8 @@ define(
     this.emitters = [];
     var xOff = 0;
     var yOff = 0;
+  	if (services.globals.levelName == "level2-0")
+  		data.hue = 0.6638; // hack for blue teleporter in level 
     switch (type.particleType) {
       case 3:
         this.emitters.push(createSmoke(services.particleSystemManager, data));
