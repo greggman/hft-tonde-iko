@@ -56,6 +56,7 @@ requirejs(
     './ball',
     './gift',
     './coingen',
+    './flyingportal',    
     './debug-renderer',
     './image-cutter',
     './levelloader',
@@ -86,6 +87,7 @@ requirejs(
     Ball,
     Gift,
     CoinGen,
+    FlyingPortal,
     DebugRenderer,
     ImageCutter,
     LevelLoader,
@@ -457,11 +459,13 @@ window.g = globals;
         {type: "door",                          constructor: Door,    },
         {type: "ball",                          constructor: Ball,    },
         {type: "coingen",                       constructor: CoinGen, },
+        {type: "flyingportal",                 constructor: FlyingPortal, },
      ].forEach(function(type) {
         var teleports = level.getThings(type.type);
         if (teleports) {
           Object.keys(teleports).forEach(function(key) {
             teleports[key].forEach(function(teleport) {
+            console.log(type);
               new (type.constructor)(
                 g_services,
                 teleport,
