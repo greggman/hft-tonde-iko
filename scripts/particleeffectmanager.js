@@ -110,6 +110,34 @@ define(
     return tdl.particles.createOneShotManager(emitter, maxConfetti);
   };
 
+  var createBonk= function(particleSystemManager) {
+    var emitter = particleSystemManager.createParticleEmitterInFrontOfPlayer(onePixelTexture.texture);
+    emitter.setState(tdl.particles.ParticleStateIds.BLEND);
+    emitter.setColorRamp(
+        [1, 1, 1, 1]);
+    emitter.setParameters({
+        numParticles: 2,
+        lifeTime: 0.5,
+        //timeRange: 0.0,
+        startSize: 3.0,
+        endSize: 5.0,
+        spinSpeedRange: Math.PI * 4},
+        function(index, parameters) {
+            var speed = Math.random() * 12 + 5;
+            var angle = Math.random() * 2 * Math.PI;
+            var color = ImageUtils.hsvToRgb(0.1638, 0.7, 1);
+            parameters.startTime = 0;// Math.random() * 0.2;
+            parameters.colorMult = [color[0] / 255, color[1] / 255, color[2] / 255, 1];
+            parameters.position = Maths.matrix4.transformPoint(
+                Maths.matrix4.rotationZ(angle), [0, 0, 0])
+            parameters.velocity = Maths.matrix4.transformPoint(
+                Maths.matrix4.rotationZ(angle), [speed * 10, 0, 0]);
+            parameters.acceleration = Maths.addVector(Maths.matrix4.transformPoint(
+                Maths.matrix4.rotationZ(angle), [-speed * 8, 0, 0]), [0, 50, 0]);
+        });
+    return tdl.particles.createOneShotManager(emitter, maxConfetti);
+  };
+
   var createBallConfetti = function(particleSystemManager, hue) {
     var emitter = particleSystemManager.createParticleEmitterInFrontOfPlayer(onePixelTexture.texture);
     emitter.setState(tdl.particles.ParticleStateIds.BLEND);
@@ -227,6 +255,7 @@ define(
     setup(services);
     this.services = services;
     this.confettis = createConfetti(services.particleSystemManager);
+    this.bonk = createBonk(services.particleSystemManager);
     this.ballRedConfetti = createBallConfetti(services.particleSystemManager, 0);
     this.ballBlueConfetti = createBallConfetti(services.particleSystemManager, 0.666);
   };
@@ -234,6 +263,11 @@ define(
   ParticleEffectManager.prototype.spawnConfetti = function(x, y) {
     var _tp_ = tdl.fast.matrix4.translation(new Float32Array(16), [x, y, 0]);
     this.confettis.startOneShot(_tp_);
+  };
+
+  ParticleEffectManager.prototype.spawnBonk = function(x, y) {
+    var _tp_ = tdl.fast.matrix4.translation(new Float32Array(16), [x, y, 0]);
+    this.bonk.startOneShot(_tp_);
   };
 
   ParticleEffectManager.prototype.spawnBallRedConfetti = function(x, y) {

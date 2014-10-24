@@ -465,7 +465,6 @@ window.g = globals;
         if (teleports) {
           Object.keys(teleports).forEach(function(key) {
             teleports[key].forEach(function(teleport) {
-            console.log(type);
               new (type.constructor)(
                 g_services,
                 teleport,

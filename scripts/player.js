@@ -632,6 +632,7 @@ define([
         if (!this.bonked) {
           this.bonked = true;
           this.services.audioManager.playSound('bonkhead');
+          this.services.particleEffectManager.spawnBonk(this.position[0], this.position[1] - this.height);
         }
         return true;
       }
