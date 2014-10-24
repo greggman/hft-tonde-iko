@@ -35,18 +35,27 @@ define([
     'hft/misc/strings',
     '../bower_components/hft-utils/dist/2d',
     '../bower_components/hft-utils/dist/imageutils',
-    './particleemitter',
     './math',
+   './particleemitter',
   ], function(
     Misc,
     Strings,
     M2D,
     ImageUtils,
-    ParticleEmitter,
-    gmath) {
+    gmath,
+    ParticleEmitter) {
+
+  var nextColor = 0;
+  var balls = [];
+  var nameFontOptions = {
+    font: "16px sans-serif",
+    yOffset: 18,
+    height: 20,
+    fillStyle: "black",
+  };
 
   /**
-   * FlyingPortal represnt a portal that bounces around the level like the fireball in Super Mario Bros.
+   * FlyingPortal represnt a portal that bounces around the level like the fireball in Super Mario Bros arcade game.
    * @constructor
    */
   var FlyingPortal = (function() {
@@ -62,9 +71,25 @@ define([
       services.entitySystem.addEntity(this);
       this.velocity = [50, -150];
       this.acceleration = [0, 0];
+      this.stopFriction = globals.stopFriction;
+      this.ballElasticity = globals.ballElasticity;
+      this.ballStopVelocity = globals.ballStopVelocity;
+      this.walkAcceleration = globals.moveAcceleration;
+      this.idleAnimSpeed = (0.8 + Math.random() * 0.4) * globals.idleAnimSpeed;
+      this.points = 0;
       
-      this.width  = 32;
-      this.height = 32;
+      var h = (++nextColor) % 2 ? 0 : 0.4;
+      this.colorIndex = nextColor;
+      this.color = {
+        id: 0,
+        h: h,
+        s: 0,
+        v: 0,
+        hsv: [h, 0, 0, 0],
+        range: [180 / 360, 275 / 360],
+      };
+      this.width  = 24;
+      this.height = 24;
       var startPosition = {
         x: (data.tx + 0.5) * level.tileWidth,
         y: (data.ty + 0.5) * level.tileHeight
@@ -73,15 +98,30 @@ define([
 
       this.data = data;
       
+      
+      this.animTimer = 0;
+      this.canJump = false;
       this.checkWallOffset = [
         -this.width / 2,
         this.width / 2 - 1,
       ];
+      this.timeAccumulator = 0;
+      this.moveVector = {};
+      this.workVector = {};
+      this.tileVector = {};
 
-      this.pm = new ParticleEmitter(services, {tileInfo: {teleportDest: 0}}, {type: "teleport",     particleType: 0, constructor: ParticleEmitter,  } );
-      this.emitter = pm.emitters[0];
-      
+      this.sprite = this.services.spriteManager.createSprite();
+      this.nameSprite = this.services.spriteManager.createSprite();
+
+
+      this.pm = new ParticleEmitter(services, data, {type: "teleport",     particleType: 0, constructor: ParticleEmitter,  } );
+      this.emitter = this.pm.emitters[0];
+
+      this.setName();
       this.direction = data.direction || 0;         // direction player is pushing (-1, 0, 1)
+      this.facing = 1; //data.facing || direction;    // direction player is facing (-1, 1)
+      this.score = 0;
+      this.addPoints(0);
 
       //console.log(startPosition);
       this.reset(startPosition);
@@ -89,9 +129,18 @@ define([
 
 
       this.checkBounds();
+      balls.push(this);
     };
   }());
 
+  FlyingPortal.prototype.setName = function() {
+   	var name = this.points.toString();
+    if (name != this.playerName) {
+      this.playerName = name;
+      this.nameImage = this.services.createTexture(
+          ImageUtils.makeTextImage(name, nameFontOptions));
+    }
+  };
 
   FlyingPortal.prototype.reset = function(startPosition) {
     var levelManager = this.services.levelManager;
@@ -104,7 +153,19 @@ define([
     this.sprite.uniforms.u_adjustRange = this.color.range.slice();
   };
 
+  FlyingPortal.prototype.updateMoveVector = function() {
+    this.moveVector.x = this.position[0] - this.lastPosition[0];
+    this.moveVector.y = this.position[1] - this.lastPosition[1];
+  };
+
+  FlyingPortal.prototype.addPoints = function(points) {
+    this.score += points;
+  };
+
   FlyingPortal.prototype.setState = function(state) {
+    if (state != 'move') {
+      return;
+    }
     this.state = state;
     var init = this["init_" + state];
     if (init) {
@@ -123,8 +184,9 @@ define([
   };
 
   FlyingPortal.prototype.removeFromGame = function() {
+    this.services.spriteManager.deleteSprite(this.sprite);
+    this.services.spriteManager.deleteSprite(this.nameSprite);
     this.services.entitySystem.removeEntity(this);
-    this.services.drawSystem.removeEntity(this);
   };
 
   FlyingPortal.prototype.updatePosition = function(axis, elapsedTime) {
@@ -137,6 +199,19 @@ define([
     }
   };
 
+  FlyingPortal.prototype.updateVelocity = function(axis, elapsedTime) {
+    var globals = this.services.globals;
+    var axis = axis || 3;
+    if (axis & 1) {
+//      this.velocity[0] += this.acceleration[0] * elapsedTime;
+      this.velocity[0] = Misc.clampPlusMinus(this.velocity[0], globals.maxVelocityBall[0]);
+    }
+    if (axis & 2) {
+      this.velocity[1] += (this.acceleration[1] + globals.ballGravity) * elapsedTime;
+      this.velocity[1] = Misc.clampPlusMinus(this.velocity[1], globals.maxVelocityBall[1]);
+    }
+  };
+
   FlyingPortal.prototype.updatePhysics = function(axis) {
     var kOneTick = 1 / 60;
     var globals = this.services.globals;
@@ -146,7 +221,7 @@ define([
     this.lastPosition[0] = this.position[0];
     this.lastPosition[1] = this.position[1];
     for (var ii = 0; ii < ticks; ++ii) {
-//      this.updateVelocity(axis, kOneTick);
+ //     this.updateVelocity(axis, kOneTick);
       this.updatePosition(axis, kOneTick);
     }
     this.emitter.setTranslation(this.position[0], this.position[1], 0);
@@ -160,33 +235,64 @@ define([
     var didBounce = false;
     for (var ii = 0; ii < 2; ++ii) {
       var xCheck = this.position[0] + this.checkWallOffset[off];
-        var tile = levelManager.getTileInfoByPixel(xCheck, this.position[1] - this.height / 4 - this.height / 2 * ii);
+        var tile = levelManager.getTileInfoByPixel(xCheck, this.position[1] + this.height / 4 - this.height / 2 * ii);
         if ((tile.solidForAI && !tile.oneWay) || ( tile.collisions && (!tile.sideBits || (tile.sideBits & 0x3)))) {
           if (!didBounce) {
-            this.velocity[0] = -this.velocity[0]; //0; jma
-             didBounce = true;
+            this.velocity[0] = -this.velocity[0]; // * this.ballElasticity; //0; jma
+            didBounce = true;
           }
           var distInTile = gmath.emod(xCheck, level.tileWidth);
           var xoff = off ? -distInTile : level.tileWidth - distInTile;
           this.position[0] += xoff;
         }
+        if (tile.teleport && tile.local) {
+          this.doTeleport(level, tile, 1);
+        }
     }
   };
 
+  FlyingPortal.prototype.doTeleport = function(level, tile, numPoints){
+   this.services.collectableManager.spawn(this.position, this.velocity, 3);
+    var dest = level.getLocalDest(tile.dest);
+    if (!dest) {
+      console.error("missing local dest for dest: " + tile.dest);
+      return;
+    }
+    this.points += numPoints;
+    if (this.points >= this.services.globals.ballWinGamePoints)
+    {
+      // Do confetti of this ballsc color here:
+      if ((this.colorIndex % 2)== 0) {
+        this.services.particleEffectManager.spawnBallRedConfetti(this.position[0], this.position[1]);
+      } else {
+        this.services.particleEffectManager.spawnBallBlueConfetti(this.position[0], this.position[1]);
+      }
+
+      // Reset all ball points to 0. (new game)
+        this.points = 0;
+        for (var i=0; i < balls.length; ++i)
+        {
+          if (balls[i] != this)
+          {
+            balls[i].points = 0;
+            balls[i].setName();
+          }
+        }  
+    }
 
     dest = dest[Misc.randInt(dest.length)];
     this.position[0] = (dest.tx + 0.5) * level.tileWidth;
     this.position[1] = (dest.ty +   1) * level.tileHeight - 1;
+    this.setName();
   };
-
 
   FlyingPortal.prototype.teleportPlayer = function(player) {
     var levelManager = this.services.levelManager;
     var level = levelManager.getLevel();
 
-    var dest = level.getLocalDest(0); //tile.dest);
+    var dest = level.getLocalDest(this.data.tileInfo.dest); //tile.dest);
     if (!dest) {
-      console.error("missing local dest for dest: " + tile.dest);
+      console.error("missing local dest for dest: " );
       return;
     }
     dest = dest[Misc.randInt(dest.length)];
@@ -195,18 +301,18 @@ define([
     player.statePrevTeleport = player.state;
     player.setState("teleport");
   }
-  
+
   FlyingPortal.prototype.checkTeleport = function(){
     if (!this.checkTeleportPlayer) {
       this.checkTeleportPlayer = function(player) {
         var dx = this.position[0] - (player.position[0]);
         var dx2 = dx * dx;
-        var radius = 28;
+        var radius = 16;
         var radius2 = radius * radius;
         if (dx2 > radius2) {
           return false;
         }
-        var dy = this.position[1] - (player.position[1] + 12);
+        var dy = this.position[1] - (player.position[1] - player.height/2);
         var dy2 = dy*dy;
         if (dy2 > radius2) {
           return false;
@@ -219,24 +325,25 @@ define([
     }
     this.services.playerManager.forEachPlayer(this.checkTeleportPlayer);
   }
+
   
   FlyingPortal.prototype.checkUp = function() {
     var levelManager = this.services.levelManager;
     var level = levelManager.getLevel();
     for (var ii = 0; ii < 2; ++ii) {
-      var tile = levelManager.getTileInfoByPixel(this.position[0] - this.width / 4 + this.width / 2 * ii, this.position[1] - this.height);
+      var tile = levelManager.getTileInfoByPixel(this.position[0] - this.width / 4 + this.width / 2 * ii, this.position[1] - this.height/2);
       if ((tile.solidForAI && !tile.oneWay) || (tile.collisions && (!tile.sideBits || (tile.sideBits & 0x4)))) {
-        this.velocity[1] = -this.velocity[1] * this.ballElasticity; // 0;
-        if (Math.abs(this.velocity[1]) < this.ballStopVelocity) {
-          this.velocity[1] = 0;
-        }
-        this.position[1] = (gmath.unitdiv(this.position[1], level.tileHeight) + 1) * level.tileHeight;
-        this.velocity[0] *= this.stopFriction;
+        this.velocity[1] = -this.velocity[1]; // * this.ballElasticity; // 0;
+        this.position[1] = (gmath.unitdiv(this.position[1], level.tileHeight) ) * level.tileHeight + this.height/2;
+   //     this.velocity[0] *= this.stopFriction;
         if (!this.bonked) {
           this.bonked = true;
           //this.services.audioManager.playSound('bonkhead');
         }
         return true;
+      }
+      if (tile.teleport && tile.local) {
+        this.doTeleport(level, tile, 1);
       }
     }
     return false;
@@ -247,23 +354,23 @@ define([
     var levelManager = this.services.levelManager;
     var level = levelManager.getLevel();
     for (var ii = 0; ii < 2; ++ii) {
-      var tile = levelManager.getTileInfoByPixel(this.position[0] - this.width / 4 + this.width / 2 * ii, this.position[1]);
+      var tile = levelManager.getTileInfoByPixel(this.position[0] - this.width / 4 + this.width / 2 * ii, this.position[1] + this.height/2);
       if (tile.solidForAI) {
         var ty = gmath.unitdiv(this.position[1], level.tileHeight) * level.tileHeight;
         if (!this.oneWay || this.lastPosition[1] <= ty) {
-          this.position[1] = Math.floor(this.position[1] / level.tileHeight) * level.tileHeight;
-          this.velocity[1] = -Math.abs(this.velocity[1]) * this.ballElasticity; //0;
-          if (Math.abs(this.velocity[1]) < this.ballStopVelocity) {
-            this.velocity[1] = 0;
-          }
+          this.position[1] = Math.floor(this.position[1] / level.tileHeight) * level.tileHeight + this.height/2;
+          this.velocity[1] = -Math.abs(this.velocity[1]); // * this.ballElasticity; //0;
           this.stopFriction = tile.stopFriction || globals.stopFriction;
-          this.velocity[0] *= this.stopFriction;
+        //  this.velocity[0] *= this.stopFriction;
           if (!this.landed) {
             this.landed = true;
             //this.services.audioManager.playSound('land');
           }
         }
         return true;
+      }
+      if (tile.teleport && tile.local) {
+        this.doTeleport(level, tile, 1);
       }
     }
     return false;
@@ -294,6 +401,7 @@ define([
 //jma    this.acceleration[0] = this.lastDirection * this.walkAcceleration;
     this.animTimer += globals.moveAnimSpeed * Math.abs(this.velocity[0]) * globals.elapsedTime;
     //this.updatePhysics(1);
+//    this.checkBall();
     this.checkTeleport();
     this.updatePhysics();
 
@@ -302,7 +410,6 @@ define([
 
     this.lastDirection = this.direction;
   };
-
 
   return FlyingPortal;
 });

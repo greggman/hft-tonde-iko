@@ -203,7 +203,10 @@ define([
   var tileInfoSuperCoin = { thing: "supercoin", id: 0, };
   var tileInfoBall = { thing: "ball", id: 0, };
   var tileInfoCoinGen = { thing: "coingen", id: 0, };
-  var tileInfoFlyingPortal = { thing: "flyingportal", id: 0, };
+  var tileInfoFlyingPortal0 = { thing: "flyingportal", id: 0, dest: 0};
+  var tileInfoFlyingPortal1 = { thing: "flyingportal", id: 0, dest: 1};
+  var tileInfoFlyingPortal2 = { thing: "flyingportal", id: 0, dest: 2};
+  var tileInfoFlyingPortal3 = { thing: "flyingportal", id: 0, dest: 3};
   var tileInfoCandle = { thing: "candle", id: 0, };
   var tileInfoGift = {   collisions: false,
     open: true, gift:true, };
@@ -368,10 +371,10 @@ define([
     tileInfoArea3,            // 0x46
     tileInfoGift,             // 0x47
     tileInfoCandle,           // 0x48
-    tileInfoFlyingPortal,     // 0x49
-    nullTile,			 // 0x4A
-    nullTile,            // 0x4B
-    nullTile,            // 0x4C
+    tileInfoFlyingPortal0,    // 0x49
+    tileInfoFlyingPortal1,    // 0x4A
+    tileInfoFlyingPortal2,    // 0x4B
+    tileInfoFlyingPortal3,    // 0x4C
     nullTile,            // 0x4D
     nullTile,            // 0x4E
     nullTile,            // 0x4F
