@@ -6,7 +6,20 @@ To effectively play you need 2 or more computers and some
 configuration. It allows you to play one giant platformer
 across multiple machines.
 
-<img src="screenshot.png" />
+The 6 levels below were created for the [Steam Carnival](http://steamcarnival.com)
+
+<img src="images/level0-0.jpg" width="640" height="357" />
+
+<img src="images/level0-1.jpg" width="640" height="357" />
+
+<img src="images/level0-2.jpg" width="640" height="357" />
+
+<img src="images/level0-3.jpg" width="640" height="357" />
+
+<img src="images/level0-4.jpg" width="640" height="357" />
+
+<img src="images/level0-5.jpg" width="640" height="357" />
+
 
 Cloning
 -------
