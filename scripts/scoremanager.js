@@ -327,12 +327,13 @@ define([
       return place;
     }.bind(this));
 
-    // Remove day players past max because otherwise they'll
-    // never be removed and we'll have thousands of players
-    var dayPlayers = this.tops[0].players;
-    if (dayPlayers.length > this.maxScores_) {
-      dayPlayers.splice(this.maxScores_, dayPlayers.length - this.maxScores_);
-    }
+    // Don't do this ! If we do this then pretty much every player get's 5th for the day.
+//    // Remove day players past max because otherwise they'll
+//    // never be removed and we'll have thousands of players
+//    var dayPlayers = this.tops[0].players;
+//    if (dayPlayers.length > this.maxScores_) {
+//      dayPlayers.splice(this.maxScores_, dayPlayers.length - this.maxScores_);
+//    }
 
     return places
   };
