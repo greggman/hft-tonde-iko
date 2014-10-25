@@ -209,7 +209,7 @@ define([
   var tileInfoFlyingPortal3 = { thing: "flyingportal", id: 0, dest: 3};
   var tileInfoCandle = { thing: "candle", id: 0, };
   var tileInfoGift = {   collisions: false,
-    open: true, gift:true, };
+    open: false, gift:true, };
 
   var tileInfoArea1 = { open: true, thing: "area", id: 0, };
   var tileInfoArea2 = { open: true, thing: "area", id: 1, };

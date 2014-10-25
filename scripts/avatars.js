@@ -443,7 +443,7 @@ define([
       range: [0.4, 0.6],              // the hue range to adjust. Only hues in this range will be affected
       scale: 1,                       // Can be used to slightly scale a sprite that's too small
       idleAnimSpeed: 4,
-      moveAnimSpeed: 0.2,
+      moveAnimSpeed: 0.06,
 
       // for the animations:
       //   scale:  how much to scale UP the sprite using nearest neighbor
