@@ -35,20 +35,24 @@ define([
     'hft/misc/strings',
     '../bower_components/hft-utils/dist/2d',
     '../bower_components/hft-utils/dist/imageutils',
+    './canvas-utils',
     './math',
   ], function(
     Misc,
     Strings,
     M2D,
     ImageUtils,
+    CanvasUtils,
     gmath) {
 
   var nextColor = 0;
   var nameFontOptions = {
-    font: "16px sans-serif",
+    font: "20px sans-serif",
+    xOffset: 1,
     yOffset: 18,
     height: 20,
-    fillStyle: "black",
+    padding: 3,
+    fillStyle: "white",
   };
 
   /**
@@ -109,12 +113,14 @@ define([
       this.nameSprite = this.services.spriteManager.createSprite();
 
 
-      this.setName(player.playerName);
+      this.avatar = player.avatar;
+      this.color = player.color;
+      this.setName(player.playerName + "+500");
+      player.addPoints(500);
       this.facing = 1;     // direction player is facing (-1, 1)
       this.score = 0;
 
       //console.log(startPosition);
-      this.color = player.color;
       this.reset(startPosition);
       this.setState('move');
 
@@ -124,8 +130,22 @@ define([
   }());
 
   Gift.prototype.setName = function(name) {
-   	if (name != this.playerName) {
+    if (name != this.playerName) {
       this.playerName = name;
+      nameFontOptions.prepFn = function(ctx) {
+
+        var h = (this.avatar.baseHSV[0] + this.color.h) % 1;
+        var s = gmath.clamp(this.avatar.baseHSV[1] + this.color.s, 0, 1);
+        var v = gmath.clamp(this.avatar.baseHSV[2] + this.color.v, 0, 1);
+        var brightness = (0.2126 * this.avatar.baseColor[0] / 255 + 0.7152 * this.avatar.baseColor[1] / 255 + 0.0722 * this.avatar.baseColor[2] / 255);
+        nameFontOptions.fillStyle = brightness > 0.6 ? "black" : "white";
+        var rgb = ImageUtils.hsvToRgb(h, s, v);
+        ctx.beginPath();
+        CanvasUtils.roundedRect(ctx, 0, 0, ctx.canvas.width, ctx.canvas.height, 10);
+        ctx.fillStyle = "rgb(" + rgb.join(",") + ")";
+        ctx.fill();
+      }.bind(this);
+
       this.nameImage = this.services.createTexture(
           ImageUtils.makeTextImage(name, nameFontOptions));
     }
@@ -278,6 +298,9 @@ define([
           if (!this.landed) {
             this.landed = true;
             //this.services.audioManager.playSound('land');
+	        this.addConfettiNearGift(1000 * 0);
+	        this.addConfettiNearGift(1000 * 0.5);
+	        this.addConfettiNearGift(1000 * 1.0);
           }
         }
         return true;
@@ -286,6 +309,15 @@ define([
     return false;
   };
 
+  Gift.prototype.addConfettiNearGift = function(delay) {
+    var x = this.position[0];// + Misc.randInt(150);
+    var y = this.position[1] - this.height/2; // + Misc.randInt(100);
+    var pm = this.services.particleEffectManager;
+    setTimeout(function() {
+      pm.spawnConfetti(x, y);
+    }, delay);
+  };
+  
   Gift.prototype.checkLand = function() {
     if (this.velocity[1] > 0) {
       this.bonked = false;

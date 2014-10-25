@@ -476,6 +476,8 @@ define([
       scale: 1,
       idleAnimSpeed: 4,
       moveAnimSpeed: 0.1,
+      dxHat: -2,
+      dyHat: -2,
       anims: {
         idle:  { url: "assets/spr_idle.png",    scale: 2, slices: 16, },
         move:  { url: "assets/spr_run.png",     scale: 2, slices: 16, },

@@ -447,8 +447,8 @@ define([
       if (globals.levelName == "level5-0") {
 
         this.addConfettiNearPlayer(1000 * 0);
-        this.addConfettiNearPlayer(1000 * 0.5);
-        this.addConfettiNearPlayer(1000 * 1.0);
+       // this.addConfettiNearPlayer(1000 * 0.5);
+       // this.addConfettiNearPlayer(1000 * 1.0);
 
         if (this.hasGift) {
           this.hasHat = true;
@@ -493,8 +493,8 @@ define([
   };
 
   Player.prototype.addConfettiNearPlayer = function(delay) {
-    var x = this.position[0] - 150 + Misc.randInt(300);
-    var y = this.position[1] - 100 + Misc.randInt(200);
+    var x = this.position[0];// - 150 + Misc.randInt(300);
+    var y = this.position[1] - this.height/2; // - 100 + Misc.randInt(200);
     var pm = this.services.particleEffectManager;
     setTimeout(function() {
       pm.spawnConfetti(x, y);
