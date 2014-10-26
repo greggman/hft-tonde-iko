@@ -128,7 +128,7 @@ window.s = g_services;
     stopFriction: 0.60,       // amount of velocity to keep each frame
     gravity: 1200,
     ladderGravity: 600,
-    ladderMaxVelocityY: 200,
+    ladderMaxVelocityY: 100,
     frameCount: 0,
     coinAnimSpeed: 10,
     coinAnimSpeedRange: 2,
