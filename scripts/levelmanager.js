@@ -224,8 +224,14 @@ define([
   LevelManager.prototype.getTileInfoByPixel = function(x, y) {
     if (y < 0 || y >= this.level.levelHeight) {
       return Tiles.getInfo(this.offTopBottomTileID);
-    } else if (x < 0 || x >= this.level.levelWidth) {
-      return Tiles.getInfo(this.offEdgeTileId);
+    } else if (x < 0) {
+      var tileId = this.level.getTileByPixel(0, y);
+      var info = this.getTileInfo(tileId);
+      return info.collisions ? info : Tiles.getInfo(this.offEdgeTileId);
+    } else if (x >= this.level.levelWidth) {
+      var tileId = this.level.getTileByPixel(this.level.levelWidth - 1, y);
+      var info = this.getTileInfo(tileId);
+      return info.collisions ? info : Tiles.getInfo(this.offEdgeTileId);
     }
     var tileId = this.level.getTileByPixel(x, y);
     return this.getTileInfo(tileId);

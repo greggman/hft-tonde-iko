@@ -488,7 +488,7 @@ define([
       velocity: this.velocity,  // Send the velocity so where going the right speed
       score: this.score,        // Send the score
       position: this.position,  // Send the position incase there's no dest.
-      hasGift: this.hasGift,	// Send the carrying-gift flag.
+      hasGift: this.hasGift,    // Send the carrying-gift flag.
     });
   };
 
