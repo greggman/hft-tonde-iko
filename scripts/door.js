@@ -192,9 +192,9 @@ this.onCount = Math.max(0, this.onCount - 1);
 
     this.area = r;
     this.doorArea = new gmath.Rect(
-      this.position[0] - level.tileWidth * 2.5,
+      this.position[0] - level.tileWidth * 1.5,
       this.position[1] - level.tileHeight * 2,
-      level.tileWidth * 5,
+      level.tileWidth * 2,
       level.tileHeight * 2 + 2);
 
     this.anim = this.services.images.door.frames;
@@ -231,7 +231,9 @@ this.onCount = Math.max(0, this.onCount - 1);
 
   // Tell door to open (it might already be open)
   Door.prototype.open = function() {
-    this.openTimer = 0;
+    var globals = this.services.globals;
+    this.openTimer = 3;
+    this.doorTimer = Math.max(this.doorTimer - globals.elapsedTime, 0);
     if (this.state == "closed") {
       this.setState("opening");
     }
@@ -263,7 +265,8 @@ this.services.status.addMsg("a# " + this.id + " : inArea = " + this.numPlayersIn
   };
 
   Door.prototype.resetDoor = function() {
-    this.doorTimer = 0;
+    var globals = this.services.globals;
+    this.doorTimer = globals.doorWaitTime;
     this.meterSprite.visible = false;
     this.frameSprite.visible = false;
   };
@@ -271,29 +274,20 @@ this.services.status.addMsg("a# " + this.id + " : inArea = " + this.numPlayersIn
   Door.prototype.init_closed = function() {
     this.resetDoor();
     this.setTiles(this.doorTile);
+    this.meterSprite.visible = false;
+    this.frameSprite.visible = false;
   };
 
   Door.prototype.state_closed = function() {
     var globals = this.services.globals;
-    this.countPlayersInArea();
-    // There's > 1 player in area
-    if (this.numPlayersInArea > 1) {
-      this.resetDoor();
-    } else if (this.numPlayersInDoorArea > 0) {
-      this.doorTimer += globals.elapsedTime;
-      this.meterSprite.visible = true;
-      this.frameSprite.visible = true;
-      if (this.doorTimer > globals.doorWaitTime) {
-        this.open();
-      }
-    } else {
-      this.resetDoor();
+    if (this.doorTimer < globals.doorWaitTime) {
+      this.setState("opening");
     }
   };
 
   Door.prototype.init_opening = function() {
-    this.meterSprite.visible = false;
-    this.frameSprite.visible = false;
+    this.meterSprite.visible = true;
+    this.frameSprite.visible = true;
     this.animTimer = 0;
     this.setTiles(0);
   };
@@ -313,20 +307,21 @@ this.services.status.addMsg("a# " + this.id + " : inArea = " + this.numPlayersIn
   };
 
   Door.prototype.init_opened = function() {
-    this.openTimer = 0;
   };
 
   Door.prototype.state_opened = function() {
     var globals = this.services.globals;
     this.countPlayersInArea();
-    // If there's no players in the door
-    if (this.numPlayersInDoorArea == 0) {
-      this.openTimer += globals.elapsedTime;
-      if (this.openTimer > globals.doorOpenTime) {
-        this.setState("closing");
-      }
+    if (this.openTimer) {
+      --this.openTimer;
     } else {
-      this.openTimer = 0;
+      this.doorTimer = Math.min(this.doorTimer + globals.elapsedTime, globals.doorWaitTime);
+      if (this.doorTimer >= globals.doorWaitTime) {
+        // If there's no players in the door
+        if (this.numPlayersInDoorArea == 0) {
+          this.setState("closing");
+        }
+      }
     }
   };
 
