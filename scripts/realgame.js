@@ -381,6 +381,7 @@ window.g = globals;
     doormeter:      { url: "assets/door-meter.png", },
     doormeterframe: { url: "assets/door-meter-frame.png", },
     ball:           { url: "assets/ball.png",       },
+    balloon:        { url: "assets/Balloon_a.png",  filter: false, preMult: true },
     hat:            { url: "assets/partyhat.png",   },
     gem:            { url: "assets/gem.png",        scale: 1, slices: 16, },
     gift:           { url: "assets/gift.png",       },
@@ -483,6 +484,7 @@ window.g = globals;
         g_services.particleEffectManager.createSnow();
         break;
       case "level5-0":
+        g_services.particleEffectManager.createBalloons();
         $("score").style.display = "block";
         g_services.scoreManager = new ScoreManager(
           g_services, $("top-today"), $("top-hour"), $("top-10mins"));

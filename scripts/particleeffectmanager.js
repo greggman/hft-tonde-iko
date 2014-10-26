@@ -52,6 +52,7 @@ define(
   var snowFlakeTexture;
   var ghostsTexture;
   var rainTexture;
+  var balloonTexture;
 
   var setup = function(services) {
     if (!onePixelTexture) {
@@ -81,6 +82,7 @@ define(
       ctx.stroke();
       rainTexture = new Textures.Texture2D(c);
       ghostsTexture = services.images.ghosts.frames[0];
+      balloonTexture = services.images.balloon.frames[0];
     }
   };
 
@@ -112,7 +114,7 @@ define(
     return tdl.particles.createOneShotManager(emitter, maxConfetti);
   };
 
-  var createBonk= function(particleSystemManager) {
+  var createBonk = function(particleSystemManager) {
     var emitter = particleSystemManager.createParticleEmitterInFrontOfPlayer(onePixelTexture.texture);
     emitter.setState(tdl.particles.ParticleStateIds.BLEND);
     emitter.setColorRamp(
@@ -253,6 +255,32 @@ define(
     return emitter;
   };
 
+  var createBalloons = function(particleSystemManager) {
+    var emitter = particleSystemManager.createParticleEmitterBehindLevel(balloonTexture.texture);
+    emitter.setState(tdl.particles.ParticleStateIds.BLEND_PREMULTIPLY);
+    var timeRange = 1;
+    emitter.setColorRamp(
+        [1, 1, 1, 1]);
+    emitter.setParameters({
+        numParticles: 20,
+        lifeTime: 23.0,
+        timeRange: 23.0,
+        startSize: 64.0,
+        endSize: 64.0,
+      },
+      function(index, parameters) {
+        var angle = Math.PI * (1.4 + Math.random() * 0.2);
+        parameters.spinStart = Math.PI * 1.5 - angle;
+        var color = ImageUtils.hsvToRgb(Math.random(), Math.random() * 0.5 + 0.5, 1);
+        parameters.colorMult = [color[0] / 255, color[1] / 255, color[2] / 255, 1];
+        var speed = Math.random() * 1 + 40;
+        parameters.position =  [Misc.randInt(1280), 740, 0];
+        parameters.velocity = Maths.matrix4.transformPoint(
+            Maths.matrix4.rotationZ(angle), [speed, 0, 0]);
+        });
+    return emitter;
+  };
+
   var ParticleEffectManager = function(services) {
     setup(services);
     this.services = services;
@@ -299,6 +327,10 @@ define(
 
   ParticleEffectManager.prototype.createRain = function() {
     createRain(this.services.particleSystemManager);
+  };
+
+  ParticleEffectManager.prototype.createBalloons = function() {
+    createBalloons(this.services.particleSystemManager);
   };
 
   return ParticleEffectManager;
