@@ -1,12 +1,28 @@
 飛んで行こ！(Tonde-Iko!)
 ======================
 
-This is a special multi-machine game for HappyFunTimes.
-To effectively play you need 2 or more computers and some
-configuration. It allows you to play one giant platformer
-across multiple machines.
+This is a 50 player 6 screen platformer. Players
+connect to the WiFi and use their smartphone to
+control a player.
 
-<img src="screenshot.png" />
+<img src="images/all-set-up.jpg" width="750" height="160" />
+
+Made with [HappyFunTimes](http://greggman.github.io/HappyFunTimes)
+
+The 6 levels below were created for the [Steam Carnival](http://steamcarnival.com)
+
+<img src="images/level0-0.jpg" width="640" height="357" />
+
+<img src="images/level1-0.jpg" width="640" height="357" />
+
+<img src="images/level2-0.jpg" width="640" height="357" />
+
+<img src="images/level3-0.jpg" width="640" height="357" />
+
+<img src="images/level4-0.jpg" width="640" height="357" />
+
+<img src="images/level5-0.jpg" width="640" height="357" />
+
 
 Cloning
 -------

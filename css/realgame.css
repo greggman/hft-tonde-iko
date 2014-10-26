@@ -30,6 +30,7 @@
  */
 html, body {
   background-color: #222;
+  cursor: none;
 }
 
 #visual {
