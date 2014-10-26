@@ -46,6 +46,8 @@ define(
     Textures) {
 
   var maxConfetti = 10;
+  var numBonkGroups = 4;
+  var numBonksPerGroup = 3;
   var onePixelTexture;
   var snowFlakeTexture;
   var ghostsTexture;
@@ -116,7 +118,7 @@ define(
     emitter.setColorRamp(
         [1, 1, 1, 1]);
     emitter.setParameters({
-        numParticles: 2,
+        numParticles: 2 + Misc.randInt(3),
         lifeTime: 0.5,
         //timeRange: 0.0,
         startSize: 3.0,
@@ -135,7 +137,7 @@ define(
             parameters.acceleration = Maths.addVector(Maths.matrix4.transformPoint(
                 Maths.matrix4.rotationZ(angle), [-speed * 8, 0, 0]), [0, 50, 0]);
         });
-    return tdl.particles.createOneShotManager(emitter, maxConfetti);
+    return tdl.particles.createOneShotManager(emitter, numBonksPerGroup);
   };
 
   var createBallConfetti = function(particleSystemManager, hue) {
@@ -255,9 +257,14 @@ define(
     setup(services);
     this.services = services;
     this.confettis = createConfetti(services.particleSystemManager);
-    this.bonk = createBonk(services.particleSystemManager);
     this.ballRedConfetti = createBallConfetti(services.particleSystemManager, 0);
     this.ballBlueConfetti = createBallConfetti(services.particleSystemManager, 0.666);
+
+    this.nextBonkGroup = 0;
+    this.bonkGroups = [];
+    for (var ii = 0; ii < numBonkGroups; ++ii) {
+      this.bonkGroups.push(createBonk(services.particleSystemManager));
+    }
   };
 
   ParticleEffectManager.prototype.spawnConfetti = function(x, y) {
@@ -266,8 +273,10 @@ define(
   };
 
   ParticleEffectManager.prototype.spawnBonk = function(x, y) {
+    var bonk = this.bonkGroups[this.nextBonkGroup];
+    this.nextBonkGroup = (this.nextBonkGroup + 1) % this.bonkGroups.length;
     var _tp_ = tdl.fast.matrix4.translation(new Float32Array(16), [x, y, 0]);
-    this.bonk.startOneShot(_tp_);
+    bonk.startOneShot(_tp_);
   };
 
   ParticleEffectManager.prototype.spawnBallRedConfetti = function(x, y) {
