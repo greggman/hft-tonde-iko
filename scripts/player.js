@@ -897,7 +897,7 @@ define([
       sprite.xScale = scale; //this.facing > 0 ? scale : -scale;     
       sprite.yScale = scale;
       sprite.x = off.x + ((    this.position[0]) | 0) * globals.scale;
-      sprite.y = off.y + (( (height / -2)  + this.position[1]) -36 - 22 + dy| 0) * globals.scale;
+      sprite.y = off.y + (( (height * this.giftScale / -2)  + this.position[1]) -64 + dy| 0) * globals.scale;
       sprite.width  = img.img.width * this.giftScale; //globals.scale;
       sprite.height = img.img.height * this.giftScale; //globals.scale;
       dyName = -27; 

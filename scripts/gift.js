@@ -92,9 +92,12 @@ define([
       };
       this.width  = 32;
       this.height = 32;
+
+      var img = player.anim[0];
+      var height = img.img.height * player.avatar.scale;
       var startPosition = {
-        x: player.position[0],
-        y: player.position[1]
+        x: player.position[0] ,
+        y: player.position[1] + -64
       };
 
        
@@ -364,15 +367,16 @@ define([
     var sprite = this.sprite;
     sprite.uniforms.u_texture = img;
     sprite.x = off.x + ((              this.position[0]) | 0) * globals.scale;
-    sprite.y = off.y + ((height / -2 + this.position[1]) | 0) * globals.scale;
+    sprite.y = off.y + ((height*this.giftScale / -2 + this.position[1]) | 0) * globals.scale;
     sprite.width  = width  * globals.scale;
     sprite.height = height * globals.scale;
-    sprite.xScale = this.facing > 0 ? 1 : -1;
+    sprite.xScale = this.giftScale;
+    sprite.yScale = this.giftScale;
 
     var nameSprite = this.nameSprite;
     nameSprite.uniforms.u_texture = this.nameImage;
     nameSprite.x = off.x + ((              this.position[0])      | 0) * globals.scale;
-    nameSprite.y = off.y + ((height / -2 + this.position[1] - 36) | 0) * globals.scale;
+    nameSprite.y = off.y + ((height / -2 + this.position[1] - 36 * this.giftScale) | 0) * globals.scale;
     nameSprite.width  = this.nameImage.img.width  * globals.scale;
     nameSprite.height = this.nameImage.img.height * globals.scale;
   };
