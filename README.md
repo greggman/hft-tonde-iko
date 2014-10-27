@@ -3,7 +3,9 @@
 
 This is a 50 player 6 screen platformer. Players
 connect to the WiFi and use their smartphone to
-control a player.
+control a player. They then start at the left
+most screen and can move their characters
+across all 6 screens.
 
 <img src="images/all-set-up.jpg" width="750" height="160" />
 
