@@ -7,7 +7,8 @@ control a player. They then start at the left
 most screen and can move their characters
 across all 6 screens.
 
-[![Video of Tonde-Iko at Steam Carnival](http://img.youtube.com/vi/aFMNmKYE8KM/0.jpg)](http://www.youtube.com/watch?v=aFMNmKYE8KM)
+[![Video of Tonde-Iko at Steam Carnival](http://img.youtube.com/vi/aFMNmKYE8KM/0.jpg)](http://www.youtube.com/watch?v=aFMNmKYE8KM)<br/>
+Click image above for video
 
 <img src="images/all-set-up.jpg" width="750" height="160" />
 
