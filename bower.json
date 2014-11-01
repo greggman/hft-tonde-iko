@@ -21,7 +21,6 @@
     "tests"
   ],
   "dependencies": {
-    "hft-utils": "https://github.com/greggman/hft-utils.git#0.5.0",
-    "pako": "~0.2.5"
+    "hft-utils": "https://github.com/greggman/hft-utils.git#0.5.1"
   }
 }
