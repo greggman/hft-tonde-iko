@@ -49,6 +49,7 @@ requirejs(
     '../bower_components/hft-utils/dist/entitysystem',
     '../bower_components/hft-utils/dist/imageloader',
     '../bower_components/hft-utils/dist/imageutils',
+    '../bower_components/hft-utils/dist/levelloader',
     '../bower_components/hft-utils/dist/spritemanager',
     './avatars',
     './collectable-manager',
@@ -59,7 +60,7 @@ requirejs(
     './flyingportal',    
     './debug-renderer',
     './image-cutter',
-    './levelloader',
+    './level',
     './levelmanager',
     './particleeffectmanager',
     './particleemitter',
@@ -80,6 +81,7 @@ requirejs(
     EntitySystem,
     ImageLoader,
     ImageUtils,
+    LevelLoader,
     SpriteManager,
     avatars,
     CollectableManager,
@@ -90,7 +92,7 @@ requirejs(
     FlyingPortal,
     DebugRenderer,
     ImageCutter,
-    LevelLoader,
+    Level,
     LevelManager,
     ParticleEffectManager,
     ParticleEmitter,
@@ -509,10 +511,19 @@ window.g = globals;
 
     document.title = "Tonde-Iko: " + (globals.levelName ? globals.levelName : "*level*");
     if (globals.levelName) {
-      LevelLoader.load(globals.debug, gl, "assets/" + globals.levelName + ".json", function(err, level) {
+      var realImageMappings = {
+        "assets/bricks.png": "assets/bricks-real.png",
+      };
+      var loaderOptions = {
+        imageMappings: globals.debug ? {} : realImageMappings,
+      };
+      LevelLoader.load(gl, "assets/" + globals.levelName + ".json", loaderOptions, function(err, level) {
         if (err) {
           throw err;
         }
+        level.layers = level.layers.map(function(layer) {
+          return new Level(layer);
+        });
         globals.level = level;
         startGame();
       });
