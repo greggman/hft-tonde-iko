@@ -560,7 +560,7 @@ window.g = globals;
     var level = g_services.levelManager.getLevel();
     var xtraX = ((gl.canvas.width  - level.levelWidth ) / 2 | 0);
     var xtraY = ((gl.canvas.height - level.levelHeight) / 2 | 0);
-    gl.scissor(xtraX, xtraY, gl.canvas.width, gl.canvas.height);
+    gl.scissor(xtraX, xtraY, level.levelWidth, level.levelHeight);
     gl.enable(gl.SCISSOR_TEST);
     gl.clearColor(
         globals.level.backgroundColor[0],
