@@ -94,26 +94,6 @@ define(
     return document.getElementById(id);
   }
 
-  // shit hacks for iOS8 because iOS8 barfs toolbars on the screen and
-  // (a) the user can NOT dismiss them and (b) there is no way for the
-  // webpage to see they exist. This only happens on iPhone 4/4s/5/s.
-
-  var isIOS;
-  var shittyOldIPhoneWithShittyIOS8Plus = function() {
-    var iPhone4 = (window.screen.height == (960 / 2));
-    var iPhone5 = (window.screen.height == (1136 / 2));
-    var iOS8Plus = function() {
-      if (/iP(hone|od|ad)/.test(navigator.platform)) {
-        // supports iOS 2.0 and later: <http://bit.ly/TJjs1V>
-        var v = (navigator.appVersion).match(/OS (\d+)_(\d+)_?(\d+)?/);
-        isIOS = true;
-        return parseInt(v[1], 10) >= 8;
-      }
-    }();
-    return iOS8Plus && (iPhone4 || iPhone5);
-  }();
-
-
   // check for old android
   var rxaosp = window.navigator.userAgent.match(/Android.*AppleWebKit\/([\d.]+)/);
   var isaosp = (rxaosp && rxaosp[1]<537);
@@ -910,7 +890,7 @@ window.p = pointers;
               virtualWidth = ctx.canvas.width;
               virtualHeight = ctx.canvas.height;
 
-              if (shittyOldIPhoneWithShittyIOS8Plus && virtualHeight == 320) {
+              if (MobileHacks.isIOS8OrNewerAndiPhone4OrIPhone5 && virtualHeight == 320) {
                 virtualHeight -= 90;
               } else if (isIOS) {
                 virtualHeight -= 45;
