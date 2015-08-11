@@ -132,7 +132,9 @@ define(
   var enableTouch = function() {
     document.removeEventListener('touchstart', preventStuff, false);
   };
-  disableTouch();
+// I think this was here to prevent scrolling but I don't know why
+// it broke
+//  disableTouch();
 
   var readCookie = function() {
     var s = g_playerCookie.get();
