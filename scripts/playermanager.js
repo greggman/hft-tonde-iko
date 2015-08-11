@@ -58,7 +58,7 @@ define([
         y: data.position[1],
       };
     } else {
-      if (data) {
+      if (data && data.name) {
         destId = data.dest;
         subDestId = data.subDest;
       }

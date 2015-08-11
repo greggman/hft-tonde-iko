@@ -105,9 +105,11 @@ define(
 
   var globals = {
     debug: false,
+    orientation: "landscape-primary",
   };
   Misc.applyUrlSettings(globals);
   MobileHacks.fixHeightHack();
+  MobileHacks.disableContextMenu();
 
   var assert = function(g) {
     if (!g) {
@@ -890,9 +892,9 @@ window.p = pointers;
               virtualWidth = ctx.canvas.width;
               virtualHeight = ctx.canvas.height;
 
-              if (MobileHacks.isIOS8OrNewerAndiPhone4OrIPhone5 && virtualHeight == 320) {
+              if (MobileHacks.isIOS8OrNewerAndiPhone4OrIPhone5() && virtualHeight == 320) {
                 virtualHeight -= 90;
-              } else if (isIOS) {
+              } else if (MobileHacks.isIOS()) {
                 virtualHeight -= 45;
               }
               //ctx.translate(ctx.canvas.width - 1, ctx.canvas.height - 1);

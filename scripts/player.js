@@ -75,7 +75,7 @@ define([
    */
   var Player = (function() {
     return function(services, width, height, direction, name, netPlayer, startPosition, data, isLocalPlayer) {
-      var isNewPlayer = data === undefined;
+      var isNewPlayer = (data === undefined || data.name === undefined);
       data = data || {};
       var globals = services.globals;
       this.services = services;
