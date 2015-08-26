@@ -40,8 +40,8 @@ any number of screens in any arrangement. Instead of
 
 How about
 
-                  ▆ ▆
-        ▆ ▆ ▆   ▆
+                ▆ ▆ ▆
+        ▆ ▆ ▆   ▆   ▆ ▆
     ▆ ▆ ▆   ▆ ▆ ▆
 
 For example
