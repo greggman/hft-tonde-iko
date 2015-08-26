@@ -40,11 +40,9 @@ any number of screens in any arrangement. Instead of
 
 How about
 
-                ▆ ▆ ▆
-        ▆ ▆ ▆   ▆   ▆ ▆
-    ▆ ▆ ▆   ▆ ▆ ▆
-
-For example
+                ▆ ▆ ▆   ▆ ▆ ▆
+        ▆ ▆ ▆   ▆   ▆ ▆ ▆   ▆ ▆ ▆
+    ▆ ▆ ▆   ▆ ▆ ▆       ▆ ▆ ▆
 
 With a little more work diagonal screens could also be supported.
 
