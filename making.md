@@ -1,7 +1,7 @@
 Making Levels
 =============
 
-I've forced this to be 6 screens, 1920x1080. With 32x32 pixel tiles that's 60x33 tiles per screen.
+I've forced this to be 6 screens, 1208x720. With 32x32 pixel tiles that's 40x22 tiles per screen.
 
 I've made 1 map for each screen, they are stored in
 
@@ -66,6 +66,12 @@ the letters "play" is the **playable layer**. It is the only layer in which tile
 Layers behind that layer will be be drawn behind, layers in front of that layer will be draw in front.
 Be aware that each layer has a cost. Too many layers can ruin performance. I'd prefer to keep it at
 3 layers, one behind, one the player is on, one in front.
+
+## You can flip, rotate tiles
+
+The meanings will not change at the moment so if any meaning has a direction then don't rotate/flip those tiles
+
+
 
 
 

@@ -28,6 +28,26 @@ The 6 levels below were created for the [Steam Carnival](http://steamcarnival.co
 <img src="images/level5-0.jpg" width="640" height="357" />
 
 
+Making Levels
+-------
+
+See [Making Levels](making.md).
+
+Note: The code is currently hardcoded to 6 levels across. That is an artifical limit. It would be trival (as in minutes of work) to support
+any number of screens in any arrangement. Instead of
+
+    ▆ ▆ ▆ ▆ ▆ ▆
+
+How about
+
+                  ▆ ▆
+        ▆ ▆ ▆   ▆
+    ▆ ▆ ▆   ▆ ▆ ▆
+
+For example
+
+With a little more work diagonal screens could also be supported.
+
 Cloning
 -------
 
